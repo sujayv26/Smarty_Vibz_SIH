@@ -12,34 +12,6 @@ import io
 import pandas as pd
 from datetime import date
 
-TEST_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-app.dependency_overrides[get_db] = override_get_db
-
-@pytest.fixture(scope="function")
-def db_session():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@pytest.fixture(scope="function")
-def client(db_session):
-    set_extraction_provider(MockExtractionProvider())
-    with TestClient(app) as c:
-        yield c
 
 @pytest.fixture(scope="function")
 def sample_schedule_file():
@@ -53,6 +25,7 @@ def sample_schedule_file():
     buffer.seek(0)
     return buffer
 
+
 @pytest.fixture(scope="function")
 def sample_progress_excel_file():
     df = pd.DataFrame([
@@ -65,6 +38,7 @@ def sample_progress_excel_file():
     buffer.seek(0)
     return buffer
 
+
 class TestHealthAndRoot:
     def test_root(self, client):
         response = client.get("/")
@@ -75,6 +49,7 @@ class TestHealthAndRoot:
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json()["status"] == "healthy"
+
 
 class TestScheduleUpload:
     def test_valid_schedule_upload(self, client, sample_schedule_file):
@@ -126,6 +101,7 @@ class TestScheduleUpload:
         assert len(activities) == 3
         assert activities[0]["activity_code"] == "MEC-2011"
 
+
 class TestProgressExtraction:
     def test_valid_progress_extraction(self, client):
         response = client.post("/progress/extract", json={"raw_text": "Today at 9:30 AM, the piping team started erection of the XX-101 spool in Area B"})
@@ -167,6 +143,7 @@ class TestProgressExtraction:
         assert response.status_code == 200
         events = response.json()
         assert len(events) == 2
+
 
 class TestExcelProgressUpload:
     def test_valid_excel_progress_upload(self, client, sample_progress_excel_file):
@@ -222,6 +199,7 @@ class TestExcelProgressUpload:
         response = client.post("/progress/upload-excel", files={"file": ("progress.xlsx", buffer, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")})
         assert response.status_code == 400
         assert "Missing required columns" in response.json()["detail"]
+
 
 class TestTimeAgent:
     def test_basic_chat(self, client):
@@ -291,6 +269,7 @@ class TestTimeAgent:
         events = response.json()
         assert len(events) == 2
 
+
 class TestDatabaseBehavior:
     def test_schedule_persists(self, client, sample_schedule_file):
         client.post("/schedule/upload", files={"file": ("schedule.xlsx", sample_schedule_file, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")})
@@ -304,6 +283,7 @@ class TestDatabaseBehavior:
         client.post("/progress/extract", json={"raw_text": "Started XX-101"})
         response = client.get("/progress/events")
         assert len(response.json()) == 1
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime
+from sqlalchemy import Column, Integer, String, Date, DateTime, Boolean
 from sqlalchemy.sql import func
 from app.database import Base
 
@@ -12,4 +12,5 @@ class ScheduleActivity(Base):
     wbs = Column(String, nullable=False)
     planned_start = Column(Date, nullable=False)
     planned_finish = Column(Date, nullable=False)
+    is_unplanned = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
