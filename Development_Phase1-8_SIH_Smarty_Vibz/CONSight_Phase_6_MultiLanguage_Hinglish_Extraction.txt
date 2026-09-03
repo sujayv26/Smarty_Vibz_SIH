@@ -1,0 +1,584 @@
+CONSight | PHASE 6 DEVELOPMENT PROMPT
+Multilingual + Hinglish Field Progress Understanding
+Target Model: NVIDIA Nemotron 3 Ultra 550B-A55B
+Repository: https://github.com/sujayv26/Smarty_Vibz_SIH
+Previous Phase: Phase 5 — WhatsApp Integration
+Depends On: Phases 1–5
+Status: BACKEND ONLY — FRONTEND DEFERRED
+
+======================================================================
+0. ROLE
+======================================================================
+
+You are the principal backend/AI engineer for CONSight (Construction +
+Insight), an infrastructure project progress intelligence platform.
+
+Your task is to IMPLEMENT PHASE 6 in the EXISTING repository.
+
+Repository:
+https://github.com/sujayv26/Smarty_Vibz_SIH
+
+Do not create a greenfield project.
+
+IMPORTANT:
+- The repository code is the source of truth.
+- Existing Phase 1–5 behavior must be preserved.
+- Inspect the repository before changing anything.
+- Do not assume class names, filenames, database schemas, endpoints,
+  services, or models from this document.
+- Reuse the existing extraction → matching → confidence → review →
+  audit pipeline.
+- Do not build a parallel AI pipeline.
+
+Nemotron 3 Ultra 550B-A55B is a frontier model with a hybrid
+Mamba-Attention MoE architecture and up to 1M-token context. For an
+actual implementation, prefer the post-trained/instruction-capable
+checkpoint or an API/deployment endpoint. Do NOT treat the base
+checkpoint as a drop-in assistant model.
+
+======================================================================
+1. PHASE 6 GOAL
+======================================================================
+
+Enable CONSight to understand construction-site progress messages written
+in multiple supported languages and common Indian construction-site
+Hinglish/code-mixed language.
+
+Examples:
+
+English:
+"XX-101 spool erection started in Area B."
+
+Hinglish:
+"XX-101 ka spool erection start kiya."
+
+Hindi:
+"XX-101 का स्पूल इरेक्शन एरिया बी में शुरू किया।"
+
+Mixed:
+"Foundation ka concreting complete ho gaya, Area A."
+
+The key requirement is NOT generic translation.
+
+The system must preserve the operational meaning of the original field
+message and convert it into the SAME structured progress representation
+already used by the existing system.
+
+======================================================================
+2. STRICT ARCHITECTURAL PRINCIPLE
+======================================================================
+
+Phase 6 adds multilingual understanding to the existing pipeline.
+
+Desired flow:
+
+Input Channel
+    ↓
+Existing WhatsApp / Agent / Progress input
+    ↓
+Language + code-mix detection
+    ↓
+Multilingual normalization / extraction
+    ↓
+EXISTING Progress Event schema
+    ↓
+EXISTING Phase 2 Hybrid Matching
+    ↓
+EXISTING Phase 3 Confidence Engine
+    ↓
+EXISTING Planner Review when required
+    ↓
+EXISTING Audit Trail
+    ↓
+Existing response mechanism
+
+Do NOT create:
+- a second matching engine
+- a second confidence engine
+- a second Progress Event model
+- a separate multilingual database
+- a separate WhatsApp AI flow
+- automatic approval merely because Nemotron is confident
+
+Nemotron is an understanding/extraction component, not the final
+deterministic authority for schedule matching or approval.
+
+======================================================================
+3. FIRST STEP — REPOSITORY AUDIT
+======================================================================
+
+Before writing code:
+
+1. Inspect the entire backend tree.
+2. Identify:
+   - FastAPI application entrypoint
+   - routes
+   - services
+   - models
+   - schemas
+   - database/session setup
+   - existing agent service
+   - progress extraction
+   - matching engine
+   - confidence engine
+   - planner review
+   - audit trail
+   - WhatsApp integration from Phase 5
+   - configuration/environment handling
+   - tests
+   - requirements
+3. Run the COMPLETE existing test suite.
+4. Record:
+   - passed
+   - failed
+   - skipped
+   - warnings
+5. Do not hide or rewrite pre-existing failures.
+6. Read existing tests before designing new behavior.
+
+If Phase 5 is absent or incomplete in the actual repository, do not
+invent it. Document the discrepancy and integrate only with what is
+actually present.
+
+======================================================================
+4. SUPPORTED LANGUAGE SCOPE
+======================================================================
+
+Phase 6 should support a practical MVP language set based on what the
+chosen Nemotron deployment can reliably handle.
+
+At minimum, design for:
+- English
+- Hindi
+- Hinglish/code-mixed English + Hindi
+
+If implementation/testing demonstrates reliable support for additional
+languages, they may be added without changing the core architecture.
+
+Do NOT promise perfect multilingual coverage.
+
+Language detection must be evidence-based:
+- detected language
+- code-mixed flag
+- confidence/quality indicator where available
+
+Never infer a language from user identity, phone number, location, or
+name.
+
+======================================================================
+5. NEMOTRON INTEGRATION
+======================================================================
+
+Create a small provider/adapter abstraction around the model.
+
+For example, conceptually:
+
+MultilingualUnderstandingProvider
+    - detect_language(...)
+    - extract_progress(...)
+    - normalize_progress(...)
+
+Possible implementations:
+- NemotronProvider
+- MockMultilingualProvider
+
+Do not hardwire the rest of the application to one SDK.
+
+Configuration must use environment variables.
+
+Possible configuration:
+- NEMOTRON_API_KEY
+- NEMOTRON_BASE_URL
+- NEMOTRON_MODEL
+- NEMOTRON_TIMEOUT
+- NEMOTRON_REASONING_BUDGET
+- NEMOTRON_ENABLED
+
+Use the actual project's configuration conventions if they differ.
+
+NEVER:
+- hardcode API keys
+- commit secrets
+- print secrets
+- put tokens into tests
+- depend on live model access for the test suite
+
+The model should receive only the minimum context needed for extraction.
+
+======================================================================
+6. STRUCTURED EXTRACTION CONTRACT
+======================================================================
+
+The model must NOT directly modify database records.
+
+It should produce structured candidate information compatible with the
+existing Progress Event pipeline.
+
+Fields may include only fields already supported by the repository,
+plus narrowly justified Phase 6 metadata such as:
+
+- original_text
+- detected_language
+- is_code_mixed
+- normalized_text
+- extracted_activity_reference
+- discipline
+- location
+- progress/status
+- actual date/time
+- notes
+
+IMPORTANT:
+If a value is not explicitly present or safely derivable according to
+the existing extraction rules, return null/unknown.
+
+Do not hallucinate:
+- activity IDs
+- dates
+- locations
+- quantities
+- equipment
+- personnel
+- percentages
+- schedule relationships
+- completion states
+
+Example:
+
+Input:
+"XX-101 ka spool erection start kiya."
+
+Acceptable:
+activity_reference = "XX-101"
+activity_description = "spool erection"
+status = "started"
+language = "hinglish"
+
+Unacceptable:
+location = "Area B" if not present
+date = today's date if not supplied by the message/event metadata
+progress = 50%
+confidence = HIGH merely because the sentence is clear
+
+======================================================================
+7. NORMALIZATION RULES
+======================================================================
+
+Normalization must preserve meaning.
+
+Examples:
+
+"ka" / "ki" / "ke"
+→ grammatical relationship, not a project field
+
+"start kiya"
+→ started
+
+"complete ho gaya"
+→ completed
+
+"chal raha hai"
+→ in progress
+
+"kal complete hoga"
+→ future expectation, NOT completed
+
+"abhi tak nahi hua"
+→ not completed / pending depending on existing schema
+
+Never convert future or conditional statements into actual progress.
+
+The original message must remain recoverable for audit/debug purposes.
+
+======================================================================
+8. PROMPT / OUTPUT SAFETY
+======================================================================
+
+Use structured output / schema validation where supported.
+
+The model response must be validated before entering the existing
+pipeline.
+
+Handle:
+- malformed model output
+- missing fields
+- invalid enum values
+- impossible dates
+- contradictory fields
+- unknown activity references
+- provider timeout
+- provider unavailable
+- rate limit
+- malformed JSON
+- empty model response
+
+On failure:
+- do not fabricate data
+- return a safe extraction/review response
+- preserve original input
+- log only non-sensitive diagnostic information
+
+======================================================================
+9. TEMPORAL SEMANTICS
+======================================================================
+
+Phase 6 must preserve the distinction between:
+
+PAST:
+"kal concreting kiya"
+→ actual progress happened yesterday
+
+PRESENT:
+"aaj concreting kar rahe hain"
+→ current/in-progress
+
+FUTURE:
+"kal concreting karenge"
+→ planned/future statement, not actual completion
+
+AMBIGUOUS:
+"kal concreting?"
+→ unclear; require clarification/review
+
+The model must not silently replace missing dates with the current date.
+
+Use existing event timestamps where the application already supplies
+provider metadata, but distinguish event receipt time from stated
+activity time.
+
+======================================================================
+10. WHATSAPP INTEGRATION
+======================================================================
+
+If Phase 5 exists:
+
+WhatsApp text
+    ↓
+Phase 6 multilingual understanding
+    ↓
+existing Progress Event creation
+    ↓
+Phase 2 matching
+    ↓
+Phase 3 confidence/review
+    ↓
+Phase 5 response
+
+Do not duplicate the webhook.
+
+The WhatsApp layer remains a transport/input adapter.
+
+======================================================================
+11. API DESIGN
+======================================================================
+
+Prefer extending existing APIs/services rather than adding unnecessary
+public endpoints.
+
+If a dedicated endpoint is justified, document it clearly.
+
+Possible internal/public capability:
+
+POST /progress/extract
+
+or the existing agent endpoint can transparently accept multilingual
+input.
+
+If adding metadata to a response, preserve backward compatibility.
+
+Do not break existing clients.
+
+======================================================================
+12. DATABASE CHANGES
+======================================================================
+
+Only add database fields if genuinely required.
+
+Potential fields:
+- detected_language
+- is_code_mixed
+- normalized_text
+
+Before changing schema:
+- inspect current models
+- determine whether migration support exists
+- preserve existing data
+- do not drop/reset tables
+
+Do not store unnecessary personal information.
+
+======================================================================
+13. TESTING
+======================================================================
+
+All tests must work offline.
+
+Use a deterministic MockMultilingualProvider.
+
+Test at least:
+
+A. English
+- normal progress statement
+- activity code + action
+
+B. Hindi
+- Devanagari construction progress
+
+C. Hinglish
+- "XX-101 ka spool erection start kiya."
+
+D. Code-mixed
+- English technical terms + Hindi grammar
+
+E. Temporal
+- yesterday
+- today
+- tomorrow
+- ambiguous time
+
+F. Unknown
+- message contains no clear construction activity
+
+G. Hallucination resistance
+- missing location must remain missing
+- missing activity ID must remain missing
+- no invented progress percentage
+
+H. Model failure
+- timeout
+- malformed output
+- invalid structured response
+
+I. Regression
+- ALL Phase 1–5 tests
+
+J. End-to-end:
+multilingual input
+→ extraction
+→ existing Progress Event
+→ Phase 2 matching
+→ Phase 3 confidence
+→ review if needed
+→ audit
+
+======================================================================
+14. DEMO CASES
+======================================================================
+
+CASE 1 — English:
+"XX-101 spool erection started at 9:30 AM in Area B."
+
+CASE 2 — Hinglish:
+"XX-101 ka spool erection 9:30 baje Area B mein start kiya."
+
+CASE 3 — Hindi:
+"XX-101 का स्पूल इरेक्शन एरिया बी में शुरू किया।"
+
+CASE 4 — Completion:
+"Foundation ka concreting complete ho gaya."
+
+CASE 5 — Future:
+"Foundation ka concreting kal complete hoga."
+
+CASE 6 — Ambiguous:
+"Piping ka kaam ho gaya."
+
+Expected:
+Do not invent which piping activity was completed. Let matching and
+confidence/review determine the outcome.
+
+======================================================================
+15. NON-GOALS — DO NOT IMPLEMENT
+======================================================================
+
+Do NOT implement:
+- voice recognition
+- speech-to-text
+- OCR
+- image understanding
+- video understanding
+- delay prediction
+- critical path ripple
+- weather intelligence
+- RAG
+- vector database
+- BIM
+- enterprise multi-project
+- mobile app
+- frontend/dashboard
+- autonomous schedule modification
+- autonomous planner approval
+- Phase 7 features
+- Phase 8 features
+
+======================================================================
+16. DOCUMENTATION
+======================================================================
+
+Update README with:
+- Phase 6 purpose
+- supported language scope
+- Hinglish examples
+- Nemotron configuration
+- provider abstraction
+- mock/offline testing
+- structured extraction contract
+- limitations
+- privacy/security notes
+- fallback behavior
+
+Add .env.example entries only if needed.
+
+======================================================================
+17. DEFINITION OF DONE
+======================================================================
+
+Phase 6 is complete only when:
+
+[ ] Repository was inspected before implementation
+[ ] Baseline tests were recorded
+[ ] Existing Phase 1–5 behavior remains intact
+[ ] English extraction works
+[ ] Hindi extraction works
+[ ] Hinglish extraction works
+[ ] Code-mixed technical vocabulary works
+[ ] Temporal meaning is preserved
+[ ] No hallucinated project fields
+[ ] Structured model output is validated
+[ ] Nemotron is behind a provider/adapter
+[ ] Mock provider exists
+[ ] No secrets are committed/logged
+[ ] Existing matching engine is reused
+[ ] Existing confidence engine is reused
+[ ] Existing review/audit flow is reused
+[ ] Offline tests pass
+[ ] Regression tests pass
+[ ] End-to-end multilingual flow passes
+[ ] README updated
+[ ] No Phase 7/8 features were implemented
+[ ] No frontend was implemented
+
+======================================================================
+18. FINAL REPORT
+======================================================================
+
+At the end, report:
+
+1. Baseline test result
+2. Files inspected
+3. Files added/modified
+4. Architecture changes
+5. Nemotron integration method
+6. Supported languages
+7. Extraction schema
+8. Database changes, if any
+9. New API changes, if any
+10. Test counts
+11. Regression result
+12. Example outputs
+13. Known limitations
+14. Exact commands used to run tests
+15. Confirmation that Phase 7/8/frontend were NOT implemented
+
+Do not claim completion unless the implementation and tests actually
+support it.

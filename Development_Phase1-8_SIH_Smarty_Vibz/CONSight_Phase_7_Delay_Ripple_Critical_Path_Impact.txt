@@ -1,0 +1,587 @@
+CONSight | PHASE 7 DEVELOPMENT PROMPT
+Delay Ripple Analysis + Critical Path Impact Engine
+Target Model: NVIDIA Nemotron 3 Ultra 550B-A55B ONLY WHERE JUSTIFIED
+Repository: https://github.com/sujayv26/Smarty_Vibz_SIH
+Previous Phase: Phase 6 — Multilingual + Hinglish
+Depends On: Phases 1–6
+Status: BACKEND ONLY — FRONTEND DEFERRED
+
+======================================================================
+0. ROLE
+======================================================================
+
+You are the principal backend engineer for CONSight.
+
+IMPLEMENT PHASE 7 inside the EXISTING repository.
+
+The repository is the source of truth:
+https://github.com/sujayv26/Smarty_Vibz_SIH
+
+Do not build a greenfield system.
+
+Inspect the actual Phase 1–6 implementation before changing anything.
+
+Phase 7 is a deterministic schedule-impact analysis capability. It must
+not replace the existing Phase 2 matching or Phase 3 confidence/review
+pipeline.
+
+Nemotron 3 Ultra may be used for explanation/summarization if useful,
+but mathematical schedule calculations MUST be deterministic and
+code-driven. Never ask an LLM to calculate the authoritative critical
+path or delay dates.
+
+======================================================================
+1. PHASE 7 GOAL
+======================================================================
+
+Build a Delay Ripple + Critical Path Impact Engine using the schedule
+relationships already imported/preserved by the previous integration
+phases.
+
+Example:
+
+Activity A
+  ↓ FS
+Activity B
+  ↓ FS
+Activity C
+
+If Activity A is delayed by 3 days, calculate which downstream activities
+can be affected and identify whether the delay reaches critical-path or
+near-critical activities.
+
+The system should answer:
+
+- What activity was delayed?
+- By how much?
+- Which successors are affected?
+- Which paths are impacted?
+- Which activities have zero/low float?
+- What is the projected effect on downstream dates?
+- Is the project completion date affected?
+- What assumptions were used?
+
+Do NOT automatically rewrite the official schedule.
+
+======================================================================
+2. FIRST STEP — REPOSITORY AUDIT
+======================================================================
+
+Before coding:
+
+1. Inspect all existing schedule models.
+2. Inspect Phase 4 P6/XER relationship implementation.
+3. Inspect activity identifiers and external IDs.
+4. Inspect relationship types.
+5. Inspect lag handling.
+6. Inspect planned/actual date representation.
+7. Inspect progress events.
+8. Inspect planner approval behavior.
+9. Inspect confidence logic.
+10. Inspect audit records.
+11. Inspect existing tests.
+12. Run the complete baseline test suite.
+
+Record:
+- passed
+- failed
+- skipped
+- warnings
+
+Do not hide pre-existing failures.
+
+======================================================================
+3. REQUIRED GRAPH MODEL
+======================================================================
+
+Use the schedule dependency graph already stored by the application.
+
+Supported relationship types should include whatever Phase 4 actually
+supports, especially:
+- FS — Finish to Start
+- SS — Start to Start
+- FF — Finish to Finish
+- SF — Start to Finish
+
+Each relationship may include lag.
+
+Do not silently discard relationship type or lag.
+
+If the repository does not actually support a relationship type, document
+the limitation instead of pretending it does.
+
+======================================================================
+4. CORE DATA MODEL
+======================================================================
+
+Conceptually, the engine needs:
+
+Activity:
+- internal ID
+- external schedule ID/code
+- planned start
+- planned finish
+- actual start/finish where available
+- duration where available
+- status
+- float if imported/calculated
+
+Relationship:
+- predecessor
+- successor
+- type
+- lag
+
+Delay Event:
+- source progress event / approved event
+- activity
+- baseline date
+- observed/approved actual date
+- delay duration
+- source/audit reference
+
+Impact Result:
+- delayed activity
+- delay amount
+- impacted successors
+- propagated date changes
+- criticality
+- float
+- project finish impact
+- assumptions
+- calculation trace
+
+Use the existing models when possible.
+
+Do not duplicate Activity or Relationship models unnecessarily.
+
+======================================================================
+5. AUTHORITATIVE INPUT RULE
+======================================================================
+
+A delay analysis must NOT be triggered by unapproved ambiguous text.
+
+Preferred flow:
+
+Field progress
+    ↓
+existing extraction
+    ↓
+existing matching
+    ↓
+existing confidence
+    ↓
+planner review if required
+    ↓
+approved/canonical actual
+    ↓
+Phase 7 impact analysis
+
+Do not treat a LOW confidence match as an authoritative delay.
+
+If the existing project allows HIGH-confidence auto-approval, follow its
+actual rules.
+
+======================================================================
+6. DELAY CALCULATION
+======================================================================
+
+Implement deterministic date arithmetic.
+
+Examples:
+
+Baseline finish: 2026-09-10
+Approved actual/forecast finish: 2026-09-13
+
+Delay = +3 calendar days
+
+But the engine must respect the repository's existing calendar/business
+day semantics if available.
+
+Do NOT invent a working calendar.
+
+If only calendar-day arithmetic exists, document that limitation.
+
+======================================================================
+7. RELATIONSHIP PROPAGATION
+======================================================================
+
+Propagation must depend on relationship type.
+
+For FS:
+successor start is constrained by predecessor finish + lag.
+
+For SS:
+successor start is constrained by predecessor start + lag.
+
+For FF:
+successor finish is constrained by predecessor finish + lag.
+
+For SF:
+successor finish is constrained by predecessor start + lag.
+
+The exact date constraints must be implemented mathematically and tested.
+
+Do not reduce all relationships to FS.
+
+======================================================================
+8. LAG
+======================================================================
+
+Lag must be preserved.
+
+Example:
+
+A → FS + 2d → B
+
+If A finish moves from Sep 10 to Sep 13,
+B's earliest constrained start shifts accordingly.
+
+Test:
+- positive lag
+- zero lag
+- negative lag if supported
+- invalid lag
+
+Never silently treat missing lag as an arbitrary value.
+
+======================================================================
+9. CRITICAL PATH
+======================================================================
+
+Implement a deterministic critical-path calculation appropriate to the
+schedule graph.
+
+At minimum:
+- forward pass
+- backward pass
+- earliest start
+- earliest finish
+- latest start
+- latest finish
+- total float
+
+Critical activities should be identified based on the calculated float,
+not on an LLM judgment.
+
+Define the exact critical threshold in code/config and document it.
+
+Handle:
+- multiple starting activities
+- multiple finishing activities
+- disconnected components
+- activities with missing dates
+- cycles
+- malformed relationships
+
+Do not assume the graph is always perfect.
+
+======================================================================
+10. CYCLE DETECTION
+======================================================================
+
+A valid schedule dependency graph should not contain impossible cycles
+for the supported CPM calculation.
+
+Detect cycles explicitly.
+
+Example:
+A → B → C → A
+
+Return a structured validation/calculation error.
+
+Never recurse indefinitely.
+
+======================================================================
+11. FLOAT / NEAR-CRITICAL
+======================================================================
+
+Expose:
+- critical
+- near-critical
+- non-critical
+
+Do not invent a universal threshold without justification.
+
+Prefer:
+- configurable threshold
+- default documented threshold
+- explicit float values in responses
+
+Example:
+critical: float <= 0
+near-critical: 0 < float <= configured threshold
+
+======================================================================
+12. PROJECT COMPLETION IMPACT
+======================================================================
+
+Calculate whether a delay changes the calculated project completion date.
+
+Distinguish:
+
+1. Activity delay
+2. Downstream date impact
+3. Critical path impact
+4. Project finish impact
+
+A delayed non-critical activity may have zero project completion impact.
+
+Do not report every delay as a project delay.
+
+======================================================================
+13. MULTIPLE DELAYS
+======================================================================
+
+Support multiple approved delay inputs where practical.
+
+Avoid double-counting propagated delay.
+
+The graph engine should calculate from a coherent baseline and apply
+constraints systematically.
+
+Document precedence/combination rules.
+
+======================================================================
+14. EXPLANATION LAYER
+======================================================================
+
+The authoritative result comes from deterministic calculations.
+
+Optionally use Nemotron to turn the structured result into a planner-
+friendly explanation.
+
+Example structured result:
+
+Activity XX-101 delayed by 3 days.
+Successor XX-102 shifts by 3 days.
+XX-103 remains within float.
+Project finish unchanged.
+Critical path unaffected.
+
+Nemotron may produce:
+- concise explanation
+- planner summary
+- plain-language reasoning
+
+But the model must not modify:
+- delay amount
+- dates
+- float
+- criticality
+- project finish
+
+Validate any generated explanation against the structured result.
+
+If model access fails, deterministic results must still work.
+
+======================================================================
+15. API DESIGN
+======================================================================
+
+Design APIs only after inspecting existing routing conventions.
+
+Potential endpoints:
+
+POST /schedule/impact/analyze
+GET /schedule/critical-path
+GET /schedule/activities/{activity_id}/impact
+GET /schedule/float
+
+Do not add all endpoints automatically.
+
+Choose the smallest coherent API surface.
+
+Responses should include:
+- activity
+- delay
+- impacted activities
+- criticality
+- float
+- project finish impact
+- calculation assumptions
+- audit/source references where applicable
+
+======================================================================
+16. AUDITABILITY
+======================================================================
+
+Every authoritative impact analysis should be reproducible.
+
+Record:
+- input activity
+- input delay
+- baseline schedule/version if available
+- relationships used
+- calculation timestamp
+- resulting dates
+- critical-path state
+- source approved progress/review event
+
+Do not store model reasoning as authoritative calculation evidence.
+
+======================================================================
+17. TESTING
+======================================================================
+
+Offline tests are mandatory.
+
+Build synthetic schedules.
+
+TEST A — Simple FS chain
+A → B → C
+
+Delay A by 3 days.
+Expected downstream propagation is deterministic.
+
+TEST B — SS
+A → SS → B
+
+TEST C — FF
+A → FF → B
+
+TEST D — SF
+A → SF → B
+
+TEST E — lag
+A → FS + 2d → B
+
+TEST F — non-critical delay
+Delay activity with sufficient float.
+Project finish should remain unchanged.
+
+TEST G — critical delay
+Delay a critical activity.
+Project finish should move accordingly.
+
+TEST H — near-critical
+Verify float classification.
+
+TEST I — cycle
+A → B → C → A
+Must fail safely.
+
+TEST J — missing dates
+Must return structured validation/calculation error.
+
+TEST K — multiple paths
+Verify longest-path/critical-path logic.
+
+TEST L — multiple delays
+Verify no accidental double counting.
+
+TEST M — Phase 1–6 regression
+Run all previous tests.
+
+TEST N — end-to-end:
+approved progress
+→ activity delay
+→ impact engine
+→ critical-path result
+→ planner-readable explanation
+
+======================================================================
+18. SECURITY / ROBUSTNESS
+======================================================================
+
+Handle:
+- unknown activity
+- unknown relationship
+- invalid dates
+- impossible graph
+- cycles
+- duplicate relationships
+- negative/invalid durations
+- provider failure
+- malformed input
+
+Never expose stack traces to API users in production-style responses.
+
+======================================================================
+19. NON-GOALS
+======================================================================
+
+DO NOT implement:
+- automatic schedule rewriting
+- autonomous recovery schedule
+- weather prediction
+- cost prediction
+- resource optimization
+- BIM
+- computer vision
+- OCR
+- voice
+- mobile app
+- frontend/dashboard
+- RAG
+- vector database
+- enterprise multi-project
+- WhatsApp redesign
+- Phase 8 productivity/institutional memory features
+
+======================================================================
+20. DOCUMENTATION
+======================================================================
+
+README must explain:
+- dependency graph
+- relationship types
+- lag
+- CPM algorithm
+- float
+- delay propagation
+- assumptions
+- limitations
+- APIs
+- test fixtures
+- deterministic vs optional AI explanation
+
+======================================================================
+21. DEFINITION OF DONE
+======================================================================
+
+[ ] Existing repository inspected
+[ ] Baseline tests recorded
+[ ] Phase 1–6 regression passes
+[ ] Relationship graph reused
+[ ] FS supported
+[ ] SS supported where repository supports it
+[ ] FF supported where repository supports it
+[ ] SF supported where repository supports it
+[ ] Lag supported
+[ ] Cycle detection works
+[ ] CPM is deterministic
+[ ] Float calculated
+[ ] Critical activities identified
+[ ] Near-critical classification documented
+[ ] Delay propagation works
+[ ] Project completion impact calculated
+[ ] Multiple-delay behavior defined/tested
+[ ] Approved progress is the authoritative input
+[ ] Nemotron, if used, only explains deterministic results
+[ ] No schedule mutation is performed automatically
+[ ] Offline tests pass
+[ ] README updated
+[ ] No Phase 8/frontend features implemented
+
+======================================================================
+22. FINAL REPORT
+======================================================================
+
+Report:
+1. baseline tests
+2. graph architecture
+3. relationship handling
+4. lag implementation
+5. CPM algorithm
+6. float calculation
+7. delay propagation
+8. APIs
+9. DB changes
+10. tests
+11. regression result
+12. sample analysis
+13. limitations
+14. commands used
+15. confirmation that schedule data was not silently fabricated or
+    automatically rewritten

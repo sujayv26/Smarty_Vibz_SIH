@@ -1,0 +1,631 @@
+CONSight | PHASE 8 DEVELOPMENT PROMPT
+Productivity Intelligence + Institutional Memory
+Target Model: NVIDIA Nemotron 3 Ultra 550B-A55B
+Repository: https://github.com/sujayv26/Smarty_Vibz_SIH
+Previous Phase: Phase 7 — Delay Ripple + Critical Path
+Depends On: Phases 1–7
+Status: BACKEND ONLY — FRONTEND DEFERRED
+
+======================================================================
+0. ROLE
+======================================================================
+
+You are the principal backend/AI engineer for CONSight.
+
+Implement PHASE 8 inside the EXISTING repository:
+
+https://github.com/sujayv26/Smarty_Vibz_SIH
+
+Do not create a greenfield project.
+
+The actual repository is the source of truth.
+
+Phase 8 introduces productivity intelligence and institutional memory
+using historical project data already captured by CONSight.
+
+The system must remain auditable and must distinguish observed facts,
+calculated metrics, and AI-generated summaries.
+
+Nemotron 3 Ultra is suitable for long-context reasoning, agentic
+workflows and multilingual analysis, but model output must never be
+treated as an authoritative database fact without validation.
+
+======================================================================
+1. PHASE 8 GOAL
+======================================================================
+
+Turn accumulated CONSight project history into useful operational
+insights.
+
+Examples:
+
+- Which activities consistently take longer than planned?
+- Which work types repeatedly experience delays?
+- Which disciplines show recurring execution patterns?
+- What lessons were observed on similar activities?
+- What productivity trends appear over time?
+- What historical evidence is relevant to a planner reviewing a new
+  activity?
+- Which previous project outcomes resemble the current situation?
+
+The goal is DECISION SUPPORT, not autonomous project management.
+
+======================================================================
+2. FIRST STEP — REPOSITORY AUDIT
+======================================================================
+
+Before implementation:
+
+1. Inspect all existing models.
+2. Inspect progress events.
+3. Inspect schedule activities.
+4. Inspect actual/planned dates.
+5. Inspect matching records.
+6. Inspect confidence/review records.
+7. Inspect audit trail.
+8. Inspect Phase 5/6 input metadata.
+9. Inspect Phase 7 delay/critical-path outputs.
+10. Inspect database schema.
+11. Inspect tests.
+12. Run complete baseline suite.
+
+Record:
+- passed
+- failed
+- skipped
+- warnings
+
+Do not erase or rewrite existing data.
+
+======================================================================
+3. INSTITUTIONAL MEMORY PRINCIPLE
+======================================================================
+
+Institutional memory must be derived from stored project evidence.
+
+Evidence sources may include:
+- approved progress events
+- planner corrections
+- approved activity matches
+- rejected matches, if useful and properly labeled
+- actual vs planned dates
+- delay impact results
+- activity descriptions
+- discipline
+- WBS
+- historical audit records
+
+Do NOT use:
+- unapproved speculative AI outputs
+- fabricated lessons
+- unsupported assumptions
+- personal/private information unrelated to project operations
+
+======================================================================
+4. FACT / DERIVED / AI DISTINCTION
+======================================================================
+
+Every insight should be classifiable as:
+
+FACT
+A directly stored project record.
+
+DERIVED
+A deterministic metric calculated from project records.
+
+AI SUMMARY
+A language-model interpretation of facts/derived metrics.
+
+Example:
+
+FACT:
+XX-101 actual finish = Sep 13.
+
+DERIVED:
+XX-101 finished 3 calendar days after baseline.
+
+AI SUMMARY:
+"XX-101 experienced a 3-day finish variance."
+
+The AI summary must never introduce a new number or fact absent from the
+structured evidence.
+
+======================================================================
+5. PRODUCTIVITY METRICS
+======================================================================
+
+Implement deterministic metrics appropriate to the available data.
+
+Potential metrics:
+
+Schedule adherence:
+planned duration vs actual duration
+
+Finish variance:
+actual finish - planned finish
+
+Start variance:
+actual start - planned start
+
+On-time completion rate:
+completed activities meeting the chosen schedule criterion
+
+Average delay:
+mean delay among eligible activities
+
+Median delay:
+median delay
+
+Discipline-level performance:
+aggregated metrics by discipline
+
+Activity-type performance:
+aggregated metrics by normalized activity type/description where safely
+available
+
+Do not calculate metrics where required source data is missing.
+
+Return:
+- value
+- sample size
+- time range
+- filters
+- exclusions/limitations
+
+Never present a metric without enough context.
+
+======================================================================
+6. PRODUCTIVITY NORMALIZATION
+======================================================================
+
+Be careful with activity names.
+
+Examples:
+"Concrete footing"
+"Footing concreting"
+"Foundation footing concrete"
+
+These may refer to similar work, but the system must not blindly merge
+them.
+
+Reuse existing matching/normalization logic where appropriate.
+
+If semantic grouping is introduced:
+- make it explicit
+- keep original activity identifiers
+- store grouping evidence
+- avoid destructive renaming
+
+======================================================================
+7. COMPARATIVE ANALYSIS
+======================================================================
+
+Allow comparisons such as:
+
+- discipline vs discipline
+- activity type vs activity type
+- current period vs previous period
+- project segment vs historical project segment
+- planned vs actual
+
+Always show:
+- comparison basis
+- sample sizes
+- time period
+- filters
+- missing data
+
+Avoid misleading conclusions from tiny samples.
+
+======================================================================
+8. INSTITUTIONAL MEMORY RECORDS
+======================================================================
+
+If the repository supports a durable memory model, implement a small
+structured record such as:
+
+Memory:
+- id
+- title
+- observation
+- category
+- source type
+- source reference
+- project/activity reference
+- created_at
+- confidence/status
+- evidence summary
+
+Possible categories:
+- recurring delay pattern
+- execution lesson
+- matching correction
+- planning observation
+- productivity pattern
+
+Do not create a free-form "AI memory" table containing untraceable
+model-generated text.
+
+Every memory item should point back to evidence.
+
+======================================================================
+9. LESSON EXTRACTION
+======================================================================
+
+A lesson should only be created when supported by evidence.
+
+Bad:
+"Workers are usually slow in rainy weather."
+
+No evidence → reject.
+
+Good:
+"Across 8 approved electrical cable-laying activities in the selected
+period, 5 finished later than baseline."
+
+This is a derived observation.
+
+An AI-generated planner summary may then explain the pattern, but must
+reference the underlying evidence.
+
+======================================================================
+10. NEMOTRON USAGE
+======================================================================
+
+Nemotron can be used for:
+
+- summarizing historical evidence
+- grouping semantically similar observations
+- generating planner-readable explanations
+- answering evidence-grounded natural-language questions
+- synthesizing long historical context
+
+Recommended architecture:
+
+Structured project records
+        ↓
+Deterministic retrieval/filtering
+        ↓
+Evidence package
+        ↓
+Nemotron
+        ↓
+Structured/validated summary
+        ↓
+API response
+
+Do NOT send the entire database blindly to the model.
+
+Retrieve relevant evidence first.
+
+Do NOT allow the model to:
+- modify schedule activities
+- modify progress events
+- approve planner reviews
+- change confidence scores
+- change critical-path calculations
+- create unsupported facts
+
+======================================================================
+11. EVIDENCE-GROUNDED AI
+======================================================================
+
+Every AI answer should receive a bounded evidence package.
+
+Example:
+
+Question:
+"Why are piping activities taking longer?"
+
+Evidence:
+- 12 approved piping activities
+- 7 had positive finish variance
+- average variance = X
+- median variance = Y
+- date range = ...
+- activity IDs = ...
+
+Model instruction:
+Answer only from the supplied evidence.
+If evidence is insufficient, say so.
+Do not invent causes.
+
+The API should expose evidence references where practical.
+
+======================================================================
+12. NATURAL-LANGUAGE QUERYING
+======================================================================
+
+If adding a planner query endpoint, keep it narrow.
+
+Possible:
+
+POST /insights/query
+
+Input:
+{
+  "question": "Which piping activities had the largest delays?"
+}
+
+Pipeline:
+
+question
+→ intent/filter extraction
+→ deterministic database query
+→ evidence package
+→ optional Nemotron summary
+→ response with evidence
+
+Do NOT let the model generate arbitrary SQL.
+
+If model-assisted query interpretation is used, validate the resulting
+filters against an explicit allowlist.
+
+======================================================================
+13. PRODUCTIVITY API
+======================================================================
+
+Possible endpoints after inspecting the existing API conventions:
+
+GET /insights/productivity
+GET /insights/trends
+GET /insights/activity/{activity_id}
+GET /insights/memory
+POST /insights/query
+
+Do not implement every endpoint automatically.
+
+Choose a minimal API surface.
+
+Responses should include:
+- metrics
+- sample size
+- period
+- filters
+- evidence references
+- limitations
+- optional AI summary
+
+======================================================================
+14. TIME WINDOWS
+======================================================================
+
+Support explicit time windows if the current data model permits:
+
+- from
+- to
+- project
+- discipline
+- activity type
+- status
+
+Do not silently use arbitrary dates.
+
+If no time window is supplied, document the default.
+
+======================================================================
+15. DATA QUALITY
+======================================================================
+
+Handle:
+
+- missing planned dates
+- missing actual dates
+- duplicate records
+- rejected progress
+- unapproved reviews
+- incomplete activities
+- invalid durations
+- inconsistent timestamps
+
+Define eligibility rules.
+
+Example:
+An activity with no approved actual finish cannot be included in an
+"actual finish variance" metric.
+
+======================================================================
+16. PRIVACY / DATA MINIMIZATION
+======================================================================
+
+Institutional memory is about project knowledge, not personal profiling.
+
+Do not store unnecessary:
+- phone numbers
+- personal identifiers
+- private conversations
+- authentication secrets
+
+If source metadata is needed for audit, store only the minimum necessary
+reference.
+
+======================================================================
+17. TESTING
+======================================================================
+
+All core tests must be offline.
+
+Create synthetic historical data.
+
+TEST A — schedule adherence
+Known planned/actual dates.
+
+TEST B — finish variance
+Verify deterministic calculation.
+
+TEST C — discipline aggregation
+Verify sample counts and averages.
+
+TEST D — insufficient data
+Ensure metric is not fabricated.
+
+TEST E — evidence grounding
+AI summary receives known evidence and must not add unsupported facts.
+
+TEST F — no hallucinated causes
+Question:
+"Why are piping activities delayed?"
+If the evidence only contains delay numbers and no causes, response must
+state that cause is not established.
+
+TEST G — historical retrieval
+Verify only relevant records enter the evidence package.
+
+TEST H — memory traceability
+Every memory record points to source evidence.
+
+TEST I — rejected/unapproved data
+Verify it does not contaminate authoritative productivity metrics.
+
+TEST J — time filtering
+Verify date boundaries.
+
+TEST K — regression
+All Phase 1–7 tests.
+
+TEST L — end-to-end:
+approved progress
+→ historical record
+→ productivity calculation
+→ evidence retrieval
+→ optional Nemotron summary
+→ traceable response
+
+======================================================================
+18. NEMOTRON FAILURE FALLBACK
+======================================================================
+
+If Nemotron is unavailable:
+
+The deterministic API must still return:
+- metrics
+- evidence
+- structured observations
+
+AI summary may be null/unavailable.
+
+Do not fail the entire productivity API merely because the model provider
+is unavailable unless the endpoint specifically requires generation.
+
+======================================================================
+19. PERFORMANCE
+======================================================================
+
+Do not scan the entire database for every query if avoidable.
+
+Use:
+- indexed fields
+- bounded date ranges
+- deterministic filters
+- pagination
+- aggregation queries
+
+Do not introduce Redis/vector DB unless a later architecture explicitly
+requires it. Phase 8 should remain lightweight.
+
+======================================================================
+20. VECTOR SEARCH / RAG
+======================================================================
+
+Do NOT automatically introduce a vector database or RAG framework.
+
+For the MVP:
+- deterministic retrieval
+- structured filters
+- SQL queries
+- bounded evidence packages
+
+If semantic similarity is genuinely required, implement the smallest
+local/testable abstraction and document it. Do not turn Phase 8 into a
+new infrastructure project.
+
+======================================================================
+21. DOCUMENTATION
+======================================================================
+
+Update README with:
+- productivity metrics
+- eligibility rules
+- historical evidence
+- institutional memory
+- AI summary architecture
+- evidence grounding
+- privacy
+- limitations
+- API examples
+- test commands
+
+Document exactly which insights are deterministic and which are
+Nemotron-generated.
+
+======================================================================
+22. NON-GOALS
+======================================================================
+
+DO NOT implement:
+- autonomous planning
+- automatic schedule modification
+- autonomous resource allocation
+- automatic delay prediction
+- weather intelligence
+- BIM
+- OCR
+- voice
+- mobile
+- frontend/dashboard
+- enterprise multi-project architecture
+- Kubernetes
+- microservices
+- Redis
+- vector database as a mandatory dependency
+- unbounded RAG
+- autonomous planner approval
+- Phase 9+ features
+
+======================================================================
+23. DEFINITION OF DONE
+======================================================================
+
+[ ] Repository inspected
+[ ] Baseline tests recorded
+[ ] Phase 1–7 regression passes
+[ ] Productivity metrics are deterministic
+[ ] Sample sizes are exposed
+[ ] Time windows are explicit
+[ ] Missing data is handled safely
+[ ] Historical evidence is traceable
+[ ] Institutional memory is evidence-backed
+[ ] AI summaries cannot invent authoritative facts
+[ ] Nemotron is behind a provider/adapter
+[ ] Deterministic fallback works without Nemotron
+[ ] No arbitrary SQL generated by the model
+[ ] No automatic schedule mutation
+[ ] No personal data unnecessarily stored
+[ ] Offline tests pass
+[ ] README updated
+[ ] No frontend implemented
+[ ] No prohibited future infrastructure added
+
+======================================================================
+24. FINAL REPORT
+======================================================================
+
+Report:
+
+1. baseline test result
+2. repository findings
+3. productivity metrics implemented
+4. eligibility rules
+5. institutional memory design
+6. evidence retrieval design
+7. Nemotron integration
+8. APIs
+9. DB/schema changes
+10. tests
+11. regression result
+12. example insight queries/results
+13. limitations
+14. performance considerations
+15. exact run commands
+16. confirmation that all AI outputs remain evidence-grounded
+17. confirmation that no future-phase/frontend work was implemented

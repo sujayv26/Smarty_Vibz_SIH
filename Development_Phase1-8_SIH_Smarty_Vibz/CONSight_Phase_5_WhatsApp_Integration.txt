@@ -1,0 +1,949 @@
+CONSight / SMARTY_VIBZ
+PHASE 5 DEVELOPMENT PROMPT
+WhatsApp Integration for Low-Friction Field Progress Capture
+
+======================================================================
+PHASE NUMBERING
+======================================================================
+
+The active roadmap is:
+
+Phase 1 = FastAPI Backend Foundation + Data Capture        [COMPLETED]
+Phase 2 = Hybrid Schedule Matching Engine                 [COMPLETED]
+Phase 3 = Confidence + Planner Review + Audit Trail       [COMPLETED]
+Phase 4 = Primavera P6 / MS Project Round-Trip             [PREVIOUS PHASE]
+Phase 5 = WhatsApp Integration                            <-- IMPLEMENT NOW
+Phase 6 = Multi-Language / Hinglish Extraction
+Phase 7 = Delay Ripple / Critical Path Impact
+Phase 8 = Productivity + Institutional Memory Analytics
+
+IMPORTANT:
+- The old frontend/dashboard Phase 4 was intentionally deferred.
+- Do NOT implement the frontend in this phase.
+- Do NOT implement Phase 6, 7 or 8.
+- Phase 5 must extend the existing backend.
+- Do NOT rebuild Phase 1, 2, 3 or 4.
+
+======================================================================
+ROLE
+======================================================================
+
+You are the lead backend engineer for our SIH hackathon project,
+currently called Smarty_vibz / ConSight.
+
+Phase 1, Phase 2 and Phase 3 are completed.
+Phase 4 covers schedule interoperability and is the preceding backend
+phase.
+
+Your task is to IMPLEMENT PHASE 5 — WHATSAPP INTEGRATION in the existing
+repository.
+
+This is NOT a request for an explanation or pseudocode.
+
+ACTUALLY:
+INSPECT -> TEST BASELINE -> IMPLEMENT -> TEST -> DEBUG
+-> REGRESSION TEST -> VERIFY -> DOCUMENT.
+
+======================================================================
+PROJECT PROBLEM STATEMENT
+======================================================================
+
+Project:
+Intelligent Data Capture & Schedule-Linking Layer for Infrastructure
+Project Management.
+
+The system connects:
+- structured project schedules
+- unstructured field progress
+- AI extraction
+- schedule matching
+- confidence evaluation
+- planner review
+- audit trail
+
+The problem statement emphasizes an LLM-based conversational interface
+for site supervisors and a "minimal friction" / "low-friction" mechanism
+for logging field activity.
+
+WhatsApp is being added as the practical field communication channel.
+
+The important design principle is:
+
+WhatsApp is ONLY AN INPUT CHANNEL.
+
+It must reuse the existing ConSight intelligence pipeline rather than
+creating a second AI system.
+
+======================================================================
+PHASE 5 OBJECTIVE
+======================================================================
+
+Allow a site supervisor to send a WhatsApp text message containing
+field progress.
+
+Example:
+
+"XX-101 ka spool erection 9:30 baje start kiya"
+
+or:
+
+"Today at 9:30 AM, the piping team started erection of the XX-101
+spool in Area B."
+
+The system should:
+
+WhatsApp message
+      |
+      v
+WhatsApp webhook
+      |
+      v
+ConSight backend
+      |
+      v
+Existing extraction service
+      |
+      v
+Structured Progress Event
+      |
+      v
+Existing Phase 2 matching
+      |
+      v
+Existing Phase 3 confidence/review workflow
+      |
+      v
+Stored result + response
+      |
+      v
+WhatsApp reply
+
+The goal is to prove that supervisors can submit field progress without
+learning a new application.
+
+======================================================================
+CRITICAL ARCHITECTURE RULE
+======================================================================
+
+DO NOT build a separate WhatsApp-specific AI pipeline.
+
+Reuse the existing services.
+
+Conceptually:
+
+WhatsApp
+   |
+   v
+Webhook/API Adapter
+   |
+   v
+Existing agent_service.chat()
+   |
+   v
+Existing extraction service
+   |
+   v
+Existing Progress Event
+   |
+   v
+Existing Phase 2 Matching
+   |
+   v
+Existing Phase 3 Confidence / Review
+   |
+   v
+Existing Audit Trail
+   |
+   v
+WhatsApp response
+
+The WhatsApp layer should be as thin as possible.
+
+Business logic belongs in existing/new services, NOT inside the
+FastAPI route handler.
+
+======================================================================
+STEP 1 — INSPECT THE EXISTING REPOSITORY
+======================================================================
+
+Before changing anything:
+
+- inspect the complete repository
+- inspect requirements.txt / pyproject.toml
+- inspect FastAPI application
+- inspect API routes
+- inspect agent_service.py
+- inspect extraction_service.py
+- inspect progress services
+- inspect matching services
+- inspect confidence/review services
+- inspect audit services
+- inspect Pydantic schemas
+- inspect SQLAlchemy models
+- inspect database setup
+- inspect environment configuration
+- inspect tests
+- inspect README
+- inspect Phase 4 implementation if already present
+
+Understand exactly how Phase 1–4 currently work.
+
+DO NOT assume the reference documentation perfectly matches the code.
+
+The current repository is the source of truth.
+
+======================================================================
+STEP 2 — RUN BASELINE TESTS
+======================================================================
+
+Before making changes:
+
+Run the complete existing test suite.
+
+Record:
+- test command
+- passed tests
+- failed tests
+- skipped tests
+
+If failures already exist, identify them before changing the code.
+
+Do NOT hide or rewrite unrelated existing failures.
+
+======================================================================
+STEP 3 — UNDERSTAND EXISTING AGENT FLOW
+======================================================================
+
+The project already has a conversational Time Agent / agent service.
+
+Reuse it.
+
+The Phase 1 architecture established:
+
+Supervisor Chat Input
+        |
+        v
+AI Extraction
+        |
+        v
+Structured Event
+        |
+        v
+Matching
+        |
+        v
+Conversational Response
+
+Phase 5 should make WhatsApp another entry point into this existing
+flow.
+
+If the existing agent_service.chat() already performs extraction,
+matching and response generation, reuse it rather than duplicating
+those operations.
+
+If Phase 3 currently requires explicit planner review for medium/low
+confidence matches, preserve that behavior.
+
+Never bypass Phase 3 confidence/review rules merely because the input
+came from WhatsApp.
+
+======================================================================
+WHATSAPP INTEGRATION
+======================================================================
+
+Implement a WhatsApp Business Cloud API webhook using the existing
+FastAPI backend.
+
+The implementation should support:
+
+1. Webhook verification
+2. Incoming message handling
+3. Text-message extraction
+4. Sender/session identification
+5. Routing message into the existing ConSight agent flow
+6. Sending a response back through WhatsApp
+7. Safe error handling
+8. Testable provider abstraction
+
+Do NOT hard-code WhatsApp credentials.
+
+Use environment variables.
+
+======================================================================
+WEBHOOK DESIGN
+======================================================================
+
+Implement a dedicated WhatsApp route, for example:
+
+GET  /whatsapp/webhook
+POST /whatsapp/webhook
+
+Adapt the exact route naming to the existing API conventions.
+
+GET should support WhatsApp webhook verification.
+
+POST should:
+- validate the webhook request
+- identify the incoming message
+- ignore unsupported/non-text events safely
+- identify sender
+- create/reuse an appropriate session identifier
+- pass the message to the existing agent service
+- generate the ConSight response
+- send the response using the WhatsApp provider abstraction
+- return an appropriate HTTP response quickly
+
+Keep route handlers thin.
+
+======================================================================
+WEBHOOK VERIFICATION
+======================================================================
+
+Implement the standard WhatsApp Cloud API webhook verification flow.
+
+Use environment variables for:
+- verify token
+- access token
+- phone number ID
+- API configuration
+
+Do NOT hard-code credentials.
+
+Verification failures must return appropriate errors.
+
+Never expose secrets in logs or API responses.
+
+======================================================================
+WHATSAPP PROVIDER ABSTRACTION
+======================================================================
+
+Create a clean provider/service abstraction.
+
+Conceptually:
+
+WhatsAppProvider
+    |
+    +-- verify_webhook()
+    |
+    +-- parse_incoming_message()
+    |
+    +-- send_text_message()
+
+The exact class/function design should follow the existing project style.
+
+The core ConSight business logic must NOT depend directly on raw
+WhatsApp API payload structures.
+
+This makes the integration testable and replaceable.
+
+======================================================================
+INCOMING MESSAGE HANDLING
+======================================================================
+
+Handle normal WhatsApp text messages.
+
+Extract only the information actually provided by WhatsApp, such as:
+- sender identifier
+- message identifier
+- timestamp
+- text body
+- phone number metadata when legitimately available
+
+Do NOT infer:
+- activity ID
+- discipline
+- location
+- dates
+- equipment tag
+- actual progress
+- identity beyond the data supplied by the webhook
+
+The existing AI extraction service should determine structured
+progress fields from the message.
+
+Maintain the project's no-hallucination rule.
+
+======================================================================
+SESSION HANDLING
+======================================================================
+
+The same supervisor should be able to have a conversational interaction
+through WhatsApp.
+
+Reuse the existing agent session mechanism if available.
+
+Use the WhatsApp sender identifier as the basis for mapping a WhatsApp
+conversation to an agent session where appropriate.
+
+Do NOT introduce a complicated authentication/user-management system.
+
+For the SIH MVP, a simple deterministic session mapping is sufficient.
+
+If persistent mapping is required, implement the smallest database
+change necessary.
+
+Document the design.
+
+======================================================================
+RESPONSE FLOW
+======================================================================
+
+After receiving a message:
+
+1. Parse incoming WhatsApp message.
+2. Pass text to existing agent service.
+3. Reuse existing extraction.
+4. Reuse existing matching.
+5. Reuse existing confidence logic.
+6. Reuse existing planner-review behavior.
+7. Store relevant events/results using existing persistence.
+8. Generate a concise conversational response.
+9. Send response back to WhatsApp.
+
+Example successful response:
+
+"Progress recorded for XX-101 spool erection.
+Match confidence: 94%.
+Status: START logged."
+
+Example ambiguous response:
+
+"I found multiple possible schedule activities.
+Please review the suggested matches in ConSight."
+
+Do not claim a match is final when Phase 3 has classified it as requiring
+review.
+
+======================================================================
+PHASE 3 INTEGRATION
+======================================================================
+
+This is critical.
+
+WhatsApp must NOT become a shortcut around the human-in-the-loop design.
+
+The flow remains:
+
+WhatsApp message
+      |
+      v
+Progress Event
+      |
+      v
+Phase 2 Top 3 Matches
+      |
+      v
+Phase 3 Confidence
+      |
+      +--> HIGH -> existing automatic path
+      |
+      +--> MEDIUM/LOW -> existing planner review
+      |
+      v
+Final Decision
+      |
+      v
+Audit Trail
+
+If Phase 3 requires planner intervention, the WhatsApp response should
+communicate that the event requires review rather than falsely reporting
+that it has been finalized.
+
+======================================================================
+ERROR HANDLING
+======================================================================
+
+Handle safely:
+
+- malformed webhook payload
+- verification failure
+- unsupported event type
+- unsupported message type
+- empty text
+- duplicate webhook delivery
+- unknown sender
+- agent service failure
+- extraction failure
+- matching failure
+- confidence/review failure
+- WhatsApp API failure
+- network timeout
+- invalid credentials
+- rate limiting
+
+Do not expose internal stack traces to WhatsApp users.
+
+Provide useful server-side logs without exposing secrets.
+
+======================================================================
+DUPLICATE MESSAGE / IDEMPOTENCY
+======================================================================
+
+WhatsApp webhooks can be retried.
+
+Avoid processing the same incoming message multiple times.
+
+Use the WhatsApp message ID where available.
+
+Implement a simple idempotency mechanism compatible with the existing
+database architecture.
+
+Do NOT create an elaborate distributed event-processing system.
+
+A lightweight database-backed approach is enough for the SIH MVP.
+
+Test duplicate delivery.
+
+======================================================================
+SECURITY
+======================================================================
+
+Never commit:
+- WhatsApp access tokens
+- verify tokens
+- API secrets
+- private credentials
+
+Use .env / environment variables.
+
+Update .env.example with placeholder variables.
+
+Do not log access tokens.
+
+Validate webhook requests appropriately.
+
+If signature verification is supported by the chosen API flow and
+implementation, implement it correctly.
+
+Do not invent a security mechanism that the provider does not support.
+
+======================================================================
+EXTERNAL API DEPENDENCY
+======================================================================
+
+The core automated test suite MUST remain offline.
+
+Do not make tests depend on the real WhatsApp API.
+
+Create a mock/fake WhatsApp provider.
+
+Conceptually:
+
+RealWhatsAppProvider
+MockWhatsAppProvider
+
+The same business service should work with either provider.
+
+This allows tests to verify:
+
+incoming WhatsApp message
+-> agent service
+-> progress event
+-> matching
+-> confidence
+-> response
+
+without internet access.
+
+======================================================================
+TESTING
+======================================================================
+
+Add automated tests for:
+
+Webhook:
+- valid verification
+- invalid verification
+- malformed verification request
+- valid text webhook
+- unsupported event
+- unsupported message type
+- empty message
+- malformed payload
+
+Message processing:
+- valid supervisor message
+- sender/session mapping
+- structured progress extraction
+- matching integration
+- confidence integration
+- response generation
+
+Idempotency:
+- same message processed once
+- duplicate webhook ignored safely
+
+Provider:
+- outgoing text message
+- provider failure
+- timeout/error handling
+
+Security:
+- secrets are read from environment
+- no credentials hard-coded
+
+Regression:
+- Phase 1 complete suite
+- Phase 2 complete suite
+- Phase 3 complete suite
+- Phase 4 complete suite if implemented
+
+Integration:
+- WhatsApp
+  -> extraction
+  -> matching
+  -> confidence
+  -> final decision/review
+  -> response
+
+All tests must work without:
+- internet
+- real WhatsApp account
+- real WhatsApp phone number
+- live LLM API
+
+Use mocks/fakes for external services.
+
+======================================================================
+SAMPLE DEMO SCENARIOS
+======================================================================
+
+Create deterministic test/demo messages.
+
+SCENARIO 1 — HIGH-CONFIDENCE MATCH
+
+Input:
+
+"XX-101 spool erection started at 9:30 AM in Area B."
+
+Expected:
+- progress event created
+- correct schedule activity identified
+- confidence evaluated
+- automatic path if the existing Phase 3 threshold permits it
+- WhatsApp confirmation returned
+- audit trail preserved
+
+SCENARIO 2 — AMBIGUOUS MATCH
+
+Input:
+
+"Piping erection started in Area B."
+
+Expected:
+- progress event created
+- multiple candidates may be returned
+- Phase 2 top 3 retained
+- Phase 3 confidence is not falsely marked HIGH
+- planner review remains required
+- WhatsApp response indicates review is needed
+
+SCENARIO 3 — UNMATCHED ACTIVITY
+
+Input:
+
+"Repainted the perimeter fence around the compound."
+
+Expected:
+- structured event
+- no fabricated existing activity
+- existing Phase 3 unmatched/new-activity workflow is preserved
+- audit trail records the final decision
+
+SCENARIO 4 — CODE-MIXED MESSAGE
+
+Input:
+
+"XX-101 ka spool erection start kiya."
+
+This message may be used as a demonstration input, but DO NOT build
+Phase 6 multilingual/Hinglish functionality now.
+
+Phase 5 should simply pass the message through the existing extraction
+system.
+
+======================================================================
+API / DOCUMENTATION
+======================================================================
+
+Expose the WhatsApp endpoints through FastAPI Swagger where appropriate.
+
+Update README with:
+
+- WhatsApp architecture
+- environment variables
+- webhook setup overview
+- local testing approach
+- mock provider
+- supported message type
+- limitations
+- production configuration notes
+
+Do not claim the system is production-ready unless it has actually been
+tested/configured for production.
+
+======================================================================
+LOCAL DEVELOPMENT
+======================================================================
+
+The implementation should be easy to test locally.
+
+Because WhatsApp Cloud API requires a publicly reachable webhook, do not
+assume localhost alone is sufficient for real webhook delivery.
+
+Document the local-development requirement for a secure public tunnel
+or deployment environment if needed.
+
+However, the automated test suite must NOT require such a tunnel.
+
+Provide a mock webhook test path or test fixture.
+
+======================================================================
+DATABASE CHANGES
+======================================================================
+
+Only add database structures if genuinely required.
+
+Potential data may include:
+- WhatsApp message ID
+- sender/session mapping
+- processing status
+- received timestamp
+
+Adapt to the existing schema.
+
+Do not duplicate the existing progress-event model.
+
+Do not store unnecessary personal data.
+
+Do not redesign the database.
+
+Existing Phase 1–4 records must remain intact.
+
+======================================================================
+NO UNNECESSARY TECHNOLOGY
+======================================================================
+
+Do NOT add:
+
+- React/frontend
+- native mobile application
+- Kubernetes
+- microservices
+- Redis
+- vector database
+- RAG
+- OCR
+- voice processing
+- delay prediction
+- weather integration
+- BIM
+- enterprise multi-project architecture
+- unrelated AI agents
+
+WhatsApp is an input-channel integration, not a reason to redesign the
+entire system.
+
+======================================================================
+FUTURE PHASE BOUNDARY
+======================================================================
+
+Do NOT implement these now.
+
+PHASE 6:
+Multi-Language / Hinglish Extraction
+
+PHASE 7:
+Delay Ripple / Critical Path Impact
+
+PHASE 8:
+Productivity + Institutional Memory Analytics
+
+The Phase 5 implementation should only provide clean interfaces/data
+that allow those phases to be added later.
+
+======================================================================
+IMPLEMENTATION ORDER
+======================================================================
+
+STEP 1
+Inspect the complete Phase 1–4 repository.
+
+STEP 2
+Run the existing test suite.
+
+STEP 3
+Record baseline.
+
+STEP 4
+Understand agent_service.chat() and existing session handling.
+
+STEP 5
+Understand Phase 2 and Phase 3 integration points.
+
+STEP 6
+Design the minimal WhatsApp adapter/provider layer.
+
+STEP 7
+Implement webhook verification.
+
+STEP 8
+Implement incoming message parsing.
+
+STEP 9
+Implement sender/session mapping.
+
+STEP 10
+Connect the WhatsApp message to the EXISTING agent service.
+
+STEP 11
+Connect the resulting flow to existing matching/confidence/review
+logic without duplication.
+
+STEP 12
+Implement outgoing WhatsApp response.
+
+STEP 13
+Implement idempotency.
+
+STEP 14
+Implement mock provider.
+
+STEP 15
+Add unit tests.
+
+STEP 16
+Add integration tests.
+
+STEP 17
+Run complete Phase 1 + Phase 2 + Phase 3 + Phase 4 regression suite.
+
+STEP 18
+Fix every regression.
+
+STEP 19
+Run the application.
+
+STEP 20
+Verify /docs.
+
+STEP 21
+Manually verify the webhook using mock/local testing.
+
+STEP 22
+If credentials/environment are available, verify the real WhatsApp
+Cloud API path without compromising secrets.
+
+STEP 23
+Update README and .env.example.
+
+STEP 24
+Review for unnecessary complexity.
+
+STEP 25
+Produce final implementation report.
+
+======================================================================
+DEFINITION OF DONE
+======================================================================
+
+Phase 5 is complete only when:
+
+[ ] Existing Phase 1 tests pass.
+[ ] Existing Phase 2 tests pass.
+[ ] Existing Phase 3 tests pass.
+[ ] Existing Phase 4 tests pass, if Phase 4 exists in the repository.
+[ ] WhatsApp webhook verification works.
+[ ] Incoming text messages are parsed correctly.
+[ ] WhatsApp messages enter the existing ConSight agent pipeline.
+[ ] Existing extraction service is reused.
+[ ] Existing matching service is reused.
+[ ] Existing confidence/review workflow is preserved.
+[ ] Audit trail remains intact.
+[ ] Outgoing WhatsApp responses work through an isolated provider.
+[ ] Mock provider exists.
+[ ] Automated tests do not require internet.
+[ ] Duplicate webhook delivery is handled safely.
+[ ] Secrets are environment-based.
+[ ] No secrets are committed or logged.
+[ ] Errors are handled safely.
+[ ] Swagger documentation is updated.
+[ ] README is updated.
+[ ] A complete WhatsApp -> Progress Event -> Match -> Confidence ->
+    Response flow is tested.
+[ ] No frontend has been implemented.
+[ ] Phase 6 multilingual functionality has NOT been implemented.
+[ ] Phase 7 delay-ripple functionality has NOT been implemented.
+[ ] Phase 8 analytics functionality has NOT been implemented.
+
+======================================================================
+FINAL REPORT REQUIRED
+======================================================================
+
+After actually implementing and testing Phase 5, report:
+
+1. Repository structure inspected.
+2. Baseline test result.
+3. Existing Phase 1–4 functionality reused.
+4. Files created.
+5. Files modified.
+6. Database changes, if any.
+7. WhatsApp API/provider approach.
+8. Webhook endpoints.
+9. Session strategy.
+10. Idempotency strategy.
+11. Environment variables added.
+12. Agent-service integration.
+13. Extraction/matching/confidence integration.
+14. Response behavior.
+15. Error-handling strategy.
+16. Mock provider implementation.
+17. Tests added.
+18. Complete test result.
+19. Manual verification performed.
+20. Commands to run the backend.
+21. Swagger path.
+22. WhatsApp configuration/setup steps.
+23. Known limitations.
+24. Future Phase 6–8 compatibility.
+
+Explicitly confirm:
+
+- Frontend Phase 4 was NOT implemented.
+- Phase 5 WhatsApp was implemented.
+- Phase 6 multilingual extraction was NOT implemented.
+- Phase 7 delay ripple was NOT implemented.
+- Phase 8 institutional-memory analytics was NOT implemented.
+
+======================================================================
+FINAL COMMAND
+======================================================================
+
+DO NOT STOP AT EXPLANATION.
+
+DO NOT ONLY PROVIDE CODE SNIPPETS.
+
+DO NOT CREATE A PARALLEL BACKEND.
+
+DO NOT REBUILD COMPLETED PHASES.
+
+DO NOT BYPASS PHASE 3 HUMAN-IN-THE-LOOP LOGIC.
+
+DO NOT BUILD A SECOND AI PIPELINE FOR WHATSAPP.
+
+FIRST INSPECT THE REAL REPOSITORY.
+
+THEN RUN BASELINE TESTS.
+
+THEN IMPLEMENT PHASE 5 IN THE EXISTING CODEBASE.
+
+THEN TEST.
+
+THEN DEBUG.
+
+THEN RUN THE COMPLETE REGRESSION SUITE.
+
+THEN VERIFY THE END-TO-END WHATSAPP FLOW.
+
+THE FINAL RESULT MUST BE A WORKING, TESTED, CONTINUABLE PHASE 5
+IMPLEMENTATION.
