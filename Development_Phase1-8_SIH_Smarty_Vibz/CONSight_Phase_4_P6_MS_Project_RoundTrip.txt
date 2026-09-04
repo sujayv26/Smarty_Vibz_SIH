@@ -1,100 +1,182 @@
 CONSight / SMARTY_VIBZ
-PHASE 4 DEVELOPMENT PROMPT
-Primavera P6 / MS Project Round-Trip Integration
-Backend Continuation After Completed Phase 1, Phase 2 and Phase 3
+SIH26122 — PHASE 4 IMPLEMENTATION SPECIFICATION
+Primavera P6 Schedule Interoperability and Verified Progress Export
 
 ======================================================================
-IMPORTANT PHASE RENUMBERING
+PURPOSE
 ======================================================================
 
-The original roadmap called the frontend/dashboard "Phase 4".
+Phase 1, Phase 2, and Phase 3 are already implemented.
 
-THAT FRONTEND PHASE IS NOW DEFERRED.
+Phase 4 connects the existing ConSight field-progress and matching
+workflow with a real infrastructure project schedule.
 
-For the current backend development plan, DO NOT implement the old
-frontend Phase 4.
+Phase 4 must:
 
-The new numbering is:
+1. Import a Primavera P6 .XER schedule.
+2. Convert imported activities into the existing ConSight schedule model.
+3. Preserve activity identifiers, dates, WBS, and useful metadata.
+4. Preserve predecessor-successor relationships and lag.
+5. Reuse the existing Phase 2 matching engine.
+6. Reuse the existing Phase 3 confidence, planner-review, and audit flow.
+7. Export a new updated schedule containing only trusted approved actuals.
+8. Validate invalid schedule data clearly.
+9. Add offline tests and preserve all Phase 1-3 behavior.
 
-Phase 1 = FastAPI Backend Foundation + Data Capture
-Phase 2 = Hybrid Schedule Matching Engine
-Phase 3 = Confidence + Planner Review + Audit Trail
-Phase 4 = Primavera P6 / MS Project Round-Trip        <-- IMPLEMENT NOW
-Phase 5 = WhatsApp Integration
-Phase 6 = Multi-Language / Hinglish Extraction
-Phase 7 = Delay Ripple / Critical Path Impact
-Phase 8 = Productivity + Institutional Memory Analytics
-
-Phase 5 onward are future phases. ONLY IMPLEMENT PHASE 4 in this task.
-
-======================================================================
-ROLE
-======================================================================
-
-You are the lead backend engineer for our SIH hackathon project,
-currently called Smarty_vibz / ConSight.
-
-Phase 1, Phase 2 and Phase 3 have already been completed.
-
-Your job is to inspect the EXISTING repository and IMPLEMENT the new
-Phase 4 backend feature in that repository.
-
-This is an implementation task, NOT a request for an explanation,
-pseudocode, mock architecture, or disconnected sample code.
-
-ACTUALLY:
-INSPECT -> TEST BASELINE -> IMPLEMENT -> TEST -> DEBUG -> REGRESSION TEST
--> VERIFY -> DOCUMENT.
+Phase 4 is an interoperability feature. It does not train or modify an
+LLM. Nemotron may be used as a coding assistant, but the actual feature
+must be implemented in the existing FastAPI application and database.
 
 ======================================================================
-PROJECT PROBLEM STATEMENT
+CORE BUSINESS FLOW
 ======================================================================
 
-Project:
-Intelligent Data Capture & Schedule-Linking Layer for Infrastructure
-Project Management.
-
-The system connects the structured planning side (L5/L6 infrastructure
-schedule) with the unstructured execution side (field progress reports).
-
-Phase 1 answers:
-"What happened on site?"
-
-Phase 2 answers:
-"Which planned activity did that site event belong to?"
-
-Phase 3 answers:
-"Can we trust the match, and should it be automatically accepted or
-reviewed by a planner?"
-
-Phase 4 now answers:
-"Can ConSight work with the real project schedule used by planners,
-import it, preserve its important structure, connect field progress to
-it, and export updated actuals back into the schedule workflow?"
+External Primavera P6 XER Schedule
+              |
+              v
+        XER Import Adapter
+              |
+              v
+             Validation
+              |
+              v
+ Existing ConSight ScheduleActivity Model
+              |
+              v
+     Relationships and Dependencies
+              |
+              v
+      Field Progress Report
+              |
+              v
+ Phase 1 Extraction -> Phase 2 Matching
+              |
+              v
+ Phase 3 Confidence and Planner Review
+              |
+              v
+       Approved or Corrected Decision
+              |
+              v
+       Trusted Actual Start/Finish
+              |
+              v
+      New Exported Schedule File
 
 ======================================================================
-REFERENCE TO COMPLETED PHASES
+STRICT SCOPE
 ======================================================================
 
-DO NOT rebuild Phase 1, Phase 2 or Phase 3.
+IMPLEMENT NOW:
 
-Reuse their existing functionality.
+- Primavera P6 .XER import.
+- Internal schedule normalization.
+- Schedule relationship persistence.
+- Validation and useful error reporting.
+- Export of the supported normalized schedule.
+- Export of approved Phase 3 actual dates.
+- API endpoints following existing project conventions.
+- Offline unit, API, regression, and integration tests.
+- README and implementation documentation.
 
-Phase 1 established:
-- FastAPI
-- SQLAlchemy
-- SQLite
-- Pydantic
-- schedule activity ingestion/storage
-- progress event ingestion/storage
-- AI extraction
-- Time Agent
-- Excel ingestion
-- tests
-- service-based architecture
+DO NOT IMPLEMENT NOW:
 
-The Phase 1 schedule activity contains fields such as:
-- id
+- A new frontend or dashboard.
+- WhatsApp integration.
+- Hinglish, Tamil-English, or other multilingual extraction.
+- Delay-ripple calculation.
+- Critical-path prediction.
+- Productivity analytics.
+- Institutional-memory analytics.
+- RAG or vector-database infrastructure.
+- Kubernetes, Redis, microservices, OCR, BIM, or weather APIs.
+- A separate scheduling backend.
+- Fake or untested MS Project .MPP support.
+
+======================================================================
+STEP 1 — INSPECT THE EXISTING REPOSITORY
+======================================================================
+
+Before modifying files:
+
+- Inspect the complete repository structure.
+- Inspect requirements.txt or pyproject.toml.
+- Inspect database configuration and initialization.
+- Inspect SQLAlchemy models.
+- Inspect Pydantic schemas.
+- Inspect schedule ingestion and storage services.
+- Inspect Phase 2 matching services.
+- Inspect Phase 3 confidence and review services.
+- Inspect audit-trail services.
+- Inspect API routes and naming conventions.
+- Inspect existing migrations, if present.
+- Inspect all tests and sample data.
+- Inspect README and documentation.
+
+The current repository is the source of truth. Do not assume that this
+specification exactly matches the existing implementation.
+
+Do not modify code during inspection.
+
+======================================================================
+STEP 2 — BASELINE TESTS
+======================================================================
+
+Run the complete existing test suite before making changes.
+
+Record:
+
+- Command used.
+- Number passed.
+- Number failed.
+- Number skipped.
+- Pre-existing failure details.
+
+Do not hide, delete, or rewrite pre-existing tests merely to obtain a
+passing result.
+
+======================================================================
+P6/XER IMPORT REQUIREMENTS
+======================================================================
+
+Create an isolated P6/XER adapter or parser service.
+
+The adapter must:
+
+- Accept a .xer file.
+- Detect empty files.
+- Detect malformed XER files.
+- Identify schedule activities.
+- Extract the external activity identifier.
+- Extract activity code where available.
+- Extract activity name.
+- Extract WBS information where available.
+- Extract planned start and planned finish.
+- Extract discipline/category where available.
+- Extract useful external schedule metadata.
+- Extract predecessor-successor relationships.
+- Extract relationship type.
+- Extract lag where available.
+- Normalize dates safely.
+- Return structured validation errors.
+- Never silently discard important invalid records.
+- Never invent missing IDs, names, dates, relationships, or metadata.
+
+The parser must not contain FastAPI route logic or matching logic.
+
+Use the simplest dependable parser compatible with the existing Python
+environment. Add a dependency only after checking the current project
+dependencies and Python version.
+
+======================================================================
+NORMALIZED ACTIVITY MODEL
+======================================================================
+
+Use the existing ConSight schedule activity model as the canonical model.
+Do not create a parallel P6-only schedule system.
+
+Map imported activities deterministically to existing fields such as:
+
 - activity_code
 - activity_name
 - discipline
@@ -103,258 +185,37 @@ The Phase 1 schedule activity contains fields such as:
 - planned_finish
 - created_at
 
-Phase 1 schedule ingestion flow:
-Schedule File
--> validation
--> schedule activities
--> SQLite
+If the existing model requires additional fields, add only the minimum
+safe metadata, such as:
 
-Phase 2 established:
-Progress Event
--> candidate retrieval
--> exact/identifier matching
--> fuzzy matching
--> semantic matching
--> context/temporal matching
--> score aggregation
--> ranking
--> Top 3 matches
--> deterministic explanations
-
-Phase 3 established:
-Progress Event
--> Phase 2 Top 3
--> confidence evaluation
--> HIGH / MEDIUM / LOW
--> auto match OR planner review
--> approve / correct / reject
--> create new activity when required
--> final decision
--> audit trail
-
-The Phase 3 final decision and audit trail are especially important
-because Phase 4 must NOT bypass them.
-
-An approved/corrected actual event should be the trusted source for
-schedule update/export behavior.
-
-======================================================================
-WHY PHASE 4
-======================================================================
-
-The SIH requirement and project strategy prioritize integration with
-real schedule workflows.
-
-The recommended highest-priority feature is:
-"Primavera P6 / MS Project Round-Trip."
-
-The goal is to make the project feel deployable rather than like an
-isolated student prototype.
-
-The intended judge-facing story is:
-
-Primavera P6 / MS Project Schedule
-            |
-            v
-      ConSight Import
-            |
-            v
- Normalize to internal L5/L6 model
-            |
-            v
- Field Progress Report
-            |
-            v
- Phase 1 Extraction
-            |
-            v
- Phase 2 Hybrid Matching
-            |
-            v
- Phase 3 Confidence + Planner Review
-            |
-            v
- Approved Actual Start / Finish
-            |
-            v
- Update internal schedule representation
-            |
-            v
- Export back to supported schedule format
-
-The system must preserve the important schedule relationships required
-for future Phase 7 delay-ripple / critical-path analysis.
-
-======================================================================
-PHASE 4 PRIMARY OBJECTIVE
-======================================================================
-
-Implement reliable schedule interoperability for:
-
-1. Primavera P6 .XER import
-2. MS Project .MPP import/export IF a technically reliable library is
-   available and compatible with the existing Python environment
-3. Internal normalization into the existing ConSight schedule model
-4. Preservation of activity identifiers and important schedule metadata
-5. Preservation of predecessor/successor relationships
-6. Export of ConSight schedule data and approved actual dates back to
-   the external schedule workflow
-7. Validation and error reporting
-8. Offline automated testing
-9. Full regression testing of Phase 1 + Phase 2 + Phase 3
-
-Do not create a separate parallel scheduling backend.
-
-======================================================================
-CORE REQUIREMENTS
-======================================================================
-
-------------------------------
-1. INSPECT THE REPOSITORY FIRST
-------------------------------
-
-Before writing code:
-
-- inspect the complete repository structure
-- inspect requirements.txt / pyproject.toml
-- inspect database.py
-- inspect SQLAlchemy models
-- inspect Pydantic schemas
-- inspect schedule services
-- inspect progress services
-- inspect matching services
-- inspect confidence/review services
-- inspect audit services
-- inspect API routes
-- inspect existing migrations/database initialization if present
-- inspect all tests
-- inspect sample_data
-- inspect README/documentation
-
-Determine exactly how Phase 1-3 are currently implemented.
-
-Do NOT assume the reference documents perfectly match the current code.
-
-The CURRENT repository is the source of truth for implementation details.
-
-------------------------------
-2. RUN BASELINE TESTS
-------------------------------
-
-Before making changes:
-
-Run the complete existing test suite.
-
-Record:
-- command used
-- number of tests passed
-- number failed
-- number skipped, if any
-
-If the repository already has failures, identify them before modifying
-anything.
-
-Do not hide pre-existing failures.
-
-------------------------------
-3. IMPLEMENT XER / PRIMAVERA P6 IMPORT
-------------------------------
-
-Add a clean P6/XER import adapter.
-
-The adapter should:
-
-- accept a .xer file
-- parse the relevant P6 schedule data
-- identify activities
-- extract activity codes/IDs
-- extract activity names
-- extract WBS information where available
-- extract planned start
-- extract planned finish
-- extract discipline/category information when available
-- extract relevant schedule metadata
-- extract predecessor/successor relationships
-- preserve relationship type and lag where available
-- normalize dates safely
-- validate imported records
-- report row/activity-level errors clearly
-- never silently discard important invalid data
-
-Do not blindly map every P6 database field.
-
-Only import fields that are useful for the current system and future
-schedule analysis.
-
-Keep the parser isolated behind a service/adapter abstraction so it can
-be replaced or extended later.
-
-Prefer a maintained/reliable parser where compatible.
-
-If a proposed third-party library cannot reliably support the needed
-format, inspect alternatives and choose the simplest dependable
-solution.
-
-Do not add a large framework just for file parsing.
-
-------------------------------
-4. NORMALIZE P6 DATA INTO THE EXISTING SCHEDULE MODEL
-------------------------------
-
-The internal ConSight schedule model remains the canonical application
-representation.
-
-Do not create a completely separate P6-only activity model unless
-there is a clear technical reason.
-
-Map imported P6 activities into the existing schedule activity concept.
-
-Preserve external identity where needed.
-
-If necessary, add minimal metadata such as:
 - source_format
 - external_schedule_id
 - external_activity_id
 
-Do not break existing Phase 1 Excel schedules.
+Existing Excel schedule import must continue to work.
+P6 and Excel activities must coexist through the same internal schedule
+concept.
 
-Both should be able to coexist through the same internal schedule model.
+External IDs must remain traceable after import and export.
 
-Example:
+======================================================================
+RELATIONSHIP REQUIREMENTS
+======================================================================
 
-P6 Activity
--> external identifier
--> normalized activity_code
--> activity_name
--> discipline
--> WBS
--> planned_start
--> planned_finish
--> relationships
--> stored in ConSight
+Persist the normalized dependency concept:
 
-The mapping must be deterministic and documented.
+predecessor activity -> relationship -> successor activity
 
-------------------------------
-5. SCHEDULE RELATIONSHIPS
-------------------------------
+Support at minimum:
 
-This is a critical Phase 4 requirement because Phase 7 will depend on
-these relationships.
+- FS — Finish-to-Start.
+- SS — Start-to-Start.
+- FF — Finish-to-Finish.
+- SF — Start-to-Finish.
 
-Support the schedule dependency concept:
+Preserve lag when available.
 
-predecessor -> relationship -> successor
-
-At minimum, design support for:
-- FS = Finish-to-Start
-- SS = Start-to-Start
-- FF = Finish-to-Finish
-- SF = Start-to-Finish
-
-Also preserve lag when available.
-
-Use a normalized relationship representation, for example:
+Adapt the following conceptual structure to the existing architecture:
 
 schedule_relationships
 - id
@@ -364,704 +225,414 @@ schedule_relationships
 - lag
 - created_at
 
-Adapt this to the existing database architecture rather than blindly
-copying the example.
+Validation rules:
 
-Requirements:
-- foreign keys must point to valid activities
-- duplicate relationships should be handled safely
-- invalid references should produce validation errors
-- self-referencing relationships should be rejected unless there is a
-  strong domain reason
-- existing schedules without relationship data must continue to work
+- Both referenced activities must exist.
+- Relationship type must be supported.
+- Self-referencing relationships must be rejected.
+- Duplicate relationships must be handled safely and deterministically.
+- Existing schedules without relationships must remain valid.
+- Invalid references must produce understandable errors.
+- Relationship information must remain available after export where the
+  selected export format supports it.
 
-Do NOT implement Phase 7 delay-ripple calculations yet.
+Do not calculate delay ripple or critical path in Phase 4.
 
-Only build and preserve the dependency data required for it.
+======================================================================
+DATABASE REQUIREMENTS
+======================================================================
 
-------------------------------
-6. MS PROJECT SUPPORT
-------------------------------
+Use the existing SQLAlchemy architecture.
 
-Investigate the existing Python environment before choosing a library.
+If relationship persistence or external identifiers require schema
+changes:
 
-If reliable .MPP support can be implemented with a compatible library,
-add it cleanly.
+- Make the smallest safe schema change.
+- Use the existing migration mechanism if available.
+- If no migration mechanism exists, follow the current initialization
+  approach and document it.
+- Never reset the database during normal startup.
+- Never destroy existing Phase 1-3 data.
+- Test both a fresh database and an existing database.
 
-Potential approaches may include:
-- MPXJ through an appropriate Python/Java bridge
-- Aspose.Tasks if licensing/environment constraints make sense
-- another reliable parser supported by the environment
+======================================================================
+PHASE 2 AND PHASE 3 INTEGRATION
+======================================================================
 
-Do NOT pretend that a library supports .MPP if it does not.
+Imported P6 activities must be usable by the existing Phase 2 matching
+engine without rebuilding matching logic.
 
-If native .MPP import/export is not safely achievable in the current
-environment:
+The expected flow is:
 
-- do not create fake MPP files
-- do not silently claim support
-- implement the best reliable supported path
-- clearly document the limitation
-- keep the adapter interface ready for future MPP support
+Imported activity
+-> candidate retrieval
+-> exact/identifier matching
+-> fuzzy matching
+-> semantic matching
+-> temporal/context matching
+-> ranked top matches
 
-If MS Project XML/MPX or another standard interchange format is the
-reliable route, document exactly what is supported.
+Phase 4 must reuse the existing Phase 3 workflow:
 
-The goal is trustworthy interoperability, not a checkbox feature.
+Top matches
+-> confidence classification
+-> automatic decision or planner review
+-> approve, correct, reject, or create activity
+-> audit trail
+-> trusted final decision
 
-------------------------------
-7. EXPORT
-------------------------------
+Raw AI extraction must never directly update exported actual dates.
+Only an approved or corrected Phase 3 final decision may supply trusted
+actual_start or actual_finish values for export.
+
+======================================================================
+EXPORT REQUIREMENTS
+======================================================================
 
 Implement export from the internal ConSight schedule representation.
 
-Export should include, where supported:
+Where supported, export:
 
-- activity identifier
-- activity name
-- WBS
-- discipline/category where supported
-- planned start
-- planned finish
-- actual start
-- actual finish
-- predecessor/successor relationships
-- relationship type
-- lag
-- relevant external identifiers
+- Activity identifier.
+- Activity code.
+- Activity name.
+- WBS.
+- Discipline/category.
+- Planned start.
+- Planned finish.
+- Approved actual start.
+- Approved actual finish.
+- External schedule identifier.
+- External activity identifier.
+- Predecessor activity.
+- Successor activity.
+- Relationship type.
+- Lag.
 
-Most importantly:
+Export safety rules:
 
-Approved Phase 3 actual dates must be capable of flowing into the
-exported schedule.
+- Export to a new file or explicit output path by default.
+- Never silently overwrite the original imported file.
+- Do not claim success if export failed.
+- Report unsupported fields clearly.
+- Document fields that cannot be preserved exactly.
+- Preserve original external identifiers where possible.
+- Do not export unapproved actual dates.
 
-Example:
+======================================================================
+MS PROJECT SUPPORT
+======================================================================
 
-External Schedule
--> Import
--> ConSight
--> Field Report
--> Matching
--> Confidence
--> Planner Approval
--> Actual Start/Finish
--> Export
+Investigate native .MPP support separately after XER support is stable.
 
-Do NOT update actual dates merely because an AI extraction occurred.
+Only implement .MPP import/export if the selected library is compatible,
+reliable, and verified with automated tests in the target environment.
 
-Use the trusted Phase 3 final decision/review result.
+If native MPP support is not reliable:
 
-------------------------------
-8. ROUND-TRIP SAFETY
-------------------------------
+- Do not create fake MPP files.
+- Do not claim MPP support.
+- Do not expose misleading MPP endpoints.
+- Document the limitation.
+- Keep an adapter interface ready for future support.
+- Consider a reliable standard interchange format only if it is actually
+  tested and documented.
 
-Round-trip means:
+======================================================================
+API REQUIREMENTS
+======================================================================
 
-External schedule
--> import
--> normalized internal model
--> ConSight processing
--> export
+Follow the existing route -> service -> adapter -> validation -> database
+architecture.
 
-The implementation should minimize information loss.
-
-For fields that cannot be preserved exactly:
-- identify them
-- document them
-- test the behavior
-
-Never silently overwrite the original schedule file.
-
-Export to a new file/path by default.
-
-Use explicit naming or output handling.
-
-If importing a schedule that already exists in the database, define safe
-behavior for:
-- duplicate import
-- same external activity IDs
-- updated schedule version
-- changed planned dates
-- removed activities
-
-Do not invent complex version-control architecture.
-
-For the SIH MVP, implement a simple deterministic and safe strategy.
-
-------------------------------
-9. API DESIGN
-------------------------------
-
-Follow the existing route -> service -> adapter/parser -> validation ->
-database architecture.
-
-Keep FastAPI route handlers thin.
-
-Add clear endpoints such as:
+Possible endpoints, adapted to existing conventions:
 
 POST /schedule/import/p6
-POST /schedule/import/mpp        (only if supported)
 GET  /schedule/relationships
 POST /schedule/export/p6
-POST /schedule/export/mpp       (only if supported)
 
-Adapt endpoint naming to the existing API conventions.
+Expose MPP endpoints only when actual support is implemented and tested.
 
-Do not duplicate existing schedule upload functionality.
+Import responses should include:
 
-Swagger /docs must expose the new endpoints.
-
-Return clear responses including:
-- imported count
-- skipped/rejected count
-- validation errors
 - source format
-- schedule identifier/version if implemented
+- imported activity count
+- rejected activity count
 - relationship count
-- export file information where appropriate
+- validation errors
+- external schedule identifier/version where available
 
-Use proper HTTP status codes.
+Export responses should include:
 
+- source/internal schedule identifier
+- output format
+- export status
+- exported activity count
+- exported relationship count
+- output file information
+- warnings for unsupported fields
+
+Keep route handlers thin.
 Do not expose internal stack traces in normal API responses.
+Ensure new routes appear in FastAPI /docs.
 
-------------------------------
-10. DATABASE CHANGES
-------------------------------
+======================================================================
+VALIDATION REQUIREMENTS
+======================================================================
 
-Use SQLAlchemy consistently with the existing database.
+Handle at minimum:
 
-If a new relationship table or schedule metadata fields are required,
-make the smallest safe schema change.
+- Empty XER file.
+- Malformed XER file.
+- Unsupported file extension.
+- Corrupted input.
+- Missing activity identifier.
+- Missing activity name when required by the existing model.
+- Invalid planned start date.
+- Invalid planned finish date.
+- Finish before start.
+- Duplicate activity identifiers.
+- Invalid WBS reference where applicable.
+- Invalid relationship reference.
+- Unsupported relationship type.
+- Self-referencing relationship.
+- Duplicate relationship.
 
-Do not destroy existing database data.
+Errors must identify the relevant record, field, and reason whenever
+possible.
 
-Do not reset the database as part of normal application startup.
+Do not convert obviously invalid data into valid-looking data.
+Preserve null where appropriate and report missing information.
 
-Existing Phase 1-3 records must remain usable.
+======================================================================
+SYNTHETIC TEST FIXTURE
+======================================================================
 
-If the project has a migration mechanism, use it.
+Create a small deterministic XER fixture. Do not use proprietary Oil India
+Limited or other real project data.
 
-If it does not, implement the schema change consistently with the
-existing database initialization approach and document it.
+The fixture should contain activities such as:
 
-Test:
-- fresh database
-- existing database
-- imported schedule
-- existing Phase 1 Excel schedule
-- progress event
-- Phase 2 match
-- Phase 3 review
-- schedule export
-
-------------------------------
-11. VALIDATION
-------------------------------
-
-Validate imported schedules.
-
-Examples:
-- missing activity identifier
-- missing activity name
-- invalid date
-- planned finish before planned start
-- duplicate activity identifiers
-- invalid WBS reference
-- invalid relationship reference
-- unsupported relationship type
-- malformed XER
-- empty XER
-- unsupported file extension
-- corrupted file
-
-Do not guess missing identifiers.
-
-Do not silently convert obviously invalid data into valid-looking data.
-
-Return useful errors that a developer/planner can understand.
-
-------------------------------
-12. NO-HALLUCINATION RULE
-------------------------------
-
-This project already follows a strict rule against fabricated
-infrastructure data.
-
-Maintain it in Phase 4.
-
-Never:
-- invent an activity ID
-- invent a schedule activity
-- invent dates
-- invent relationships
-- invent P6 metadata
-- invent actual dates
-- claim an export succeeded when it did not
-- claim MPP support when it is not actually working
-- silently fabricate missing external fields
-
-If information is missing:
-- preserve null where appropriate
-- report it
-- let the user/planner provide it
-
-------------------------------
-13. TESTING
-------------------------------
-
-Create offline automated tests.
-
-Tests must NOT require:
-- internet
-- live LLM API
-- external paid API
-- real P6 installation
-- real MS Project installation
-
-At minimum test:
-
-P6/XER:
-- valid XER import
-- activity extraction
-- activity identifier mapping
-- activity name mapping
-- WBS mapping
-- planned dates
-- relationship extraction
-- FS relationship
-- SS relationship
-- FF relationship
-- SF relationship
-- lag preservation
-- invalid XER
-- empty XER
-- malformed activity
-- duplicate activity IDs
-- invalid dates
-- invalid relationship references
-
-Normalization:
-- P6 -> internal schedule model
-- existing Excel schedule still works
-- external identifiers preserved
-- relationships stored correctly
-
-Export:
-- valid export
-- approved actual start exported
-- approved actual finish exported
-- relationships exported where supported
-- export does not modify original input
-- round-trip data consistency
-
-Phase 1 regression:
-- schedule upload
-- progress extraction
-- progress storage
-- Time Agent
-- existing APIs
-
-Phase 2 regression:
-- matching
-- top 3
-- score breakdown
-- deterministic reasons
-- benchmark/tests
-
-Phase 3 regression:
-- confidence classification
-- auto match
-- planner review
-- approve
-- correct
-- reject
-- new activity
-- audit trail
-
-Integration:
-- imported P6 activity
-- progress event
-- Phase 2 match
-- Phase 3 approval
-- actual date update
-- export
-
-------------------------------
-14. SAMPLE DATA
-------------------------------
-
-Create small deterministic test fixtures/sample schedules.
-
-Do not use proprietary real Oil India Limited project data.
-
-Create a synthetic P6/XER test fixture representing infrastructure
-activities such as:
-
-- Civil foundation
-- Structural steel erection
-- Piping spool erection
-- Equipment installation
-- Electrical cable laying
+- Civil foundation.
+- Structural steel erection.
+- Piping spool erection.
+- Equipment installation.
+- Electrical cable laying.
 
 Include:
-- similar activity names
-- WBS
-- planned dates
-- activity IDs
-- predecessor relationships
 
-This should be enough to prove matching and round-trip behavior.
+- Activity IDs.
+- Similar activity names.
+- WBS values.
+- Planned dates.
+- FS relationship.
+- SS relationship.
+- FF relationship.
+- SF relationship.
+- At least one lag value.
 
-If a valid XER fixture is difficult to construct manually, use a minimal
-valid fixture based on the parser's actual required structure and explain
-the fixture assumptions.
-
-------------------------------
-15. ARCHITECTURE
-------------------------------
-
-Keep the existing architecture simple.
-
-Preferred conceptual structure:
-
-FastAPI Route
-    |
-    v
-Schedule Integration Service
-    |
-    +--> P6/XER Adapter
-    |
-    +--> MPP Adapter (if supported)
-    |
-    v
-Normalized Schedule Data
-    |
-    v
-Validation
-    |
-    v
-SQLAlchemy Models
-    |
-    v
-SQLite
-
-Export:
-
-Database
-    |
-    v
-Normalized Schedule
-    |
-    v
-Export Adapter
-    |
-    v
-XER / MPP / supported format
-
-Do not put parsing logic directly inside API routes.
-
-Do not mix parser logic with matching logic.
-
-Do not mix export logic with confidence/review logic.
-
-------------------------------
-16. DEPENDENCY DISCIPLINE
-------------------------------
-
-Before installing a package:
-
-- check whether the project already has an equivalent dependency
-- check compatibility with Python version
-- prefer lightweight and maintained solutions
-- avoid unnecessary dependencies
-- document why the dependency is needed
-
-Do not introduce:
-- Kubernetes
-- Redis
-- microservices
-- vector database
-- RAG
-- React/frontend
-- mobile app
-- OCR
-- voice processing
-- delay prediction
-- weather API
-- BIM
-- enterprise multi-project architecture
-
-These are NOT Phase 4 requirements.
+The fixture must be valid for the selected parser and documented.
 
 ======================================================================
-IMPORTANT FUTURE PHASE BOUNDARY
+TESTING REQUIREMENTS
 ======================================================================
 
-The following features are deliberately NOT implemented now.
+All tests must run offline and must not require:
 
-PHASE 5 — WhatsApp Integration
-- WhatsApp Business Cloud API
-- webhook
-- reuse existing agent_service.chat()
-- field report through WhatsApp
+- Internet.
+- Live LLM API.
+- Paid external APIs.
+- A real Primavera P6 installation.
+- A real Microsoft Project installation.
 
-PHASE 6 — Multi-Language / Hinglish
-- Hinglish
-- Tamil-English
-- Telugu-English
-- code-mixed extraction
-- benchmark 20–30 messages
+P6/XER tests:
 
-PHASE 7 — Delay Ripple / Critical Path Impact
-- use the relationships imported in Phase 4
-- deterministic successor traversal
-- downstream affected activities
-- critical-path warning
-- no complex predictive ML
+- Valid XER import.
+- Activity extraction.
+- ID mapping.
+- Activity-name mapping.
+- WBS mapping.
+- Planned-date mapping.
+- FS relationship.
+- SS relationship.
+- FF relationship.
+- SF relationship.
+- Lag preservation.
+- Empty XER.
+- Malformed XER.
+- Invalid date.
+- Duplicate activity ID.
+- Invalid relationship reference.
+- Self-referencing relationship.
 
-PHASE 8 — Productivity + Institutional Memory Analytics
-- planned vs actual duration
-- variance
-- discipline productivity
-- activity type performance
-- recurring delay patterns
-- variance trends
-- structured SQL analytics
-- no advanced RAG required
+Normalization tests:
 
-Do not implement these now.
+- P6 to existing schedule model.
+- External identifier preservation.
+- Existing Excel schedule still works.
+- Fresh database behavior.
+- Existing database behavior.
 
-Only prepare clean data/contracts/interfaces where necessary so future
-phases can build on Phase 4.
+Export tests:
 
-======================================================================
-RECOMMENDED IMPLEMENTATION ORDER
-======================================================================
+- Valid export.
+- Approved actual start export.
+- Approved actual finish export.
+- Unapproved actual dates are not exported.
+- Relationships are exported where supported.
+- Original input file remains unchanged.
+- Round-trip activity data remains consistent.
 
-STEP 1
-Inspect the existing Phase 1-3 repository.
+Regression tests:
 
-STEP 2
-Run all current tests and record baseline.
+- Phase 1 schedule upload.
+- Phase 1 progress extraction and storage.
+- Time Agent.
+- Existing APIs.
+- Phase 2 matching and top-three results.
+- Score breakdown and deterministic reasons.
+- Phase 3 confidence classification.
+- Planner approve, correct, reject, and create-activity workflows.
+- Audit trail.
 
-STEP 3
-Understand the existing schedule model and database.
+End-to-end test:
 
-STEP 4
-Understand the Phase 2 matching dependency on schedule activities.
-
-STEP 5
-Understand the Phase 3 trusted final decision / audit workflow.
-
-STEP 6
-Design the minimal normalized schedule integration layer.
-
-STEP 7
-Choose and validate the P6/XER parser approach.
-
-STEP 8
-Implement P6/XER import.
-
-STEP 9
-Implement schedule relationship persistence.
-
-STEP 10
-Implement normalization into existing schedule activities.
-
-STEP 11
-Implement safe export.
-
-STEP 12
-Investigate and implement MPP support only if reliable.
-
-STEP 13
-Add API endpoints.
-
-STEP 14
-Add deterministic fixtures.
-
-STEP 15
-Add unit tests.
-
-STEP 16
-Add integration tests.
-
-STEP 17
-Run Phase 1 + Phase 2 + Phase 3 regression suite.
-
-STEP 18
-Fix every regression.
-
-STEP 19
-Start FastAPI.
-
-STEP 20
-Verify Swagger /docs.
-
-STEP 21
-Manually test:
-- P6 import
-- activity listing
-- relationship listing
-- progress event
-- matching
-- confidence/review
-- approve
-- export
-
-STEP 22
-Verify original schedule file was not modified.
-
-STEP 23
-Review code for unnecessary complexity.
-
-STEP 24
-Update README/documentation.
-
-STEP 25
-Produce the final implementation report.
+XER import
+-> progress event
+-> Phase 2 match
+-> Phase 3 confidence/review
+-> planner approval
+-> trusted actual date
+-> schedule export
 
 ======================================================================
-MANUAL DEMO TARGET
+IMPLEMENTATION ORDER
 ======================================================================
 
-The minimum successful SIH demonstration should be:
+1. Inspect the repository.
+2. Run and record baseline tests.
+3. Implement isolated XER parser.
+4. Add synthetic XER fixtures.
+5. Add parser and validation tests.
+6. Normalize activities into the existing model.
+7. Add relationship persistence.
+8. Add import API.
+9. Add relationship API.
+10. Connect Phase 3 approved data to export.
+11. Add export service and API.
+12. Investigate MPP support without claiming it prematurely.
+13. Add end-to-end tests.
+14. Run all Phase 1-4 regression tests.
+15. Start FastAPI and verify /docs.
+16. Perform the manual demonstration.
+17. Update README.
+18. Review for unnecessary complexity and unsupported claims.
 
-1. Start with a synthetic Primavera P6/XER schedule.
+======================================================================
+MANUAL SIH DEMO
+======================================================================
 
-2. Import the schedule into ConSight.
+1. Start with a synthetic Primavera P6 XER schedule.
+2. Import the XER file into ConSight.
+3. Display the imported L5/L6 activities.
+4. Display predecessor-successor relationships.
+5. Submit a field report:
 
-3. Show imported L5/L6 activities.
+   Today at 9:30 AM, the piping team started erection of the
+   XX-101 spool in Area B.
 
-4. Show predecessor/successor relationships.
-
-5. Submit a field progress report such as:
-
-   "Today at 9:30 AM, the piping team started erection of the
-   XX-101 spool in Area B."
-
-6. Phase 1 extracts the structured progress event.
-
-7. Phase 2 identifies the correct schedule activity.
-
+6. Phase 1 extracts the progress event.
+7. Phase 2 identifies the matching schedule activity.
 8. Phase 3 calculates confidence.
-
-9. If required, planner reviews and approves/corrects the match.
-
-10. Approved actual start/finish data becomes trusted schedule data.
-
-11. Export the updated schedule.
-
-12. Demonstrate that the exported schedule contains the relevant
-    activity and actual date information.
-
-13. Demonstrate that schedule relationships remain available for the
-    future Phase 7 delay-ripple feature.
-
-This should feel like ONE connected system, not separate demos.
+9. The planner approves or corrects the match.
+10. The approved actual start or finish becomes trusted schedule data.
+11. Export a new updated schedule file.
+12. Show the activity and approved actual date in the export.
+13. Show that relationships are still available.
+14. Confirm that the original input file was not modified.
 
 ======================================================================
 DEFINITION OF DONE
 ======================================================================
 
-Phase 4 is complete only when:
-
-[ ] Existing Phase 1 tests pass.
-[ ] Existing Phase 2 tests pass.
-[ ] Existing Phase 3 tests pass.
-[ ] P6/XER import works on a valid fixture.
-[ ] Imported activities map correctly to the existing schedule model.
+[ ] Phase 1 tests pass.
+[ ] Phase 2 tests pass.
+[ ] Phase 3 tests pass.
+[ ] Valid XER import works.
+[ ] Imported activities use the existing schedule model.
 [ ] Planned dates are preserved.
 [ ] WBS is preserved where available.
 [ ] External activity identifiers are preserved.
-[ ] Predecessor/successor relationships are stored.
-[ ] Relationship types are preserved.
+[ ] FS, SS, FF, and SF relationships are supported.
 [ ] Lag is preserved where available.
-[ ] Invalid schedules produce useful validation errors.
+[ ] Invalid input produces useful validation errors.
 [ ] Export works for the supported format.
-[ ] Approved actual dates can flow into export.
-[ ] Original imported schedule is not silently overwritten.
-[ ] Duplicate/invalid records are handled safely.
-[ ] MPP support is either genuinely working or its limitation is
-    explicitly documented.
-[ ] APIs are visible in /docs.
-[ ] Automated tests run offline.
-[ ] Integration test proves:
-    import -> progress -> matching -> confidence/review -> approval
-    -> export.
+[ ] Approved actual dates flow into export.
+[ ] Unapproved actual dates do not flow into export.
+[ ] Original schedule is not overwritten.
+[ ] Duplicate and invalid records are handled safely.
+[ ] MPP status is honestly documented.
+[ ] New APIs appear in /docs.
+[ ] Tests run offline.
+[ ] Import-to-export integration test passes.
 [ ] README is updated.
-[ ] No Phase 5, 6, 7 or 8 feature has been implemented.
-[ ] No old frontend Phase 4 has been implemented.
+[ ] No future phase was implemented.
 
 ======================================================================
-FINAL REPORT REQUIRED FROM YOU
+FINAL IMPLEMENTATION REPORT
 ======================================================================
 
-After actually implementing and testing the feature, report:
+Report the following after implementation:
 
-1. Repository structure you found.
-2. Baseline test result before changes.
+1. Repository structure inspected.
+2. Baseline test result.
 3. Phase 1 functionality reused.
 4. Phase 2 functionality reused.
 5. Phase 3 functionality reused.
 6. Files created.
 7. Files modified.
 8. Database/schema changes.
-9. P6/XER parser/library selected and WHY.
-10. MPP approach and actual support status.
-11. P6 field-to-ConSight mapping.
-12. Relationship model and supported relationship types.
-13. Import APIs.
-14. Export APIs.
-15. Validation behavior.
-16. Error handling.
-17. Tests added.
-18. Full test result after implementation.
-19. Manual verification performed.
-20. Commands required to run the application.
-21. Swagger endpoint path.
-22. Sample fixture/demo instructions.
-23. Known limitations.
-24. Future compatibility for Phase 5-8.
-25. Explicitly confirm:
-    - frontend Phase 4 was NOT implemented
-    - WhatsApp Phase 5 was NOT implemented
-    - Hinglish Phase 6 was NOT implemented
-    - Delay Ripple Phase 7 was NOT implemented
-    - Productivity/Institutional Memory Phase 8 was NOT implemented
+9. XER parser/library selected and reason.
+10. MPP support status.
+11. P6-to-ConSight field mapping.
+12. Relationship model and supported types.
+13. Import endpoints.
+14. Relationship endpoints.
+15. Export endpoints.
+16. Validation behavior.
+17. Error handling.
+18. Tests added.
+19. Full test result after implementation.
+20. Manual verification performed.
+21. Application run commands.
+22. Swagger path.
+23. Demo instructions.
+24. Known limitations.
+25. Future compatibility notes.
+
+Explicitly confirm:
+
+- Existing Phase 1-3 were reused.
+- Frontend was not implemented.
+- WhatsApp was not implemented.
+- Hinglish was not implemented.
+- Delay Ripple was not implemented.
+- Productivity and Institutional Memory Analytics were not implemented.
+- Unsupported MPP functionality was not claimed.
 
 ======================================================================
 FINAL INSTRUCTION
 ======================================================================
 
-DO NOT STOP AT EXPLANATION.
+Implement Phase 4 inside the existing ConSight repository.
 
-DO NOT ONLY PROVIDE CODE SNIPPETS.
+Inspect first.
+Test the baseline.
+Implement incrementally.
+Run targeted tests after each milestone.
+Run the complete regression suite.
+Verify the FastAPI application and /docs.
+Perform the end-to-end XER-to-approved-export demonstration.
 
-DO NOT CREATE A PARALLEL PROJECT.
-
-DO NOT REBUILD PHASE 1-3.
-
-DO NOT IMPLEMENT THE DEFERRED FRONTEND.
-
-DO NOT IMPLEMENT FUTURE PHASES.
-
-FIRST INSPECT THE REAL REPOSITORY.
-
-THEN RUN THE BASELINE TESTS.
-
-THEN IMPLEMENT PHASE 4 INSIDE THE EXISTING CODEBASE.
-
-THEN RUN TESTS.
-
-THEN DEBUG FAILURES.
-
-THEN RUN THE COMPLETE PHASE 1 + PHASE 2 + PHASE 3 + PHASE 4 REGRESSION
-SUITE.
-
-THEN VERIFY THE FASTAPI APPLICATION AND /docs.
-
-THEN PERFORM THE END-TO-END ROUND-TRIP DEMO.
-
-THE FINAL RESULT MUST BE A WORKING, TESTED, CONTINUABLE PHASE 4
-IMPLEMENTATION — NOT A DESIGN DOCUMENT.
+The result must be a working, tested schedule-interoperability feature,
+not a design-only response and not a disconnected sample project.
