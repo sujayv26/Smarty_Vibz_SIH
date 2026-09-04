@@ -1,0 +1,37 @@
+%T	PROJECT
+%F	proj_id	proj_short_name	proj_name	data_date
+%R	SCH-001	Test Project	Test Infrastructure Project	2026-01-15
+%T	WBS
+%F	wbs_id	wbs_short_name	wbs_name	proj_id
+%R	WBSCIV	CIV	Civil Foundation	SCH-001
+%R	WBSSTR	STR	Structural Steel	SCH-001
+%R	WBSPIP	PIP	Piping Erection	SCH-001
+%R	WBSEQP	EQP	Equipment Installation	SCH-001
+%R	WBSELE	ELE	Electrical Works	SCH-001
+%T	TASK
+%F	task_id	task_code	task_name	wbs_id	proj_id	task_type	target_start_date	target_end_date	act_start_date	act_end_date	phys_pct_complete
+%R	CIV-100	CIV-100	Excavate Foundation	WBSCIV	SCH-001	Civil	2026-01-20	2026-01-30			0
+%R	CIV-110	CIV-110	Pour Foundation Concrete	WBSCIV	SCH-001	Civil	2026-02-01	2026-02-10			0
+%R	STR-200	STR-200	Erect Structural Steel Grid A	WBSSTR	SCH-001	Structural	2026-02-15	2026-03-01			0
+%R	STR-210	STR-210	Install Steel Connections	WBSSTR	SCH-001	Structural	2026-03-02	2026-03-10			0
+%R	PIP-300	PIP-300	Erect Line 24-XX-101	WBSPIP	SCH-001	Piping	2026-03-15	2026-03-30			0
+%R	PIP-310	PIP-310	Install Support for XX-101	WBSPIP	SCH-001	Piping	2026-03-10	2026-03-20			0
+%R	PIP-320	PIP-320	Erect Line 24-XX-102	WBSPIP	SCH-001	Piping	2026-04-01	2026-04-15			0
+%R	EQP-400	EQP-400	Install Pump P-101	WBSEQP	SCH-001	Mechanical	2026-04-20	2026-05-05			0
+%R	EQP-410	EQP-410	Install Compressor C-101	WBSEQP	SCH-001	Mechanical	2026-05-01	2026-05-15			0
+%R	ELE-500	ELE-500	Cable Pulling for Substation	WBSELE	SCH-001	Electrical	2026-05-10	2026-05-25			0
+%R	ELE-510	ELE-510	Terminate Cables	WBSELE	SCH-001	Electrical	2026-05-20	2026-06-01			0
+%T	TASKPRED
+%F	task_id	pred_task_id	pred_type	lag_hr_cnt
+%R	CIV-110	CIV-100	FS	0
+%R	STR-200	CIV-110	FS	0
+%R	STR-210	STR-200	SS	16
+%R	PIP-300	STR-210	FS	0
+%R	PIP-310	PIP-300	SS	8
+%R	PIP-320	PIP-300	FF	0
+%R	EQP-400	PIP-320	FS	0
+%R	EQP-410	EQP-400	SS	24
+%R	ELE-500	EQP-410	FS	0
+%R	ELE-510	ELE-500	SS	16
+%R	ELE-510	ELE-500	SF	0
+%E
