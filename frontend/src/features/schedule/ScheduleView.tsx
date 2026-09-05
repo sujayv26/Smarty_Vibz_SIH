@@ -8,6 +8,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { api } from '../../lib/api'
 import { Download, Upload, FileText, X, AlertTriangle, RefreshCw, Save } from 'lucide-react'
+import { DelayImpactPanel } from '../../components/DelayImpactPanel'
 
 interface ScheduleActivity {
   id: number
@@ -100,6 +101,7 @@ export function ScheduleView() {
   const [activities, setActivities] = useState<ScheduleActivity[]>([])
   const [externalSchedules, setExternalSchedules] = useState<ExternalSchedule[]>([])
   const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(null)
+  const [projectId, setProjectId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isImporting, setIsImporting] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -127,6 +129,9 @@ export function ScheduleView() {
       setExternalSchedules(response.data)
       if (response.data.length > 0 && !selectedScheduleId) {
         setSelectedScheduleId(response.data[0].id)
+        if (response.data[0].project_id) {
+          setProjectId(response.data[0].project_id)
+        }
       }
     } catch (error) {
       console.error('Failed to fetch external schedules:', error)
@@ -352,6 +357,14 @@ export function ScheduleView() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delay Impact Panel */}
+      {selectedScheduleId && projectId && (
+        <DelayImpactPanel 
+          projectId={projectId} 
+          className="mt-6"
+        />
+      )}
 
       {/* Import Modal */}
       {showImportModal && (

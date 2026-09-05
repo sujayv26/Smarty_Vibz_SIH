@@ -20,6 +20,7 @@ from app.models.glossary_mapping import GlossaryMapping
 from app.models.delay_reason import DelayReason, DelayCategory
 from app.models.productivity_benchmark import ProductivityBenchmark
 from app.models.audit_log import AuditLog, AuditAction
+from app.models.delay_impact import DelayImpact, ImpactType
 
 __all__ = [
     "ProgressEvent",
@@ -47,4 +48,6 @@ __all__ = [
     "ProductivityBenchmark",
     "AuditLog",
     "AuditAction",
+    "DelayImpact",
+    "ImpactType",
 ]

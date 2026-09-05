@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.progress import ProgressEvent
 from app.models.schedule import ScheduleActivity
+from app.models.wbs_node import WBSNode
 from app.models.confidence import (
     ConfidenceResult,
     PlannerReview,
@@ -23,6 +24,7 @@ from app.services.confidence_engine import (
     prepare_review_data,
     ConfidenceBreakdown,
 )
+from app.services.delay_ripple_service import DelayRippleService
 
 
 def evaluate_confidence(db: Session, progress_event_id: int) -> dict:
@@ -164,13 +166,17 @@ def evaluate_confidence(db: Session, progress_event_id: int) -> dict:
 
 
 def get_pending_reviews(db: Session) -> list[PlannerReview]:
-    return db.query(PlannerReview).filter(
+    return db.query(PlannerReview).join(
+        ProgressEvent, PlannerReview.progress_event_id == ProgressEvent.id
+    ).filter(
         PlannerReview.status == ReviewStatus.PENDING
     ).order_by(PlannerReview.created_at.desc()).all()
 
 
 def get_review_by_id(db: Session, review_id: int) -> Optional[PlannerReview]:
-    return db.query(PlannerReview).filter(PlannerReview.id == review_id).first()
+    return db.query(PlannerReview).join(
+        ProgressEvent, PlannerReview.progress_event_id == ProgressEvent.id
+    ).filter(PlannerReview.id == review_id).first()
 
 
 def _write_actuals_to_schedule_activity(db: Session, activity_id: int, event: ProgressEvent) -> None:
@@ -205,6 +211,26 @@ def approve_review(db: Session, review_id: int, reviewer_note: Optional[str] = N
         event.activity_reference = review.proposed_activity.activity_code
         db.add(event)
         _write_actuals_to_schedule_activity(db, review.proposed_activity_id, event)
+        
+        # Trigger delay ripple computation for DELAY events
+        if event.event_type == "DELAY" and event.event_date:
+            # Get the WBS node for the delayed activity
+            wbs_node = db.query(WBSNode).filter(
+                WBSNode.project_id == event.project_id,
+                WBSNode.activity_code == review.proposed_activity.activity_code
+            ).first()
+            
+            if wbs_node:
+                # Get delay days from event raw_text or delay_reason table
+                delay_days = _extract_delay_days(event, db, wbs_node.id)
+                if delay_days > 0:
+                    ripple_service = DelayRippleService(db)
+                    ripple_service.compute_delay_ripple(
+                        project_id=event.project_id,
+                        source_event_id=event.id,
+                        source_wbs_node_id=wbs_node.id,
+                        delay_days=delay_days,
+                    )
     
     audit = AuditRecord(
         progress_event_id=review.progress_event_id,
@@ -221,6 +247,28 @@ def approve_review(db: Session, review_id: int, reviewer_note: Optional[str] = N
     db.commit()
     db.refresh(review)
     return review
+
+
+def _extract_delay_days(event: ProgressEvent, db: Session, wbs_node_id: int) -> int:
+    """Extract delay days from event or delay_reasons table."""
+    # First check if there's a delay_reason entry for this activity
+    from app.models.delay_reason import DelayReason
+    delay_reason = db.query(DelayReason).filter(
+        DelayReason.wbs_node_id == wbs_node_id,
+        DelayReason.project_id == event.project_id
+    ).order_by(DelayReason.created_at.desc()).first()
+    
+    if delay_reason:
+        return delay_reason.impact_days
+    
+    # Try to extract from raw_text (e.g., "delayed by 5 days")
+    import re
+    delay_match = re.search(r'delay(?:ed)?\s*(?:by|of)?\s*(\d+)\s*day', event.raw_text, re.IGNORECASE)
+    if delay_match:
+        return int(delay_match.group(1))
+    
+    # Default to 1 day if DELAY event type but no explicit delay amount
+    return 1
 
 
 def correct_review(db: Session, review_id: int, activity_id: int, reviewer_note: Optional[str] = None) -> PlannerReview:

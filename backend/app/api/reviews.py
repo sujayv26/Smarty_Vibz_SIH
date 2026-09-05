@@ -119,6 +119,12 @@ def _serialize_review(review) -> PlannerReviewResponse:
             discipline=review.proposed_activity.discipline,
         )
     
+    # Get progress event for additional fields
+    from app.models.progress import ProgressEvent
+    event = None
+    if review.progress_event_id:
+        event = review.progress_event  # This might need a join
+    
     top_candidates = []
     if review.top_candidates_json:
         for c in json.loads(review.top_candidates_json):
@@ -150,9 +156,21 @@ def _serialize_review(review) -> PlannerReviewResponse:
     if review.matching_reasons_json:
         matching_reasons = json.loads(review.matching_reasons_json)
     
+    # Get project_id and event_type from progress_event
+    project_id = 1
+    event_text = ""
+    event_type = "START"
+    if review.progress_event:
+        project_id = review.progress_event.project_id
+        event_text = review.progress_event.raw_text[:200]
+        event_type = review.progress_event.event_type
+    
     return PlannerReviewResponse(
         review_id=review.id,
         progress_event_id=review.progress_event_id,
+        project_id=project_id,
+        event_text=event_text,
+        event_type=event_type,
         proposed_activity=proposed,
         confidence_score=review.confidence_score,
         confidence_level=review.confidence_level.value,

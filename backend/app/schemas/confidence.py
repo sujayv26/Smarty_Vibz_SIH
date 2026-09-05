@@ -57,6 +57,9 @@ class ReviewCandidate(BaseModel):
 class PlannerReviewResponse(BaseModel):
     review_id: int
     progress_event_id: int
+    project_id: int
+    event_text: str
+    event_type: str
     proposed_activity: Optional[ProposedActivity] = None
     confidence_score: float
     confidence_level: ConfidenceLevel
