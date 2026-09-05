@@ -31,6 +31,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript build passes with strict mode
 - ESLint configuration added (.eslintrc.cjs)
 
+## [0.3.0] - 2026-09-05
+
+### Added
+- **P6-whatsapp**: WhatsApp Business Cloud API integration per PRD §5.2 and add-on Phase 6
+  - Webhook endpoint `/webhooks/whatsapp/inbound` with Meta signature verification (X-Hub-Signature-256 HMAC-SHA256)
+  - GET verification endpoint for Meta webhook subscription
+  - POST handler for inbound text messages
+  - Feeds same extraction → matching → confidence pipeline as `/progress/extract` (no forked pipeline)
+  - Persists messages as `field_events` with `source_type='WHATSAPP'` and `ingestion_source_id` linked to WHATSAPP source
+  - Sends confirmation/status reply back to supervisor via WhatsApp Cloud API
+  - Configuration via environment variables: WHATSAPP_APP_ID, WHATSAPP_APP_SECRET, WHATSAPP_ACCESS_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_VERIFY_TOKEN, WHATSAPP_WEBHOOK_SECRET
+  - Frontend: Inbound Channels panel (`/inbound`) with live feed from `/progress/inbound/recent`
+  - Source status grid showing all 7 ingestion sources (WhatsApp, Time Agent, Voice, Spreadsheet, PDF/OCR, PMIS Export, Text Diary)
+  - Auto-refresh every 10 seconds with real-time message feed
+  - Message status badges (Auto-matched/Needs review/Processing/New activity/Rejected) with activity code links
+  - Time-ago formatting and live connection indicator
+
 ## [0.2.0] - 2026-09-05
 
 ### Added

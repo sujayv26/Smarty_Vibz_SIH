@@ -18,6 +18,14 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
 
+    # WhatsApp Business Cloud API
+    WHATSAPP_APP_ID: str = ""
+    WHATSAPP_APP_SECRET: str = ""
+    WHATSAPP_ACCESS_TOKEN: str = ""
+    WHATSAPP_PHONE_NUMBER_ID: str = ""
+    WHATSAPP_VERIFY_TOKEN: str = ""
+    WHATSAPP_WEBHOOK_SECRET: str = ""
+
     class Config:
         env_file = ".env"
         extra = "ignore"

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, sync_engine
-from app.api import schedule, progress, agent, matching, confidence, reviews, audit, xer_import, xer_export, auth
+from app.api import schedule, progress, agent, matching, confidence, reviews, audit, xer_import, xer_export, auth, webhooks
 from app.models import schedule as schedule_model, progress as progress_model, confidence as confidence_model, xer as xer_model
 from app.models import organization, user, project, ingestion_source, wbs_node, event_wbs_match, glossary_mapping, delay_reason, productivity_benchmark, audit_log
 from app.core.config import settings
@@ -34,6 +34,7 @@ app.include_router(reviews.router)
 app.include_router(audit.router)
 app.include_router(xer_import.router)
 app.include_router(xer_export.router)
+app.include_router(webhooks.router)
 
 @app.get("/")
 async def root():
