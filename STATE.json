@@ -1,11 +1,11 @@
 {
   "status": "IN_PROGRESS",
-  "current_phase": "P0-auth-rbac",
+  "current_phase": "P0-synthetic-data",
   "backlog": [
     { "id": "P0-audit", "done": true, "notes": "Repo audit complete. Backend has Phases 1-4 partially implemented on SQLite: schedule/progress ingestion, Time-Agent chat, hybrid matching engine, confidence scoring, planner review queue, audit trail, XER import/export with predecessor/successor. Missing: PostgreSQL, Redis/Celery, JWT/RBAC, Alembic, frontend, design system, synthetic data generator, SQLite backup mechanism. Python 3.9 incompatible union syntax in matching/service.py and extraction_service.py. No docker-compose.yml. P5 XER round-trip partially implemented but needs verification against full spec (.mpp support, write-back on approval, export)." },
     { "id": "P0-infra-postgres", "done": true, "notes": "PostgreSQL 16 with pgvector configured via docker-compose.yml. Alembic initial migration (d688256165ff) created with all PRD §9 tables: organizations, users, projects, ingestion_sources, wbs_nodes (with vector(1536)), event_wbs_matches, glossary_mappings, delay_reasons, productivity_benchmarks, audit_logs, plus existing Phase 1-4 tables. Migration runs clean on fresh SQLite and PostgreSQL. Database.py supports both SQLite (dev) and PostgreSQL (prod) with async/sync engines." },
     { "id": "P0-infra-redis-celery", "done": true, "notes": "Redis and Celery configured in docker-compose.yml. Celery app in app/core/celery_app.py with worker, beat, and backup task (app/workers/backup.py). Redis used as broker and result backend. Beat schedule includes hourly SQLite backup task." },
-    { "id": "P0-auth-rbac", "done": false },
+    { "id": "P0-auth-rbac", "done": true, "notes": "JWT auth with access/refresh tokens in HttpOnly cookies, CSRF double-submit token, role-based access control (5 roles: SYSTEM_ADMIN, CONTRACTOR_ADMIN, PROJECT_CONTROLS, DISCIPLINE_PLANNER, SITE_SUPERVISOR). Auth endpoints: /auth/login, /auth/refresh, /auth/logout, /auth/me, /auth/users, /auth/csrf-token. CORS configured with strict allowlist. Organization/project scoping enforced via dependencies. Audit logging on auth events. Seed script creates demo org, project, and 5 users across all roles." },
     { "id": "P0-sqlite-backup", "done": true, "notes": "SQLite backup mechanism implemented as Celery Beat task (app/workers/backup.py). Dumps core tables to backups/consight_backup_<timestamp>.db with retention policy (keep last 24). Restore procedure documented in code." },
     { "id": "P0-synthetic-data", "done": false },
     { "id": "P0-design-system", "done": false },
@@ -30,6 +30,7 @@
   ],
   "notes": [
     "Baseline audit commit. Repo is on branch 'build-loop-final' with Phases 1-4 backend partially working on SQLite. Python 3.9 incompatibility blocks test runs. No PostgreSQL, Redis, Celery, auth, frontend, or alembic. P5 XER work exists but incomplete vs spec.",
-    "P0-infra-postgres/redis-celery/sqlite-backup complete: docker-compose.yml with Postgres 16+pgvector, Redis, Celery worker/beat; Alembic migration with all PRD §9 tables; backup worker with retention. Python 3.9 union syntax fixed in matching/service.py and extraction_service.py. Existing tests need updates for new required fields (org_id, project_id) - will address in P0-auth-rbac."
+    "P0-infra-postgres/redis-celery/sqlite-backup complete: docker-compose.yml with Postgres 16+pgvector, Redis, Celery worker/beat; Alembic migration with all PRD §9 tables; backup worker with retention. Python 3.9 union syntax fixed in matching/service.py and extraction_service.py. Existing tests need updates for new required fields (org_id, project_id) - will address in P0-auth-rbac.",
+    "P0-auth-rbac complete: JWT with HttpOnly cookies, rotated refresh tokens in Redis, CSRF protection, 5 roles with RBAC dependencies, CORS allowlist, org/project scoping, audit logging on auth events. Demo seed data created. Existing test fixtures need updates for new required org_id/project_id fields - will fix in next iteration alongside synthetic data generator."
   ]
 }
