@@ -1,0 +1,34 @@
+{
+  "status": "IN_PROGRESS",
+  "current_phase": "P0-audit",
+  "backlog": [
+    { "id": "P0-audit", "done": true, "notes": "Repo audit complete. Backend has Phases 1-4 partially implemented on SQLite: schedule/progress ingestion, Time-Agent chat, hybrid matching engine, confidence scoring, planner review queue, audit trail, XER import/export with predecessor/successor. Missing: PostgreSQL, Redis/Celery, JWT/RBAC, Alembic, frontend, design system, synthetic data generator, SQLite backup mechanism. Python 3.9 incompatible union syntax in matching/service.py and extraction_service.py. No docker-compose.yml. P5 XER round-trip partially implemented but needs verification against full spec (.mpp support, write-back on approval, export)." },
+    { "id": "P0-infra-postgres", "done": false },
+    { "id": "P0-infra-redis-celery", "done": false },
+    { "id": "P0-auth-rbac", "done": false },
+    { "id": "P0-sqlite-backup", "done": false },
+    { "id": "P0-synthetic-data", "done": false },
+    { "id": "P0-design-system", "done": false },
+    { "id": "P0-frontend-shell", "done": false },
+    { "id": "P0-landing-page", "done": false },
+    { "id": "P5-p6-roundtrip", "done": false, "notes": "XER import/export with predecessor/successor relationships exists in backend/app/services/xer/. parser.py uses xerparser, export.py writes XER. schedule_relationships table stores FS/SS/FF/SF + lag. Missing: .mpp support (mpxj/aspose-tasks), write-back of actuals on planner approval (/api/v1/schedule/matches/{match_id}/resolve), export of current actuals back to XER/MSP format. Need to verify against PRD §8.2 and add-on Phase 5 spec." },
+    { "id": "P6-whatsapp", "done": false },
+    { "id": "P7-multilingual", "done": false },
+    { "id": "P8-delay-ripple", "done": false },
+    { "id": "P9-institutional-memory", "done": false },
+    { "id": "P10-ml-delay-prediction", "done": false },
+    { "id": "P11-voice-agent", "done": false },
+    { "id": "P12-ocr-scanned-diaries", "done": false },
+    { "id": "P13-advanced-rag", "done": false },
+    { "id": "P14-weather-context", "done": false },
+    { "id": "P15-bim-digital-twin", "done": false },
+    { "id": "P16-multi-project-enterprise", "done": false },
+    { "id": "P17-offline-mobile-pwa", "done": false },
+    { "id": "P18-frontend-consistency-pass", "done": false },
+    { "id": "P21-hardening-observability", "done": false },
+    { "id": "P22-e2e-verification", "done": false }
+  ],
+  "notes": [
+    "Baseline audit commit. Repo is on branch 'build-loop-final' with Phases 1-4 backend partially working on SQLite. Python 3.9 incompatibility blocks test runs. No PostgreSQL, Redis, Celery, auth, frontend, or alembic. P5 XER work exists but incomplete vs spec."
+  ]
+}
