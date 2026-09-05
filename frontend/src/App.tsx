@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './features/auth/AuthContext'
 import { Layout } from './components/Layout'
 import { Login } from './features/auth/Login'
+import { Landing } from './features/auth/Landing'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ScheduleView } from './features/schedule/ScheduleView'
 import { PlannerQueue } from './features/planner/PlannerQueue'
@@ -56,16 +57,17 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 export function App() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route
-        path="/"
+        path="/app"
         element={
           <ProtectedRoute>
             <Layout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<Navigate to="/app/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="schedule" element={<ScheduleView />} />
         <Route path="planner-queue" element={<PlannerQueue />} />
@@ -84,7 +86,7 @@ export function App() {
         />
         <Route path="settings" element={<Settings />} />
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
