@@ -1,9 +1,10 @@
 from fastapi import FastAPI
-from app.database import Base, engine
+from app.database import Base, sync_engine
 from app.api import schedule, progress, agent, matching, confidence, reviews, audit, xer_import, xer_export
 from app.models import schedule as schedule_model, progress as progress_model, confidence as confidence_model, xer as xer_model
+from app.models import organization, user, project, ingestion_source, wbs_node, event_wbs_match, glossary_mapping, delay_reason, productivity_benchmark, audit_log
 
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=sync_engine)
 
 app = FastAPI(
     title="Smarty Vibz API",

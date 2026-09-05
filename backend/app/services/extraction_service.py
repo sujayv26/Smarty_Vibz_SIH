@@ -1,8 +1,10 @@
+from typing import Optional
 from app.services.extraction_provider import BaseExtractionProvider
 from app.services.mock_provider import MockExtractionProvider
 from app.core.config import settings
 
-_provider: BaseExtractionProvider | None = None
+_provider: Optional[BaseExtractionProvider] = None
+
 
 def get_extraction_provider() -> BaseExtractionProvider:
     global _provider
@@ -13,6 +15,7 @@ def get_extraction_provider() -> BaseExtractionProvider:
             from app.services.llm_provider import LLMExtractionProvider
             _provider = LLMExtractionProvider(settings.LLM_API_KEY)
     return _provider
+
 
 def set_extraction_provider(provider: BaseExtractionProvider) -> None:
     global _provider

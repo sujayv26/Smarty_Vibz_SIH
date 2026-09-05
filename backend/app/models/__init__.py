@@ -10,6 +10,16 @@ from app.models.confidence import (
     ActorType,
 )
 from app.models.xer import ExternalSchedule, ScheduleRelationship
+from app.models.organization import Organization
+from app.models.user import User, UserRole
+from app.models.project import Project
+from app.models.ingestion_source import IngestionSource
+from app.models.wbs_node import WBSNode
+from app.models.event_wbs_match import EventWBSMatch, MatchType
+from app.models.glossary_mapping import GlossaryMapping
+from app.models.delay_reason import DelayReason, DelayCategory
+from app.models.productivity_benchmark import ProductivityBenchmark
+from app.models.audit_log import AuditLog, AuditAction
 
 __all__ = [
     "ProgressEvent",
@@ -23,4 +33,18 @@ __all__ = [
     "ActorType",
     "ExternalSchedule",
     "ScheduleRelationship",
+    "Organization",
+    "User",
+    "UserRole",
+    "Project",
+    "IngestionSource",
+    "WBSNode",
+    "EventWBSMatch",
+    "MatchType",
+    "GlossaryMapping",
+    "DelayReason",
+    "DelayCategory",
+    "ProductivityBenchmark",
+    "AuditLog",
+    "AuditAction",
 ]
