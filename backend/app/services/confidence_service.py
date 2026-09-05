@@ -173,6 +173,20 @@ def get_review_by_id(db: Session, review_id: int) -> Optional[PlannerReview]:
     return db.query(PlannerReview).filter(PlannerReview.id == review_id).first()
 
 
+def _write_actuals_to_schedule_activity(db: Session, activity_id: int, event: ProgressEvent) -> None:
+    """Write actual start/finish dates to schedule activity based on event type."""
+    activity = db.query(ScheduleActivity).filter(ScheduleActivity.id == activity_id).first()
+    if not activity or not event.event_date:
+        return
+    
+    if event.event_type == "START" and not activity.actual_start:
+        activity.actual_start = event.event_date
+        db.add(activity)
+    elif event.event_type == "COMPLETE" and not activity.actual_finish:
+        activity.actual_finish = event.event_date
+        db.add(activity)
+
+
 def approve_review(db: Session, review_id: int, reviewer_note: Optional[str] = None) -> PlannerReview:
     review = get_review_by_id(db, review_id)
     if not review:
@@ -190,6 +204,7 @@ def approve_review(db: Session, review_id: int, reviewer_note: Optional[str] = N
     if event and review.proposed_activity_id:
         event.activity_reference = review.proposed_activity.activity_code
         db.add(event)
+        _write_actuals_to_schedule_activity(db, review.proposed_activity_id, event)
     
     audit = AuditRecord(
         progress_event_id=review.progress_event_id,
@@ -229,6 +244,7 @@ def correct_review(db: Session, review_id: int, activity_id: int, reviewer_note:
     if event:
         event.activity_reference = activity.activity_code
         db.add(event)
+        _write_actuals_to_schedule_activity(db, activity_id, event)
     
     audit = AuditRecord(
         progress_event_id=review.progress_event_id,

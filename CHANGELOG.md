@@ -31,6 +31,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TypeScript build passes with strict mode
 - ESLint configuration added (.eslintrc.cjs)
 
+## [0.2.0] - 2026-09-05
+
+### Added
+- **P5-p6-roundtrip**: Primavera P6 / MS Project round-trip per PRD §8.2 and add-on Phase 5
+  - XER import with xerparser: activities, WBS hierarchy, predecessor/successor (FS/SS/FF/SF + lag)
+  - MPP import with mpxj: activities, relationships, lag support
+  - Upsert by activity_code (no duplicates on re-import)
+  - Write-back of actual_start/actual_finish on planner approval via /schedule/matches/{match_id}/resolve
+  - Review approve/correct endpoints also write actuals to schedule_activities
+  - Export XER with current actuals from schedule_activities (not just reviews)
+  - Alembic migration adding actual_start/actual_finish to schedule_activities
+  - Frontend: Schedule Import screen with file upload, parse preview with diff (New/Updated/Unchanged badges), commit
+  - Frontend: Export XER action with schedule selector dropdown
+  - Frontend: Schedule view with actual start/finish columns, status badges
+
 ## [0.1.0] - 2026-09-05
 
 ### Added

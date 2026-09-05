@@ -13,7 +13,7 @@ Per PRD §18 and CONSIGHT_BUILD_LOOP_PROMPT §5, this matrix maps each implement
 | P0-design-system | §6.2 (tokens), §6.3 (motion) | — | CSS tokens, Tailwind config, reusable components, animations, reduced motion | ✅ Done |
 | P0-frontend-shell | §6.4 (screens), §6.1 (landing) | — | React+Vite+TS, routing, auth context, 8 screens, sidebar, role-based access | ✅ Done |
 | P0-landing-page | §6.1 (landing page) | — | Video background, BubbledotICG-FinePos/Inter, header/pill-nav/trust-row/hero/stats-footer, animations, mobile menu, CTA → /login, EPC trust brands | ✅ Done |
-| P5-p6-roundtrip | §8.2 (schedule upload), §9 (wbs_nodes) | Phase 5 | XER/MSP import/export, predecessor/successor, write-back on approval | ⏳ Pending |
+| P5-p6-roundtrip | §8.2 (schedule upload), §9 (wbs_nodes) | Phase 5 | XER/MSP import/export, predecessor/successor, write-back on approval | ✅ Done |
 | P6-whatsapp | §8.3 (WhatsApp), §9 (ingestion_sources) | Phase 6 | WhatsApp Cloud API webhook, same extraction pipeline, live inbound panel | ⏳ Pending |
 | P7-multilingual | §6.1 (extraction), §5.7 (code-mixed) | Phase 7 | Hindi-English, Tamil-English, Telugu-English extraction, benchmark set | ⏳ Pending |
 | P8-delay-ripple | §6.5 (delay ripple), §9 (schedule_relationships) | Phase 8 | Deterministic graph traversal, critical-path flagging, persisted results | ⏳ Pending |

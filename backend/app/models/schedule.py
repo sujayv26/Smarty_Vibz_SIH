@@ -16,6 +16,8 @@ class ScheduleActivity(Base):
     wbs = Column(String, nullable=False)
     planned_start = Column(Date, nullable=False)
     planned_finish = Column(Date, nullable=False)
+    actual_start = Column(Date, nullable=True)
+    actual_finish = Column(Date, nullable=True)
     is_unplanned = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     external_schedule_id = Column(Integer, ForeignKey("external_schedules.id"), nullable=True, index=True)
