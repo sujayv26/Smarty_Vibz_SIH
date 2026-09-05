@@ -9,6 +9,7 @@ from app.models.confidence import (
     DecisionType,
     ActorType,
 )
+from app.models.xer import ExternalSchedule, ScheduleRelationship
 
 __all__ = [
     "ProgressEvent",
@@ -20,4 +21,6 @@ __all__ = [
     "ReviewStatus",
     "DecisionType",
     "ActorType",
+    "ExternalSchedule",
+    "ScheduleRelationship",
 ]
