@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P12-ocr-scanned-diaries**: Real OCR pipeline (Tesseract) for scanned diaries per PRD §6.1/P12 and add-on Phase 12
+  - OCRService with Tesseract OCR supporting multiple languages (eng, hin, tam, tel, kan)
+  - PDF and image processing (PDF, PNG, JPG, TIFF, BMP, WebP) with preprocessing for better accuracy
+  - API endpoints: /ocr/upload (OCR only), /ocr/process (OCR + agent pipeline), /ocr/model-info
+  - Frontend: DiaryUpload component with drag-and-drop, language selector (5 languages), OCR preview with confidence score, transcript display, and one-click process through Time Agent
+  - 10 tests pass covering file validation, OCR extraction, and service integration
+
 - **P11-voice-agent**: Real speech-to-text (Whisper) integrated into Time-Agent per PRD §6.2/P11 and add-on Phase 11
   - VoiceService with Whisper transcription supporting 5 languages (en, hi, ta, te, kn)
   - Audio recording with real-time waveform visualization, WebM/Opus encoding
