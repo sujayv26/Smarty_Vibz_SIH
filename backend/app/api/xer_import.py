@@ -9,9 +9,11 @@ from app.models.schedule import ScheduleActivity
 from app.models.progress import ProgressEvent
 from app.services.confidence_service import get_review_by_id
 from app.models.confidence import PlannerReview, ReviewStatus
+from app.models.project import Project
 from typing import Optional
 from datetime import date
 import io
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/schedule", tags=["Schedule"])
 
@@ -19,7 +21,9 @@ router = APIRouter(prefix="/schedule", tags=["Schedule"])
 @router.post("/import/p6", summary="Import Primavera P6 XER or MPP schedule")
 async def import_p6_schedule(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    project_id: int = Query(None, description="Project ID to associate the schedule with"),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
     if not (file.filename.endswith(".xer") or file.filename.endswith(".mpp")):
         raise HTTPException(status_code=400, detail="Only .xer and .mpp files are supported")
@@ -29,7 +33,18 @@ async def import_p6_schedule(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to read file: {str(e)}")
 
-    service = ScheduleImportService(db)
+    # Determine project_id
+    if project_id is None:
+        project = db.query(Project).filter(Project.organization_id == current_user.organization_id).first()
+        if not project:
+            raise HTTPException(status_code=400, detail="No project found for your organization. Please create a project first or specify project_id.")
+        project_id = project.id
+    else:
+        project = db.query(Project).filter(Project.id == project_id, Project.organization_id == current_user.organization_id).first()
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found or access denied")
+
+    service = ScheduleImportService(db, current_user.organization_id, project_id)
 
     if file.filename.endswith(".xer"):
         try:

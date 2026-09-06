@@ -15,8 +15,10 @@ from app.models.xer import ScheduleRelationship, ExternalSchedule
 
 
 class ScheduleImportService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, organization_id: int = None, project_id: int = None):
         self.db = db
+        self.organization_id = organization_id
+        self.project_id = project_id
 
     def import_schedule(self, parse_result, source_filename: str, source_format: str = "XER") -> dict:
         schedule = parse_result.schedule
@@ -107,7 +109,9 @@ class ScheduleImportService:
 
     def _import_activity(self, external_schedule_id: int, activity_data, source_format: str) -> Optional[ScheduleActivity]:
         existing = self.db.query(ScheduleActivity).filter(
-            ScheduleActivity.activity_code == activity_data.activity_code
+            ScheduleActivity.activity_code == activity_data.activity_code,
+            ScheduleActivity.organization_id == self.organization_id,
+            ScheduleActivity.project_id == self.project_id
         ).first()
 
         wbs = getattr(activity_data, 'wbs_code', None) or getattr(activity_data, 'wbs_name', None) or "UNKNOWN"
@@ -124,6 +128,8 @@ class ScheduleImportService:
             return existing
 
         activity = ScheduleActivity(
+            organization_id=self.organization_id,
+            project_id=self.project_id,
             activity_code=activity_data.activity_code,
             activity_name=activity_data.activity_name,
             discipline=getattr(activity_data, 'discipline', None) or "Unknown",
@@ -175,9 +181,9 @@ class ScheduleImportService:
 
 
 class XERImportService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, organization_id: int = None, project_id: int = None):
         self.db = db
-        self._service = ScheduleImportService(db)
+        self._service = ScheduleImportService(db, organization_id, project_id)
 
     def import_xer(self, content: str, source_filename: str = "import.xer") -> dict:
         result = parse_xer_content(content)

@@ -109,14 +109,19 @@ def _serialize_review(review) -> PlannerReviewResponse:
     import json
     from app.schemas.confidence import ProposedActivity, ReviewCandidate, ConfidenceScoreBreakdown
     from app.matching.schemas import ComponentScores
+    from app.models.confidence import ReviewStatus
+    
+    # Show the final activity if review is corrected/approved, otherwise show proposed
+    show_final = review.status in (ReviewStatus.CORRECTED, ReviewStatus.APPROVED)
+    activity_for_response = review.final_activity if show_final else review.proposed_activity
     
     proposed = None
-    if review.proposed_activity_id:
+    if activity_for_response:
         proposed = ProposedActivity(
-            activity_id=review.proposed_activity.id,
-            activity_code=review.proposed_activity.activity_code,
-            activity_name=review.proposed_activity.activity_name,
-            discipline=review.proposed_activity.discipline,
+            activity_id=activity_for_response.id,
+            activity_code=activity_for_response.activity_code,
+            activity_name=activity_for_response.activity_name,
+            discipline=activity_for_response.discipline,
         )
     
     # Get progress event for additional fields
@@ -181,6 +186,7 @@ def _serialize_review(review) -> PlannerReviewResponse:
         reviewer_note=review.reviewer_note,
         created_at=review.created_at,
         completed_at=review.completed_at,
+        new_activity_id=review.new_activity_id,
     )
 
 

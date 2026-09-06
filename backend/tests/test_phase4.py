@@ -175,8 +175,8 @@ class TestXERParser:
 
 
 class TestXERImportService:
-    def test_import_xer_creates_activities(self, db_session):
-        service = XERImportService(db_session)
+    def test_import_xer_creates_activities(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         result = service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         assert result["imported_activity_count"] == 11
@@ -198,8 +198,8 @@ class TestXERImportService:
         assert pip300.source_format == "XER"
         assert pip300.external_activity_id == "PIP-300"
 
-    def test_import_xer_creates_relationships(self, db_session):
-        service = XERImportService(db_session)
+    def test_import_xer_creates_relationships(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         relationships = db_session.query(ScheduleRelationship).all()
@@ -211,8 +211,8 @@ class TestXERImportService:
         ss_rel = next(r for r in relationships if r.relationship_type == "SS")
         assert ss_rel.lag >= 1
 
-    def test_import_preserves_external_ids(self, db_session):
-        service = XERImportService(db_session)
+    def test_import_preserves_external_ids(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         activity = db_session.query(ScheduleActivity).filter(
@@ -221,8 +221,10 @@ class TestXERImportService:
         assert activity.external_activity_id == "PIP-300"
         assert activity.external_schedule_id is not None
 
-    def test_existing_excel_schedule_still_works(self, db_session):
+    def test_existing_excel_schedule_still_works(self, db_session, test_org, test_project):
         excel_activity = ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="EXCEL-001",
             activity_name="Excel Activity",
             discipline="Civil",
@@ -234,7 +236,7 @@ class TestXERImportService:
         db_session.add(excel_activity)
         db_session.commit()
 
-        service = XERImportService(db_session)
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         all_activities = db_session.query(ScheduleActivity).all()
@@ -250,25 +252,25 @@ class TestXERImportService:
         ).first()
         assert xer_act.source_format == "XER"
 
-    def test_self_referencing_relationship_rejected(self, db_session):
+    def test_self_referencing_relationship_rejected(self, db_session, test_org, test_project):
         xer_self_ref = SAMPLE_XER_CONTENT.replace("%E", "%R\tCIV-100\tCIV-100\tFS\t0\n%E")
-        service = XERImportService(db_session)
+        service = XERImportService(db_session, test_org.id, test_project.id)
         result = service.import_xer(xer_self_ref, "sample.xer")
         assert result["rejected_relationship_count"] >= 1
 
-    def test_invalid_relationship_reference_rejected(self, db_session):
+    def test_invalid_relationship_reference_rejected(self, db_session, test_org, test_project):
         xer_bad_ref = SAMPLE_XER_CONTENT.replace(
             "%R	CIV-110	CIV-100	FS	0",
             "%R	CIV-110	NONEXISTENT	FS	0"
         )
-        service = XERImportService(db_session)
+        service = XERImportService(db_session, test_org.id, test_project.id)
         result = service.import_xer(xer_bad_ref, "sample.xer")
         assert result["rejected_relationship_count"] >= 1
 
 
 class TestXERExport:
-    def test_export_valid_xer(self, db_session):
-        service = XERImportService(db_session)
+    def test_export_valid_xer(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         ext_schedule = db_session.query(ExternalSchedule).first()
@@ -283,8 +285,8 @@ class TestXERExport:
         assert "FF" in xer_content
         assert "SF" in xer_content
 
-    def test_export_approved_actual_start(self, db_session):
-        service = XERImportService(db_session)
+    def test_export_approved_actual_start(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         ext_schedule = db_session.query(ExternalSchedule).first()
@@ -293,6 +295,8 @@ class TestXERExport:
         ).first()
 
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Started erection of XX-101 spool",
             activity_reference="PIP-300",
             event_type="START",
@@ -334,8 +338,8 @@ class TestXERExport:
         assert stats["approved_actuals_count"] == 1
         assert "2026-03-15" in xer_content
 
-    def test_export_does_not_include_unapproved_actuals(self, db_session):
-        service = XERImportService(db_session)
+    def test_export_does_not_include_unapproved_actuals(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         ext_schedule = db_session.query(ExternalSchedule).first()
@@ -344,6 +348,8 @@ class TestXERExport:
         ).first()
 
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Started erection of XX-101 spool",
             activity_reference="PIP-300",
             event_type="START",
@@ -370,8 +376,8 @@ class TestXERExport:
 
         assert stats["approved_actuals_count"] == 0
 
-    def test_export_preserves_relationships(self, db_session):
-        service = XERImportService(db_session)
+    def test_export_preserves_relationships(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         ext_schedule = db_session.query(ExternalSchedule).first()
@@ -380,8 +386,8 @@ class TestXERExport:
         assert stats["exported_relationship_count"] == 11
         assert "TASKPRED" in xer_content
 
-    def test_original_file_not_overwritten(self, db_session):
-        service = XERImportService(db_session)
+    def test_original_file_not_overwritten(self, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         ext_schedule = db_session.query(ExternalSchedule).first()
@@ -392,11 +398,13 @@ class TestXERExport:
 
 
 class TestXERImportAPI:
-    def test_import_p6_endpoint(self, client):
+    def test_import_p6_endpoint(self, client, db_session, test_org, test_project):
+        # Create a project for the test
         with open(FIXTURES_DIR / "sample_schedule.xer", "rb") as f:
             response = client.post(
                 "/schedule/import/p6",
-                files={"file": ("sample.xer", f, "application/octet-stream")}
+                files={"file": ("sample.xer", f, "application/octet-stream")},
+                params={"project_id": test_project.id}
             )
         assert response.status_code == 200
         data = response.json()
@@ -411,8 +419,8 @@ class TestXERImportAPI:
         )
         assert response.status_code == 400
 
-    def test_get_relationships_endpoint(self, client, db_session):
-        service = XERImportService(db_session)
+    def test_get_relationships_endpoint(self, client, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         ext_schedule = db_session.query(ExternalSchedule).first()
@@ -421,8 +429,8 @@ class TestXERImportAPI:
         relationships = response.json()
         assert len(relationships) == 11
 
-    def test_get_external_schedules_endpoint(self, client, db_session):
-        service = XERImportService(db_session)
+    def test_get_external_schedules_endpoint(self, client, db_session, test_org, test_project):
+        service = XERImportService(db_session, test_org.id, test_project.id)
         service.import_xer(SAMPLE_XER_CONTENT, "sample.xer")
 
         response = client.get("/schedule/external-schedules")
@@ -433,7 +441,7 @@ class TestXERImportAPI:
 
 
 class TestEndToEnd:
-    def test_xer_import_to_export_flow(self, client, db_session):
+    def test_xer_import_to_export_flow(self, client, db_session, test_org, test_project):
         with open(FIXTURES_DIR / "sample_schedule.xer", "rb") as f:
             import_resp = client.post(
                 "/schedule/import/p6",
@@ -448,6 +456,8 @@ class TestEndToEnd:
         ).first()
 
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Today at 9:30 AM, the piping team started erection of the XX-101 spool in Area B",
             activity_reference="PIP-300",
             event_type="START",

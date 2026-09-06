@@ -70,6 +70,7 @@ class PlannerReviewResponse(BaseModel):
     reviewer_note: Optional[str] = None
     created_at: datetime
     completed_at: Optional[datetime] = None
+    new_activity_id: Optional[int] = None
 
 
 class PlannerReviewListResponse(BaseModel):

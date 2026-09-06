@@ -367,6 +367,11 @@ def create_new_activity(
     if existing:
         raise ValueError(f"Activity code {activity_code} already exists")
     
+    # Get organization_id and project_id from the progress event
+    event = db.query(ProgressEvent).filter(ProgressEvent.id == review.progress_event_id).first()
+    organization_id = event.organization_id if event else None
+    project_id = event.project_id if event else None
+    
     if not wbs:
         wbs = f"MISC.{activity_code}"
     
@@ -376,6 +381,8 @@ def create_new_activity(
         planned_finish = date.today()
     
     new_activity = ScheduleActivity(
+        organization_id=organization_id,
+        project_id=project_id,
         activity_code=activity_code,
         activity_name=activity_name,
         discipline=discipline,

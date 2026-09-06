@@ -5,6 +5,8 @@ from app.matching.service import run_matching_for_event, get_progress_event
 from app.matching.benchmark import run_benchmark
 from app.matching.schemas import MatchingRunResponse, BenchmarkResponse
 from app.models.progress import ProgressEvent
+from app.models.project import Project
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/matching", tags=["Matching"])
 
@@ -20,6 +22,12 @@ async def run_matching_endpoint(progress_event_id: int, db: Session = Depends(ge
 
 
 @router.post("/benchmark", response_model=BenchmarkResponse)
-async def run_benchmark_endpoint(db: Session = Depends(get_db)):
-    summary = run_benchmark(db)
+async def run_benchmark_endpoint(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    # Get the first project for the user's organization
+    project = db.query(Project).filter(Project.organization_id == current_user.organization_id).first()
+    project_id = project.id if project else None
+    summary = run_benchmark(db, organization_id=current_user.organization_id, project_id=project_id)
     return BenchmarkResponse(summary=summary)
