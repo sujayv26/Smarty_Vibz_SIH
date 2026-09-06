@@ -159,26 +159,26 @@ def no_match_event(db_session, sample_schedule, test_org, test_project):
 class TestConfidenceEngine:
     def test_confidence_thresholds_default(self):
         high, medium = get_confidence_thresholds()
-        assert high == 0.80
-        assert medium == 0.50
+        assert high == 0.85
+        assert medium == 0.60
     
     def test_confidence_thresholds_custom(self):
-        set_confidence_thresholds(0.85, 0.55)
+        set_confidence_thresholds(0.90, 0.65)
         high, medium = get_confidence_thresholds()
-        assert high == 0.85
-        assert medium == 0.55
-        set_confidence_thresholds(0.80, 0.50)
+        assert high == 0.90
+        assert medium == 0.65
+        set_confidence_thresholds(0.85, 0.60)
     
     def test_classify_high(self):
         assert classify_confidence(0.90) == "HIGH"
-        assert classify_confidence(0.80) == "HIGH"
+        assert classify_confidence(0.85) == "HIGH"
     
     def test_classify_medium(self):
-        assert classify_confidence(0.70) == "MEDIUM"
-        assert classify_confidence(0.50) == "MEDIUM"
+        assert classify_confidence(0.75) == "MEDIUM"
+        assert classify_confidence(0.60) == "MEDIUM"
     
     def test_classify_low(self):
-        assert classify_confidence(0.40) == "LOW"
+        assert classify_confidence(0.55) == "LOW"
         assert classify_confidence(0.0) == "LOW"
     
     def test_should_auto_match_high(self):
