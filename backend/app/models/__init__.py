@@ -21,6 +21,7 @@ from app.models.delay_reason import DelayReason, DelayCategory
 from app.models.productivity_benchmark import ProductivityBenchmark
 from app.models.audit_log import AuditLog, AuditAction
 from app.models.delay_impact import DelayImpact, ImpactType
+from app.models.delay_prediction import DelayPrediction, ModelTrainingRun
 
 __all__ = [
     "ProgressEvent",
@@ -50,4 +51,6 @@ __all__ = [
     "AuditAction",
     "DelayImpact",
     "ImpactType",
+    "DelayPrediction",
+    "ModelTrainingRun",
 ]

@@ -8,6 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P10-ml-delay-prediction**: ML-based delay prediction per PRD §5.6/P10 and add-on Phase 10
+  - DelayPredictionModel using RandomForest classifier/regressor trained on delay_reasons, productivity_benchmarks, schedule topology, and matching confidence
+  - 32 features: predecessor/successor topology, historical delay rates, discipline productivity, schedule float, critical path exposure, confidence scores
+  - Celery Beat tasks: daily retraining (retrain_delay_model), 6-hourly predictions for all projects (predict_all_projects)
+  - API endpoints: /delay-predictions/project/{id} (all predictions), /delay-predictions/project/{id}/watchlist (ranked risk watchlist), /delay-predictions/predict (generate predictions), /delay-predictions/train (trigger retraining), /delay-predictions/training-runs (model history)
+  - Frontend: RiskWatchlist with ranked risk table, risk score bars, ML confidence indicators, model performance metrics, manual retrain button
+  - Alembic migration for delay_predictions and model_training_runs tables
+
+- **P9-institutional-memory**: Productivity & institutional memory analytics per PRD §6.6 and add-on Phase 9
+  - AnalyticsService with SQL aggregations: discipline summary (actual vs planned duration, productivity index, delay patterns), delay patterns (recurring causes by category/discipline, top causes), productivity benchmarks (historical rates by discipline/activity), variance trend (weekly buckets), matching quality (auto-commit/review/correction rates, avg confidence), confidence distribution
+  - API endpoints: /analytics/discipline-summary, /analytics/delay-patterns, /analytics/benchmarks, /analytics/variance-trend, /analytics/matching-quality, /analytics/confidence-distribution
+  - Frontend: Insights dashboard with recharts visualizations - productivity bar chart, delay causes pie chart, variance trend line chart, detailed tables for top delays, benchmarks, discipline summary
+
+- **P8-delay-ripple**: Deterministic delay ripple computation per PRD §5.4 and add-on Phase 8
+  - DelayRippleService computes propagated delays over predecessor/successor graph (FS/SS/FF/SF + lag) using CPM-based critical path detection and schedule margin analysis
+  - Hooked into approve_review for DELAY events - auto-computes impacts when planner approves delay
+  - Persists DelayImpact records with impact_type (DIRECT/PROPAGATED/FLOAT_CONSUMED/CRITICAL_PATH), propagated_delay_days, float_consumed_days, remaining_float_days, critical_path_exposure
+  - API endpoints: /delay-impacts/event/{id}, /delay-impacts/activity/{id}, /delay-impacts/project/{id}/critical, /delay-impacts/project/{id}/summary
+  - Frontend: DelayImpactPanel component integrated into ScheduleView and PlannerQueue with real-time display of impacted downstream activities, float consumption, and critical path warnings
+
 - **P0-landing-page**: Public landing page per §6.1 specification
   - Full-bleed looping video background with gradient overlay
   - BubbledotICG-FinePos display font for headlines and stat glyphs

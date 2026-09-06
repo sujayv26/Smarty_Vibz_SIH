@@ -9,6 +9,7 @@ celery_app = Celery(
         "app.workers.backup",
         "app.workers.matching",
         "app.workers.whatsapp",
+        "app.workers.ml_retrain",
     ],
 )
 
@@ -25,6 +26,14 @@ celery_app.conf.update(
         "backup-to-sqlite-hourly": {
             "task": "app.workers.backup.backup_to_sqlite",
             "schedule": 3600.0,
+        },
+        "retrain-delay-model-daily": {
+            "task": "app.workers.ml_retrain.retrain_delay_model",
+            "schedule": 86400.0,  # Daily
+        },
+        "predict-all-projects-6hourly": {
+            "task": "app.workers.ml_retrain.predict_all_projects",
+            "schedule": 21600.0,  # Every 6 hours
         },
     },
 )
