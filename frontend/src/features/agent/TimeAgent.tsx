@@ -2,35 +2,141 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
 import { Textarea } from '../../components/ui/Input'
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { cn } from '../../lib/utils'
-import { Mic, Send, MessageSquare, Loader2 } from 'lucide-react'
+import { Send, MessageSquare, Loader2 } from 'lucide-react'
+import { api } from '../../lib/api'
+import { formatDistanceToNow } from 'date-fns'
+import { VoiceRecorder } from '../../components/VoiceRecorder'
 
-const mockMessages = [
-  { id: 1, role: 'assistant', content: 'Hello! I\'m your ConSight Time Agent. How can I help you log progress today?', time: '09:00' },
-  { id: 2, role: 'user', content: 'Started erection of XX-101 spool at 9:30 AM in Area B', time: '09:05' },
-  { id: 3, role: 'assistant', content: 'I understood: START — XX-101 spool erection at 09:30 in Area B (Piping). Logged as event #1023.', time: '09:05' },
-  { id: 4, role: 'user', content: 'match it', time: '09:06' },
-  { id: 5, role: 'assistant', content: 'Found match: PIP-1023 "Erect Line 24-XX-101" (92% confidence). Auto-committed.', time: '09:06' },
-]
+interface Message {
+  id: number
+  role: 'user' | 'assistant'
+  content: string
+  time: string
+  understood?: any
+  agentResponse?: any
+}
+
+interface UnderstoodProgress {
+  activity_reference: string | null
+  event_type: string | null
+  event_date: string | null
+  event_time: string | null
+  discipline: string | null
+  location: string | null
+  equipment_tag: string | null
+}
+
+interface AgentChatResponse {
+  understood: UnderstoodProgress
+  progress_event_id: number
+  matched_activity: any
+  confidence: number | null
+  reply: string
+  follow_up: string
+}
+
+const SESSION_ID = `CONS-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-001`
 
 export function TimeAgent() {
+  const [messages, setMessages] = useState<Message[]>([])
   const [message, setMessage] = useState('')
-  const [isRecording, setIsRecording] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [preferredLanguage, setPreferredLanguage] = useState('en')
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, scrollToBottom])
+
+  // Load initial message
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: 1,
+          role: 'assistant',
+          content: "Hello! I'm your ConSight Time Agent. How can I help you log progress today?",
+          time: new Date().toISOString(),
+        }
+      ])
+    }
+  }, [])
+
+  const addMessage = (role: 'user' | 'assistant', content: string, understood?: any, agentResponse?: any) => {
+    const newMessage: Message = {
+      id: Date.now(),
+      role,
+      content,
+      time: new Date().toISOString(),
+      understood,
+      agentResponse,
+    }
+    setMessages(prev => [...prev, newMessage])
+  }
 
   const handleSend = async () => {
     if (!message.trim() || isLoading) return
+    
+    const userMessage = message.trim()
+    setMessage('')
     setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setMessage('')
+    
+    // Add user message immediately
+    addMessage('user', userMessage)
+    
+    try {
+      const response = await api.post('/agent/chat', {
+        message: userMessage,
+        session_id: SESSION_ID,
+      })
+      
+      const agentResponse: AgentChatResponse = response.data
+      
+      // Add assistant response
+      addMessage('assistant', agentResponse.reply, agentResponse.understood, agentResponse)
+      
+    } catch (err: any) {
+      console.error('Agent chat failed:', err)
+      addMessage('assistant', 'Sorry, I encountered an error. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
-  const handleVoice = () => {
-    setIsRecording(!isRecording)
+  const handleVoiceTranscript = useCallback(async (transcript: string, detectedLanguage: string) => {
+    setPreferredLanguage(detectedLanguage)
+    setMessage(transcript)
+    // Auto-send after a brief delay to show the transcript
+    setTimeout(() => {
+      handleSend()
+    }, 500)
+  }, [])
+
+  const handleVoiceError = useCallback((error: string) => {
+    console.error('Voice error:', error)
+    addMessage('assistant', `Voice input error: ${error}`)
+  }, [])
+
+  const formatTime = (isoString: string) => {
+    return formatDistanceToNow(new Date(isoString), { addSuffix: true })
+      .replace('about ', '')
+      .replace('less than a minute', 'just now')
+  }
+
+  const formatUnderstood = (understood: UnderstoodProgress) => {
+    const parts = []
+    if (understood.event_type) parts.push(understood.event_type)
+    if (understood.activity_reference) parts.push(understood.activity_reference)
+    if (understood.event_time) parts.push(`at ${understood.event_time}`)
+    if (understood.location) parts.push(`in ${understood.location}`)
+    if (understood.discipline) parts.push(`(${understood.discipline})`)
+    return parts.join(' — ') || 'No details extracted'
   }
 
   return (
@@ -45,14 +151,27 @@ export function TimeAgent() {
         <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            Session: CONS-2026-09-05-001
+            Session: {SESSION_ID}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="auto-commit" dot>Active</Badge>
+            <select
+              value={preferredLanguage}
+              onChange={(e) => setPreferredLanguage(e.target.value)}
+              className="bg-surfaceRaised border border-border rounded-lg px-2 py-1 text-sm text-white"
+              aria-label="Language"
+            >
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="ta">Tamil</option>
+              <option value="te">Telugu</option>
+              <option value="kn">Kannada</option>
+            </select>
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-          {mockMessages.map((msg) => (
+          <div ref={messagesEndRef} />
+          {messages.map((msg) => (
             <div
               key={msg.id}
               className={cn(
@@ -79,7 +198,19 @@ export function TimeAgent() {
                   : 'bg-surfaceRaised text-white rounded-tl-none'
               )}>
                 <p className="text-sm">{msg.content}</p>
-                <p className="text-xs text-textMuted/60 mt-1 text-right">{msg.time}</p>
+                {msg.understood && (
+                  <p className="text-xs text-textMuted/80 mt-1 font-mono">
+                    Understood: {formatUnderstood(msg.understood)}
+                  </p>
+                )}
+                {msg.agentResponse?.matched_activity && (
+                  <div className="mt-2 p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <p className="text-xs font-medium text-green-400 mb-1">Matched Activity</p>
+                    <p className="text-xs text-white">{msg.agentResponse.matched_activity.activity_code}: {msg.agentResponse.matched_activity.activity_name}</p>
+                    <p className="text-xs text-textMuted">{msg.agentResponse.matched_activity.discipline} • {(msg.agentResponse.confidence || 0) * 100}% confidence</p>
+                  </div>
+                )}
+                <p className="text-xs text-textMuted/60 mt-1 text-right">{formatTime(msg.time)}</p>
               </div>
             </div>
           ))}
@@ -101,47 +232,40 @@ export function TimeAgent() {
 
         {/* Input Area */}
         <div className="p-4 border-t border-border">
-          <div className="flex items-end gap-3">
+          <VoiceRecorder
+            sessionId={SESSION_ID}
+            preferredLanguage={preferredLanguage}
+            onTranscript={handleVoiceTranscript}
+            onError={handleVoiceError}
+          />
+          
+          <div className="flex items-end gap-3 mt-4">
             <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Type your progress update... (e.g., 'Completed pump P-101 installation at 2 PM')"
               rows={1}
+              disabled={isLoading}
               className="flex-1 min-h-[44px] max-h-32 resize-none"
             />
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleVoice}
-                disabled={isLoading}
-                className={cn(
-                  'p-2.5 rounded-lg transition-colors flex-shrink-0',
-                  isRecording
-                    ? 'bg-red-500/20 text-red-400 animate-pulse'
-                    : 'bg-surfaceRaised text-textMuted hover:text-white hover:bg-white/10'
-                )}
-                aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
-              >
-                <Mic className="w-5 h-5" />
-              </button>
-              <button
-                onClick={handleSend}
-                disabled={!message.trim() || isLoading}
-                className={cn(
-                  'p-2.5 rounded-lg transition-colors flex-shrink-0',
-                  message.trim() && !isLoading
-                    ? 'bg-white text-bgApp hover:bg-white/90'
-                    : 'bg-surfaceRaised text-textMuted cursor-not-allowed'
-                )}
-                aria-label="Send message"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <Send className="w-5 h-5" />
-                )}
-              </button>
-            </div>
+            <button
+              onClick={handleSend}
+              disabled={!message.trim() || isLoading}
+              className={cn(
+                'p-2.5 rounded-lg transition-colors flex-shrink-0',
+                message.trim() && !isLoading
+                  ? 'bg-white text-bgApp hover:bg-white/90'
+                  : 'bg-surfaceRaised text-textMuted cursor-not-allowed'
+              )}
+              aria-label="Send message"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+            </button>
           </div>
           <p className="text-xs text-textMuted mt-2 text-center">
             Try: "Started piping erection at 9 AM", "Pump P-101 complete", "Delay on foundation pour due to rain"

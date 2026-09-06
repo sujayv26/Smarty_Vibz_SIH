@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P11-voice-agent**: Real speech-to-text (Whisper) integrated into Time-Agent per PRD §6.2/P11 and add-on Phase 11
+  - VoiceService with Whisper transcription supporting 5 languages (en, hi, ta, te, kn)
+  - Audio recording with real-time waveform visualization, WebM/Opus encoding
+  - API endpoints: /voice/transcribe (transcribe only), /voice/process (transcribe + agent pipeline), /voice/model-info
+  - Frontend: VoiceRecorder component with press-to-talk button, real-time audio level bars, duration timer, transcript display
+  - Integrated into TimeAgent UI with language selector (5 languages)
+
 - **P10-ml-delay-prediction**: ML-based delay prediction per PRD §5.6/P10 and add-on Phase 10
   - DelayPredictionModel using RandomForest classifier/regressor trained on delay_reasons, productivity_benchmarks, schedule topology, and matching confidence
   - 32 features: predecessor/successor topology, historical delay rates, discipline productivity, schedule float, critical path exposure, confidence scores

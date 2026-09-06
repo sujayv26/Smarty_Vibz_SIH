@@ -19,7 +19,7 @@ Per PRD §18 and CONSIGHT_BUILD_LOOP_PROMPT §5, this matrix maps each implement
 | P8-delay-ripple | §6.5 (delay ripple), §9 (schedule_relationships) | Phase 8 | Deterministic graph traversal, critical-path flagging, persisted results | ✅ Done |
 | P9-institutional-memory | §6.6 (analytics), §8.4 (endpoints) | Phase 9 | Discipline productivity, delay patterns, benchmarks, Insights dashboard | ✅ Done |
 | P10-ml-delay-prediction | §6.7 (ML), §8.4 (predictions) | Phase 10 | Trained delay prediction model, Celery retraining, watchlist UI | ✅ Done |
-| P11-voice-agent | §6.2 (Time-Agent), §8.3 (chat) | Phase 11 | Whisper STT, press-to-talk, same extraction JSON, audit persistence | ⏳ Pending |
+| P11-voice-agent | §6.2 (Time-Agent), §8.3 (chat) | Phase 11 | Whisper STT, press-to-talk, same extraction JSON, audit persistence | ✅ Done |
 | P12-ocr-scanned-diaries | §6.1 (extraction), §9 (PDF_OCR source) | Phase 12 | Tesseract/cloud OCR, review queue for low confidence, verification UI | ⏳ Pending |
 | P13-advanced-rag | §6.6 (knowledge base), §8.4 (query) | Phase 13 | pgvector RAG over delay_reasons/benchmarks/glossary, cited sources | ⏳ Pending |
 | P14-weather-context | §6.5 (delay context), §10 (external) | Phase 14 | Weather API ingestion, geolocated per project, feeds ripple + ML | ⏳ Pending |
