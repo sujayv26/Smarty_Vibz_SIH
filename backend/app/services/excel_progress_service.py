@@ -85,7 +85,16 @@ def validate_excel_progress(file) -> tuple[list[dict], list[dict]]:
     
     return valid_rows, errors
 
-def process_excel_progress(db: Session, valid_rows: list[dict], source_file: str) -> tuple[int, list[dict]]:
+def process_excel_progress(db: Session, valid_rows: list[dict], source_file: str, organization_id: int = None, user_id: int = None) -> tuple[int, list[dict]]:
+    from app.models.project import Project
+    
+    # Determine project_id from organization_id
+    project_id = None
+    if organization_id is not None:
+        project = db.query(Project).filter(Project.organization_id == organization_id).first()
+        if project:
+            project_id = project.id
+    
     provider = get_extraction_provider()
     inserted = 0
     row_errors = []
@@ -117,7 +126,12 @@ def process_excel_progress(db: Session, valid_rows: list[dict], source_file: str
                 session_id=None
             )
             
-            db_event = ProgressEvent(**progress_event.model_dump())
+            db_event = ProgressEvent(
+                **progress_event.model_dump(),
+                organization_id=organization_id,
+                project_id=project_id,
+                user_id=user_id
+            )
             db.add(db_event)
             inserted += 1
             

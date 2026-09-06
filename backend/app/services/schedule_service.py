@@ -52,11 +52,13 @@ def validate_schedule_excel(file) -> tuple[list[dict], list[dict]]:
     
     return valid_rows, errors
 
-def insert_schedule_activities(db: Session, valid_rows: list[dict]) -> int:
+def insert_schedule_activities(db: Session, valid_rows: list[dict], organization_id: int, project_id: int) -> int:
     inserted = 0
     for row in valid_rows:
         existing = db.query(ScheduleActivity).filter(
-            ScheduleActivity.activity_code == row["activity_code"]
+            ScheduleActivity.activity_code == row["activity_code"],
+            ScheduleActivity.organization_id == organization_id,
+            ScheduleActivity.project_id == project_id
         ).first()
         if existing:
             existing.activity_name = row["activity_name"]
@@ -65,7 +67,11 @@ def insert_schedule_activities(db: Session, valid_rows: list[dict]) -> int:
             existing.planned_start = row["planned_start"]
             existing.planned_finish = row["planned_finish"]
         else:
-            activity = ScheduleActivity(**row)
+            activity = ScheduleActivity(
+                **row,
+                organization_id=organization_id,
+                project_id=project_id
+            )
             db.add(activity)
             inserted += 1
     db.commit()

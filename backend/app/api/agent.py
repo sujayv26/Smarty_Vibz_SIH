@@ -4,13 +4,23 @@ from app.database import get_db
 from app.services.agent_service import process_agent_chat, get_session_events
 from app.schemas.agent import AgentChatRequest, AgentChatResponse
 from app.schemas.progress import ProgressEventResponse
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/agent", tags=["Time Agent"])
 
 @router.post("/chat", response_model=AgentChatResponse)
-async def agent_chat(request: AgentChatRequest, db: Session = Depends(get_db)):
+async def agent_chat(
+    request: AgentChatRequest, 
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     try:
-        response = process_agent_chat(db, request)
+        response = process_agent_chat(
+            db, 
+            request,
+            organization_id=current_user.organization_id,
+            user_id=current_user.id
+        )
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Agent processing failed: {str(e)}")

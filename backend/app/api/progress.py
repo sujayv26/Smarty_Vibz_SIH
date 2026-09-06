@@ -7,30 +7,54 @@ from app.schemas.progress import ProgressExtractRequest, ProgressExtractResponse
 from app.models.progress import ProgressEvent
 from app.models.ingestion_source import IngestionSource
 from app.models.confidence import PlannerReview, ConfidenceResult, ReviewStatus, ConfidenceLevel
+from app.core.auth import get_current_user
 from datetime import datetime, timedelta
 from sqlalchemy import desc
+import io
 
 router = APIRouter(prefix="/progress", tags=["Progress"])
 
 @router.post("/extract", response_model=ProgressExtractResponse)
-async def extract_progress(request: ProgressExtractRequest, db: Session = Depends(get_db)):
+async def extract_progress(
+    request: ProgressExtractRequest,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     try:
-        result = extract_and_store_progress(db, request.raw_text)
+        result = extract_and_store_progress(
+            db, 
+            request.raw_text, 
+            organization_id=current_user.organization_id,
+            project_id=current_user.project_id if hasattr(current_user, 'project_id') else None,
+            user_id=current_user.id
+        )
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Extraction failed: {str(e)}")
 
 @router.post("/upload-excel")
-async def upload_excel_progress(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_excel_progress(
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     if not file.filename.endswith(".xlsx"):
         raise HTTPException(status_code=400, detail="Only .xlsx files are supported")
     
     try:
-        valid_rows, errors = validate_excel_progress(file.file)
+        content = await file.read()
+        file_bytes = io.BytesIO(content)
+        valid_rows, errors = validate_excel_progress(file_bytes)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-    inserted, row_errors = process_excel_progress(db, valid_rows, file.filename)
+    inserted, row_errors = process_excel_progress(
+        db, 
+        valid_rows, 
+        file.filename,
+        organization_id=current_user.organization_id,
+        user_id=current_user.id
+    )
     all_errors = errors + row_errors
     
     return {

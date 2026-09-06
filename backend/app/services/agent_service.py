@@ -166,9 +166,18 @@ def get_localized_reply(key: str, language: str = "en", **kwargs) -> str:
     template = lang_replies.get(language, lang_replies.get("en", key))
     return template.format(**kwargs)
 
-def process_agent_chat(db: Session, request: AgentChatRequest, preferred_language: str = "en") -> AgentChatResponse:
+def process_agent_chat(db: Session, request: AgentChatRequest, preferred_language: str = "en", organization_id: int = None, user_id: int = None) -> AgentChatResponse:
+    from app.models.project import Project
+    
     session_id = request.session_id or "default"
     context = get_session_context(session_id)
+    
+    # Determine project_id from organization_id
+    project_id = None
+    if organization_id is not None:
+        project = db.query(Project).filter(Project.organization_id == organization_id).first()
+        if project:
+            project_id = project.id
     
     provider = get_extraction_provider()
     understood = provider.extract_agent_chat(request.message, context)
@@ -278,7 +287,12 @@ def process_agent_chat(db: Session, request: AgentChatRequest, preferred_languag
         session_id=session_id
     )
     
-    db_event = ProgressEvent(**progress_event.model_dump())
+    db_event = ProgressEvent(
+        **progress_event.model_dump(),
+        organization_id=organization_id,
+        project_id=project_id,
+        user_id=user_id
+    )
     db.add(db_event)
     db.commit()
     db.refresh(db_event)

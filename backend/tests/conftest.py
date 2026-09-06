@@ -25,6 +25,10 @@ def override_get_db():
         db.close()
 
 
+# Apply the database override for all tests
+app.dependency_overrides[get_db] = override_get_db
+
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
     Base.metadata.drop_all(bind=engine)
@@ -133,10 +137,48 @@ def client(db_session, test_org, test_project, test_supervisor):
         db_session.add(src)
     db_session.commit()
     
+    # Create access token for Authorization header (works with multipart uploads)
+    access_token = create_access_token(data={"sub": str(test_supervisor.id), "role": test_supervisor.role.value, "org_id": test_supervisor.organization_id})
+    auth_headers = {"Authorization": f"Bearer {access_token}"}
+    
+    # Wrapper to add auth headers to all requests
+    class AuthenticatedClient:
+        def __init__(self, client, headers):
+            self._client = client
+            self._headers = headers
+        
+        def _merge_headers(self, headers):
+            if headers:
+                merged = self._headers.copy()
+                merged.update(headers)
+                return merged
+            return self._headers
+        
+        def get(self, url, **kwargs):
+            kwargs["headers"] = self._merge_headers(kwargs.get("headers"))
+            return self._client.get(url, **kwargs)
+        
+        def post(self, url, **kwargs):
+            kwargs["headers"] = self._merge_headers(kwargs.get("headers"))
+            return self._client.post(url, **kwargs)
+        
+        def put(self, url, **kwargs):
+            kwargs["headers"] = self._merge_headers(kwargs.get("headers"))
+            return self._client.put(url, **kwargs)
+        
+        def patch(self, url, **kwargs):
+            kwargs["headers"] = self._merge_headers(kwargs.get("headers"))
+            return self._client.patch(url, **kwargs)
+        
+        def delete(self, url, **kwargs):
+            kwargs["headers"] = self._merge_headers(kwargs.get("headers"))
+            return self._client.delete(url, **kwargs)
+        
+        def __getattr__(self, name):
+            return getattr(self._client, name)
+    
     with TestClient(app) as c:
-        # Pre-login the supervisor
-        c.post("/auth/login", json={"email": "supervisor@test.com", "password": "supervisor123"})
-        yield c
+        yield AuthenticatedClient(c, auth_headers)
 
 
 @pytest.fixture(scope="function")

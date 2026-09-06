@@ -6,96 +6,83 @@ from app.core.security import decode_token, verify_csrf_token, generate_csrf_tok
 from app.core.config import settings
 from app.models.user import User, UserRole
 from app.models.audit_log import AuditLog, AuditAction
+from app.database import get_db
 
 
 security = HTTPBearer(auto_error=False)
 
 
-def get_db_session():
-    from app.database import get_db
-    gen = get_db()
-    return next(gen)
-
-
 def get_current_user(
     request: Request,
     response: Response,
+    db: Session = Depends(get_db),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> User:
-    db = get_db_session()
-    try:
-        token = None
-        if credentials:
-            token = credentials.credentials
-        else:
-            token = request.cookies.get("access_token")
-        
-        if not token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not authenticated",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        
-        payload = decode_token(token)
-        if not payload or payload.get("type") != "access":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        
-        user_id = payload.get("sub")
-        if not user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token payload",
-            )
-        
-        user = db.query(User).filter(User.id == int(user_id), User.is_active == True).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found or inactive",
-            )
-        
-        request.state.user = user
-        request.state.db = db
-        return user
-    finally:
-        db.close()
+    token = None
+    if credentials:
+        token = credentials.credentials
+    else:
+        token = request.cookies.get("access_token")
+    
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token payload",
+        )
+    
+    user = db.query(User).filter(User.id == int(user_id), User.is_active == True).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive",
+        )
+    
+    request.state.user = user
+    return user
 
 
 def get_current_user_optional(
     request: Request,
+    db: Session = Depends(get_db),
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> Optional[User]:
-    db = get_db_session()
-    try:
-        token = None
-        if credentials:
-            token = credentials.credentials
-        else:
-            token = request.cookies.get("access_token")
-        
-        if not token:
-            return None
-        
-        payload = decode_token(token)
-        if not payload or payload.get("type") != "access":
-            return None
-        
-        user_id = payload.get("sub")
-        if not user_id:
-            return None
-        
-        user = db.query(User).filter(User.id == int(user_id), User.is_active == True).first()
-        if user:
-            request.state.user = user
-            request.state.db = db
-        return user
-    finally:
-        db.close()
+    token = None
+    if credentials:
+        token = credentials.credentials
+    else:
+        token = request.cookies.get("access_token")
+    
+    if not token:
+        return None
+    
+    payload = decode_token(token)
+    if not payload or payload.get("type") != "access":
+        return None
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    
+    user = db.query(User).filter(User.id == int(user_id), User.is_active == True).first()
+    if user:
+        request.state.user = user
+    return user
 
 
 def require_roles(allowed_roles: List[UserRole]):
@@ -118,26 +105,23 @@ def require_organization_access(
 def require_project_access(
     project_id: int,
     current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ) -> User:
-    db = get_db_session()
-    try:
-        from app.models.project import Project
-        project = db.query(Project).filter(Project.id == project_id).first()
-        if not project:
-            raise HTTPException(status_code=404, detail="Project not found")
-        
-        if current_user.role == UserRole.SYSTEM_ADMIN:
-            return current_user
-        
-        if project.organization_id != current_user.organization_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied: project belongs to different organization",
-            )
-        
+    from app.models.project import Project
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    if current_user.role == UserRole.SYSTEM_ADMIN:
         return current_user
-    finally:
-        db.close()
+    
+    if project.organization_id != current_user.organization_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: project belongs to different organization",
+        )
+    
+    return current_user
 
 
 async def verify_csrf(request: Request) -> None:
