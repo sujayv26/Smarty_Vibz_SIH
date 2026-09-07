@@ -1,37 +1,75 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.services.xer.service import XERImportService, get_relationships
+from app.services.xer.service import ScheduleImportService, XERImportService, get_relationships
+from app.services.xer.mpp_parser import parse_mpp_content, MPPParseError
+from app.services.xer.parser import parse_xer_content
 from app.models.xer import ExternalSchedule, ScheduleRelationship
 from app.models.schedule import ScheduleActivity
+from app.models.progress import ProgressEvent
+from app.services.confidence_service import get_review_by_id
+from app.models.confidence import PlannerReview, ReviewStatus
+from app.models.project import Project
 from typing import Optional
 from datetime import date
 import io
+from app.core.auth import get_current_user
 
 router = APIRouter(prefix="/schedule", tags=["Schedule"])
 
 
-@router.post("/import/p6", summary="Import Primavera P6 XER schedule")
+@router.post("/import/p6", summary="Import Primavera P6 XER or MPP schedule")
 async def import_p6_schedule(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    project_id: int = Query(None, description="Project ID to associate the schedule with"),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
 ):
-    if not file.filename.endswith(".xer"):
-        raise HTTPException(status_code=400, detail="Only .xer files are supported")
+    if not (file.filename.endswith(".xer") or file.filename.endswith(".mpp")):
+        raise HTTPException(status_code=400, detail="Only .xer and .mpp files are supported")
 
     try:
         content = await file.read()
-        content_str = content.decode("utf-8", errors="replace")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to read file: {str(e)}")
 
-    service = XERImportService(db)
-    try:
-        result = service.import_xer(content_str, file.filename)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"XER parsing failed: {str(e)}")
+    # Determine project_id
+    if project_id is None:
+        project = db.query(Project).filter(Project.organization_id == current_user.organization_id).first()
+        if not project:
+            raise HTTPException(status_code=400, detail="No project found for your organization. Please create a project first or specify project_id.")
+        project_id = project.id
+    else:
+        project = db.query(Project).filter(Project.id == project_id, Project.organization_id == current_user.organization_id).first()
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found or access denied")
 
-    return result
+    service = ScheduleImportService(db, current_user.organization_id, project_id)
+
+    if file.filename.endswith(".xer"):
+        try:
+            content_str = content.decode("utf-8", errors="replace")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to decode XER file: {str(e)}")
+
+        try:
+            parse_result = parse_xer_content(content_str)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"XER parsing failed: {str(e)}")
+
+        result = service.import_schedule(parse_result, file.filename, "XER")
+        return result
+
+    elif file.filename.endswith(".mpp"):
+        try:
+            parse_result = parse_mpp_content(content)
+        except MPPParseError as e:
+            raise HTTPException(status_code=400, detail=f"MPP parsing failed: {str(e)}")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"MPP parsing failed: {str(e)}")
+
+        result = service.import_schedule(parse_result, file.filename, "MPP")
+        return result
 
 
 @router.get("/relationships", summary="Get schedule relationships")
@@ -93,8 +131,75 @@ async def get_external_schedule_activities(
             "wbs": a.wbs,
             "planned_start": a.planned_start,
             "planned_finish": a.planned_finish,
+            "actual_start": a.actual_start,
+            "actual_finish": a.actual_finish,
             "external_activity_id": a.external_activity_id,
             "source_format": a.source_format,
         }
         for a in activities
     ]
+
+
+@router.post("/matches/{match_id}/resolve", summary="Resolve a schedule match and write back actuals")
+async def resolve_schedule_match(
+    match_id: int,
+    db: Session = Depends(get_db)
+):
+    """Resolve a match (planner review) and write actual start/finish back to schedule activity."""
+    review = get_review_by_id(db, match_id)
+    if not review:
+        raise HTTPException(status_code=404, detail=f"Match/review {match_id} not found")
+    
+    if review.status != ReviewStatus.PENDING:
+        raise HTTPException(status_code=400, detail=f"Match {match_id} is not pending (status: {review.status.value})")
+    
+    if not review.proposed_activity_id:
+        raise HTTPException(status_code=400, detail=f"Match {match_id} has no proposed activity")
+    
+    event = db.query(ProgressEvent).filter(ProgressEvent.id == review.progress_event_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail=f"Progress event {review.progress_event_id} not found")
+    
+    activity = db.query(ScheduleActivity).filter(ScheduleActivity.id == review.proposed_activity_id).first()
+    if not activity:
+        raise HTTPException(status_code=404, detail=f"Activity {review.proposed_activity_id} not found")
+    
+    if event.event_type == "START" and not activity.actual_start:
+        activity.actual_start = event.event_date
+        db.add(activity)
+    elif event.event_type == "COMPLETE" and not activity.actual_finish:
+        activity.actual_finish = event.event_date
+        db.add(activity)
+    
+    event.activity_reference = activity.activity_code
+    db.add(event)
+    
+    review.status = ReviewStatus.APPROVED
+    review.final_activity_id = review.proposed_activity_id
+    review.completed_at = func.now()
+    
+    from app.models.confidence import AuditRecord, DecisionType, ActorType
+    from sqlalchemy.sql import func
+    audit = AuditRecord(
+        progress_event_id=review.progress_event_id,
+        proposed_activity_id=review.proposed_activity_id,
+        final_activity_id=review.proposed_activity_id,
+        confidence_score=review.confidence_score,
+        confidence_level=review.confidence_level,
+        decision=DecisionType.APPROVED,
+        actor_type=ActorType.PLANNER,
+    )
+    db.add(audit)
+    
+    db.commit()
+    db.refresh(review)
+    db.refresh(activity)
+    
+    return {
+        "match_id": match_id,
+        "activity_id": activity.id,
+        "activity_code": activity.activity_code,
+        "actual_start": activity.actual_start,
+        "actual_finish": activity.actual_finish,
+        "status": "resolved",
+    }

@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.matching.engine import run_matching
 from app.matching.schemas import MatchingResult
@@ -14,5 +15,5 @@ def run_matching_for_event(db: Session, progress_event_id: int) -> MatchingResul
     return result
 
 
-def get_progress_event(db: Session, progress_event_id: int) -> ProgressEvent | None:
+def get_progress_event(db: Session, progress_event_id: int) -> Optional[ProgressEvent]:
     return db.query(ProgressEvent).filter(ProgressEvent.id == progress_event_id).first()

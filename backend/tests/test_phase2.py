@@ -19,9 +19,11 @@ import pandas as pd
 
 
 @pytest.fixture(scope="function")
-def sample_schedule(db_session):
+def sample_schedule(db_session, test_org, test_project):
     activities = [
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1023",
             activity_name="Erect Line 24-XX-101",
             discipline="Piping",
@@ -30,6 +32,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 8, 30),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1027",
             activity_name="Install Support for XX-101",
             discipline="Piping",
@@ -38,6 +42,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 8, 20),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1042",
             activity_name="Inspect XX-101",
             discipline="Piping",
@@ -46,6 +52,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 9, 5),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1050",
             activity_name="Hydrotest Line XX-101",
             discipline="Piping",
@@ -54,6 +62,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 9, 10),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="MEC-2011",
             activity_name="Install Pump P-101",
             discipline="Mechanical",
@@ -62,6 +72,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 9, 5),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="CIV-3011",
             activity_name="Construct Foundation A1",
             discipline="Civil",
@@ -77,26 +89,26 @@ def sample_schedule(db_session):
 
 
 @pytest.fixture(scope="function")
-def full_schedule(db_session):
+def full_schedule(db_session, test_org, test_project):
     activities = [
-        ScheduleActivity(activity_code="CIV-3011", activity_name="Construct Foundation A1", discipline="Civil", wbs="CIV.30.11", planned_start=date(2026, 8, 1), planned_finish=date(2026, 8, 15)),
-        ScheduleActivity(activity_code="CIV-3012", activity_name="Construct Foundation A2", discipline="Civil", wbs="CIV.30.12", planned_start=date(2026, 8, 10), planned_finish=date(2026, 8, 25)),
-        ScheduleActivity(activity_code="CIV-3021", activity_name="Erect Structural Steel Grid 1", discipline="Civil", wbs="CIV.30.21", planned_start=date(2026, 8, 20), planned_finish=date(2026, 9, 10)),
-        ScheduleActivity(activity_code="PIP-1023", activity_name="Erect Line 24-XX-101", discipline="Piping", wbs="PIP.10.23", planned_start=date(2026, 8, 15), planned_finish=date(2026, 8, 30)),
-        ScheduleActivity(activity_code="PIP-1027", activity_name="Install Support for XX-101", discipline="Piping", wbs="PIP.10.27", planned_start=date(2026, 8, 10), planned_finish=date(2026, 8, 20)),
-        ScheduleActivity(activity_code="PIP-1042", activity_name="Inspect XX-101", discipline="Piping", wbs="PIP.10.42", planned_start=date(2026, 9, 1), planned_finish=date(2026, 9, 5)),
-        ScheduleActivity(activity_code="PIP-1050", activity_name="Hydrotest Line XX-101", discipline="Piping", wbs="PIP.10.50", planned_start=date(2026, 9, 5), planned_finish=date(2026, 9, 10)),
-        ScheduleActivity(activity_code="MEC-2011", activity_name="Install Pump P-101", discipline="Mechanical", wbs="MEC.20.11", planned_start=date(2026, 8, 25), planned_finish=date(2026, 9, 5)),
-        ScheduleActivity(activity_code="MEC-2012", activity_name="Align Pump P-101", discipline="Mechanical", wbs="MEC.20.12", planned_start=date(2026, 9, 5), planned_finish=date(2026, 9, 10)),
-        ScheduleActivity(activity_code="MEC-2021", activity_name="Install Compressor C-101", discipline="Mechanical", wbs="MEC.20.21", planned_start=date(2026, 9, 1), planned_finish=date(2026, 9, 15)),
-        ScheduleActivity(activity_code="ELE-4011", activity_name="Cable Pulling for Substation SUB-1", discipline="Electrical", wbs="ELE.40.11", planned_start=date(2026, 8, 20), planned_finish=date(2026, 9, 5)),
-        ScheduleActivity(activity_code="ELE-4012", activity_name="Terminate Cables SUB-1", discipline="Electrical", wbs="ELE.40.12", planned_start=date(2026, 9, 5), planned_finish=date(2026, 9, 15)),
-        ScheduleActivity(activity_code="ELE-4021", activity_name="Install MCC Panel MCC-1", discipline="Electrical", wbs="ELE.40.21", planned_start=date(2026, 8, 25), planned_finish=date(2026, 9, 10)),
-        ScheduleActivity(activity_code="INS-5011", activity_name="Install Instrument Tubing", discipline="Instrumentation", wbs="INS.50.11", planned_start=date(2026, 9, 1), planned_finish=date(2026, 9, 20)),
-        ScheduleActivity(activity_code="INS-5012", activity_name="Calibrate Transmitters", discipline="Instrumentation", wbs="INS.50.12", planned_start=date(2026, 9, 15), planned_finish=date(2026, 9, 30)),
-        ScheduleActivity(activity_code="PIP-1060", activity_name="Erect Line 24-XX-102", discipline="Piping", wbs="PIP.10.60", planned_start=date(2026, 8, 20), planned_finish=date(2026, 9, 5)),
-        ScheduleActivity(activity_code="PIP-1065", activity_name="Install Support for XX-102", discipline="Piping", wbs="PIP.10.65", planned_start=date(2026, 8, 15), planned_finish=date(2026, 8, 25)),
-        ScheduleActivity(activity_code="CIV-3031", activity_name="Construct Foundation B1", discipline="Civil", wbs="CIV.30.31", planned_start=date(2026, 8, 15), planned_finish=date(2026, 8, 30)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="CIV-3011", activity_name="Construct Foundation A1", discipline="Civil", wbs="CIV.30.11", planned_start=date(2026, 8, 1), planned_finish=date(2026, 8, 15)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="CIV-3012", activity_name="Construct Foundation A2", discipline="Civil", wbs="CIV.30.12", planned_start=date(2026, 8, 10), planned_finish=date(2026, 8, 25)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="CIV-3021", activity_name="Erect Structural Steel Grid 1", discipline="Civil", wbs="CIV.30.21", planned_start=date(2026, 8, 20), planned_finish=date(2026, 9, 10)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="PIP-1023", activity_name="Erect Line 24-XX-101", discipline="Piping", wbs="PIP.10.23", planned_start=date(2026, 8, 15), planned_finish=date(2026, 8, 30)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="PIP-1027", activity_name="Install Support for XX-101", discipline="Piping", wbs="PIP.10.27", planned_start=date(2026, 8, 10), planned_finish=date(2026, 8, 20)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="PIP-1042", activity_name="Inspect XX-101", discipline="Piping", wbs="PIP.10.42", planned_start=date(2026, 9, 1), planned_finish=date(2026, 9, 5)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="PIP-1050", activity_name="Hydrotest Line XX-101", discipline="Piping", wbs="PIP.10.50", planned_start=date(2026, 9, 5), planned_finish=date(2026, 9, 10)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="MEC-2011", activity_name="Install Pump P-101", discipline="Mechanical", wbs="MEC.20.11", planned_start=date(2026, 8, 25), planned_finish=date(2026, 9, 5)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="MEC-2012", activity_name="Align Pump P-101", discipline="Mechanical", wbs="MEC.20.12", planned_start=date(2026, 9, 5), planned_finish=date(2026, 9, 10)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="MEC-2021", activity_name="Install Compressor C-101", discipline="Mechanical", wbs="MEC.20.21", planned_start=date(2026, 9, 1), planned_finish=date(2026, 9, 15)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="ELE-4011", activity_name="Cable Pulling for Substation SUB-1", discipline="Electrical", wbs="ELE.40.11", planned_start=date(2026, 8, 20), planned_finish=date(2026, 9, 5)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="ELE-4012", activity_name="Terminate Cables SUB-1", discipline="Electrical", wbs="ELE.40.12", planned_start=date(2026, 9, 5), planned_finish=date(2026, 9, 15)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="ELE-4021", activity_name="Install MCC Panel MCC-1", discipline="Electrical", wbs="ELE.40.21", planned_start=date(2026, 8, 25), planned_finish=date(2026, 9, 10)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="INS-5011", activity_name="Install Instrument Tubing", discipline="Instrumentation", wbs="INS.50.11", planned_start=date(2026, 9, 1), planned_finish=date(2026, 9, 20)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="INS-5012", activity_name="Calibrate Transmitters", discipline="Instrumentation", wbs="INS.50.12", planned_start=date(2026, 9, 15), planned_finish=date(2026, 9, 30)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="PIP-1060", activity_name="Erect Line 24-XX-102", discipline="Piping", wbs="PIP.10.60", planned_start=date(2026, 8, 20), planned_finish=date(2026, 9, 5)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="PIP-1065", activity_name="Install Support for XX-102", discipline="Piping", wbs="PIP.10.65", planned_start=date(2026, 8, 15), planned_finish=date(2026, 8, 25)),
+        ScheduleActivity(organization_id=test_org.id, project_id=test_project.id, activity_code="CIV-3031", activity_name="Construct Foundation B1", discipline="Civil", wbs="CIV.30.31", planned_start=date(2026, 8, 15), planned_finish=date(2026, 8, 30)),
     ]
     for act in activities:
         db_session.add(act)
@@ -105,8 +117,10 @@ def full_schedule(db_session):
 
 
 @pytest.fixture(scope="function")
-def sample_progress_event(db_session, sample_schedule):
+def sample_progress_event(db_session, sample_schedule, test_org, test_project):
     event = ProgressEvent(
+        organization_id=test_org.id,
+        project_id=test_project.id,
         raw_text="Today at 9:30 AM, the piping team started erection of the XX-101 spool in Area B",
         activity_reference="XX-101 spool erection",
         event_type="START",
@@ -175,8 +189,10 @@ class TestContextMatcher:
         score, reasons = context_match_score(sample_progress_event, activity)
         assert any("START" in r or "erect" in r.lower() for r in reasons)
     
-    def test_event_type_match_complete_inspect(self, db_session, sample_schedule):
+    def test_event_type_match_complete_inspect(self, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Inspect XX-101 completed",
             activity_reference="XX-101 inspection",
             event_type="COMPLETE",
@@ -203,8 +219,10 @@ class TestTemporalMatcher:
         assert score == 1.0
         assert any("falls within" in r for r in reasons)
     
-    def test_temporal_match_before_window(self, db_session, sample_schedule):
+    def test_temporal_match_before_window(self, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Early start on XX-101",
             event_type="START",
             event_date=date(2026, 8, 10),
@@ -216,8 +234,10 @@ class TestTemporalMatcher:
         score, reasons = temporal_match_score(event, activity)
         assert 0.5 <= score < 1.0
     
-    def test_temporal_match_after_window(self, db_session, sample_schedule):
+    def test_temporal_match_after_window(self, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Late completion of XX-101",
             event_type="COMPLETE",
             event_date=date(2026, 9, 10),
@@ -229,8 +249,10 @@ class TestTemporalMatcher:
         score, reasons = temporal_match_score(event, activity)
         assert 0.05 <= score < 0.5
     
-    def test_temporal_no_event_date(self, db_session, sample_schedule):
+    def test_temporal_no_event_date(self, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Work on XX-101",
             event_type="START",
             event_date=None,
@@ -255,8 +277,10 @@ class TestSemanticMatcher:
         assert score > 0
         assert any("erect" in r.lower() or "keyword" in r.lower() for r in reasons)
     
-    def test_semantic_no_match(self, db_session, sample_schedule):
+    def test_semantic_no_match(self, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Office meeting about budget",
             event_type="START",
             event_date=date(2026, 8, 30),
@@ -313,8 +337,10 @@ class TestMatchingEngine:
             assert isinstance(reason, str)
             assert len(reason) > 0
     
-    def test_xx101_ambiguity_distinguishes_erect_vs_support_vs_inspect(self, db_session, sample_schedule):
+    def test_xx101_ambiguity_distinguishes_erect_vs_support_vs_inspect(self, db_session, sample_schedule, test_org, test_project):
         event_erect = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Started erection of XX-101 spool",
             event_type="START",
             event_date=date(2026, 8, 30),
@@ -331,6 +357,8 @@ class TestMatchingEngine:
         assert "erect" in " ".join(result.top_matches[0].reasons).lower() or "start" in " ".join(result.top_matches[0].reasons).lower()
         
         event_support = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Install Support for XX-101 completed",
             event_type="COMPLETE",
             event_date=date(2026, 8, 20),
@@ -346,6 +374,8 @@ class TestMatchingEngine:
         assert result.top_matches[0].activity_code == "PIP-1027"
         
         event_inspect = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Inspect XX-101 completed",
             event_type="COMPLETE",
             event_date=date(2026, 9, 3),
@@ -360,8 +390,10 @@ class TestMatchingEngine:
         result = run_matching(db_session, event_inspect.id)
         assert result.top_matches[0].activity_code == "PIP-1042"
     
-    def test_no_match_returns_empty(self, db_session, sample_schedule):
+    def test_no_match_returns_empty(self, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Office furniture delivery received",
             event_type="COMPLETE",
             event_date=date(2026, 8, 15),

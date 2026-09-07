@@ -1,0 +1,405 @@
+{
+  "benchmark_cases": [
+    {
+      "id": "hi_en_001",
+      "language": "hi-en",
+      "input_text": "Aaj piping team ne XX-101 spool ka erection start kiya 9:30 baje Area B mein",
+      "expected": {
+        "activity_reference": "XX-101 spool erection",
+        "event_type": "START",
+        "event_time": "09:30",
+        "discipline": "Piping",
+        "location": "Area B",
+        "equipment_tag": "XX-101"
+      }
+    },
+    {
+      "id": "hi_en_002",
+      "language": "hi-en",
+      "input_text": "Pump P-101 installation complete ho gaya hai aaj",
+      "expected": {
+        "activity_reference": "P-101 pump installation",
+        "event_type": "COMPLETE",
+        "discipline": "Mechanical",
+        "equipment_tag": "P-101"
+      }
+    },
+    {
+      "id": "hi_en_003",
+      "language": "hi-en",
+      "input_text": "Civil team foundation A1 ka concrete pouring kar rahe hain kal se",
+      "expected": {
+        "activity_reference": "foundation A1 concrete pouring",
+        "event_type": "PROGRESS",
+        "discipline": "Civil",
+        "location": "Area A1"
+      }
+    },
+    {
+      "id": "hi_en_004",
+      "language": "hi-en",
+      "input_text": "XX-102 spool fabrication mein delay hai, material nahi aaya",
+      "expected": {
+        "activity_reference": "XX-102 spool fabrication",
+        "event_type": "DELAY",
+        "discipline": "Piping",
+        "equipment_tag": "XX-102"
+      }
+    },
+    {
+      "id": "hi_en_005",
+      "language": "hi-en",
+      "input_text": "Electrical team cable pulling kar raha hai Area C mein 10:00 baje se",
+      "expected": {
+        "activity_reference": "cable pulling",
+        "event_type": "PROGRESS",
+        "event_time": "10:00",
+        "discipline": "Electrical",
+        "location": "Area C"
+      }
+    },
+    {
+      "id": "ta_en_001",
+      "language": "ta-en",
+      "input_text": "Innum piping team XX-103 spool erection start pannirukku 8:00 mani Area D la",
+      "expected": {
+        "activity_reference": "XX-103 spool erection",
+        "event_type": "START",
+        "event_time": "08:00",
+        "discipline": "Piping",
+        "location": "Area D",
+        "equipment_tag": "XX-103"
+      }
+    },
+    {
+      "id": "ta_en_002",
+      "language": "ta-en",
+      "input_text": "Pump P-102 installation mudichiruku, hydrotest pending",
+      "expected": {
+        "activity_reference": "P-102 pump installation",
+        "event_type": "COMPLETE",
+        "discipline": "Mechanical",
+        "equipment_tag": "P-102"
+      }
+    },
+    {
+      "id": "ta_en_003",
+      "language": "ta-en",
+      "input_text": "Civil foundation B2 concrete pour panna porom naalai 7:00 AM",
+      "expected": {
+        "activity_reference": "foundation B2 concrete pouring",
+        "event_type": "START",
+        "event_time": "07:00",
+        "discipline": "Civil",
+        "location": "Area B2"
+      }
+    },
+    {
+      "id": "ta_en_004",
+      "language": "ta-en",
+      "input_text": "MEC-2015 valve installation delay aagiruku, parts missing",
+      "expected": {
+        "activity_reference": "MEC-2015 valve installation",
+        "event_type": "DELAY",
+        "discipline": "Mechanical",
+        "equipment_tag": "MEC-2015"
+      }
+    },
+    {
+      "id": "ta_en_005",
+      "language": "ta-en",
+      "input_text": "Electrical team substation cable tray erection seiyum Area E la",
+      "expected": {
+        "activity_reference": "cable tray erection",
+        "event_type": "PROGRESS",
+        "discipline": "Electrical",
+        "location": "Area E"
+      }
+    },
+    {
+      "id": "te_en_001",
+      "language": "te-en",
+      "input_text": "Ippudu piping team XX-104 spool erection start chesaru 11:00 Area F lo",
+      "expected": {
+        "activity_reference": "XX-104 spool erection",
+        "event_type": "START",
+        "event_time": "11:00",
+        "discipline": "Piping",
+        "location": "Area F",
+        "equipment_tag": "XX-104"
+      }
+    },
+    {
+      "id": "te_en_002",
+      "language": "te-en",
+      "input_text": "Pump P-103 installation ayyindi, alignment pending",
+      "expected": {
+        "activity_reference": "P-103 pump installation",
+        "event_type": "COMPLETE",
+        "discipline": "Mechanical",
+        "equipment_tag": "P-103"
+      }
+    },
+    {
+      "id": "te_en_003",
+      "language": "te-en",
+      "input_text": "Civil team foundation C3 concrete pouring chestunaru repu 6:00",
+      "expected": {
+        "activity_reference": "foundation C3 concrete pouring",
+        "event_type": "START",
+        "event_time": "06:00",
+        "discipline": "Civil",
+        "location": "Area C3"
+      }
+    },
+    {
+      "id": "te_en_004",
+      "language": "te-en",
+      "input_text": "ELE-3020 cable termination delay ayyindi, tools ledu",
+      "expected": {
+        "activity_reference": "ELE-3020 cable termination",
+        "event_type": "DELAY",
+        "discipline": "Electrical",
+        "equipment_tag": "ELE-3020"
+      }
+    },
+    {
+      "id": "te_en_005",
+      "language": "te-en",
+      "input_text": "Structural team beam erection chestunaru Area G lo",
+      "expected": {
+        "activity_reference": "beam erection",
+        "event_type": "PROGRESS",
+        "discipline": "Structural",
+        "location": "Area G"
+      }
+    },
+    {
+      "id": "hi_en_006",
+      "language": "hi-en",
+      "input_text": "Welding of XX-105 spool complete, NDT pending kal",
+      "expected": {
+        "activity_reference": "XX-105 spool welding",
+        "event_type": "COMPLETE",
+        "discipline": "Piping",
+        "equipment_tag": "XX-105"
+      }
+    },
+    {
+      "id": "hi_en_007",
+      "language": "hi-en",
+      "input_text": "HVAC duct installation shuru kiya 2:00 PM Plant Room mein",
+      "expected": {
+        "activity_reference": "HVAC duct installation",
+        "event_type": "START",
+        "event_time": "14:00",
+        "discipline": "Mechanical",
+        "location": "Plant Room"
+      }
+    },
+    {
+      "id": "hi_en_008",
+      "language": "hi-en",
+      "input_text": "Instrumentation cable tray work hold pe hai, design change",
+      "expected": {
+        "activity_reference": "instrumentation cable tray",
+        "event_type": "HOLD",
+        "discipline": "Instrumentation"
+      }
+    },
+    {
+      "id": "ta_en_006",
+      "language": "ta-en",
+      "input_text": "XX-106 spool hydrotest complete aachu, report pending",
+      "expected": {
+        "activity_reference": "XX-106 spool hydrotest",
+        "event_type": "COMPLETE",
+        "discipline": "Piping",
+        "equipment_tag": "XX-106"
+      }
+    },
+    {
+      "id": "ta_en_007",
+      "language": "ta-en",
+      "input_text": "Fire protection sprinkler installation start pannum 9:30 AM Area H la",
+      "expected": {
+        "activity_reference": "sprinkler installation",
+        "event_type": "START",
+        "event_time": "09:30",
+        "discipline": "Mechanical",
+        "location": "Area H"
+      }
+    },
+    {
+      "id": "ta_en_008",
+      "language": "ta-en",
+      "input_text": "Control room cable pulling delay aagum, access issue",
+      "expected": {
+        "activity_reference": "control room cable pulling",
+        "event_type": "DELAY",
+        "discipline": "Electrical",
+        "location": "Control Room"
+      }
+    },
+    {
+      "id": "te_en_006",
+      "language": "te-en",
+      "input_text": "PIP-1070 flange bolt up complete ayyindi, torque pending",
+      "expected": {
+        "activity_reference": "PIP-1070 flange bolt up",
+        "event_type": "COMPLETE",
+        "discipline": "Piping",
+        "equipment_tag": "PIP-1070"
+      }
+    },
+    {
+      "id": "te_en_007",
+      "language": "te-en",
+      "input_text": "Cooling tower piping erection start chesam 8:30 AM Area J lo",
+      "expected": {
+        "activity_reference": "cooling tower piping erection",
+        "event_type": "START",
+        "event_time": "08:30",
+        "discipline": "Piping",
+        "location": "Area J"
+      }
+    },
+    {
+      "id": "te_en_008",
+      "language": "te-en",
+      "input_text": "Transformer installation hold ayyindi, foundation issue",
+      "expected": {
+        "activity_reference": "transformer installation",
+        "event_type": "HOLD",
+        "discipline": "Electrical"
+      }
+    },
+    {
+      "id": "mixed_001",
+      "language": "mixed",
+      "input_text": "Today piping team ne XX-108 spool erection start kiya 10:00 AM Area K mein, welding pending",
+      "expected": {
+        "activity_reference": "XX-108 spool erection",
+        "event_type": "START",
+        "event_time": "10:00",
+        "discipline": "Piping",
+        "location": "Area K",
+        "equipment_tag": "XX-108"
+      }
+    },
+    {
+      "id": "mixed_002",
+      "language": "mixed",
+      "input_text": "Pump P-104 installation mudichiruku, commissioning naalai",
+      "expected": {
+        "activity_reference": "P-104 pump installation",
+        "event_type": "COMPLETE",
+        "discipline": "Mechanical",
+        "equipment_tag": "P-104"
+      }
+    },
+    {
+      "id": "mixed_003",
+      "language": "mixed",
+      "input_text": "Civil foundation D4 concrete pour chestunaru, vibrator issue vachindi delay",
+      "expected": {
+        "activity_reference": "foundation D4 concrete pouring",
+        "event_type": "DELAY",
+        "discipline": "Civil",
+        "location": "Area D4"
+      }
+    },
+    {
+      "id": "kn_en_001",
+      "language": "kn-en",
+      "input_text": "Ivattu piping team XX-109 spool erection start madidaru 9:00 AM Area L alli",
+      "expected": {
+        "activity_reference": "XX-109 spool erection",
+        "event_type": "START",
+        "event_time": "09:00",
+        "discipline": "Piping",
+        "location": "Area L",
+        "equipment_tag": "XX-109"
+      }
+    },
+    {
+      "id": "kn_en_002",
+      "language": "kn-en",
+      "input_text": "Pump P-105 installation aayithu, testing baki",
+      "expected": {
+        "activity_reference": "P-105 pump installation",
+        "event_type": "COMPLETE",
+        "discipline": "Mechanical",
+        "equipment_tag": "P-105"
+      }
+    },
+    {
+      "id": "kn_en_003",
+      "language": "kn-en",
+      "input_text": "Civil team foundation E5 concrete pouring maadidaru nale 7:00 AM",
+      "expected": {
+        "activity_reference": "foundation E5 concrete pouring",
+        "event_type": "START",
+        "event_time": "07:00",
+        "discipline": "Civil",
+        "location": "Area E5"
+      }
+    },
+    {
+      "id": "kn_en_004",
+      "language": "kn-en",
+      "input_text": "PIP-1080 flange bolt up delay aayithu, spanner sigalilla",
+      "expected": {
+        "activity_reference": "PIP-1080 flange bolt up",
+        "event_type": "DELAY",
+        "discipline": "Piping",
+        "equipment_tag": "PIP-1080"
+      }
+    },
+    {
+      "id": "kn_en_005",
+      "language": "kn-en",
+      "input_text": "Electrical team cable termination maadutiddare Area M alli",
+      "expected": {
+        "activity_reference": "cable termination",
+        "event_type": "PROGRESS",
+        "discipline": "Electrical",
+        "location": "Area M"
+      }
+    },
+    {
+      "id": "kn_en_006",
+      "language": "kn-en",
+      "input_text": "XX-110 spool hydrotest aayithu, report mundina dina",
+      "expected": {
+        "activity_reference": "XX-110 spool hydrotest",
+        "event_type": "COMPLETE",
+        "discipline": "Piping",
+        "equipment_tag": "XX-110"
+      }
+    },
+    {
+      "id": "kn_en_007",
+      "language": "kn-en",
+      "input_text": "Fire protection pipe installation start maadona 10:30 Area N alli",
+      "expected": {
+        "activity_reference": "fire protection pipe installation",
+        "event_type": "START",
+        "event_time": "10:30",
+        "discipline": "Mechanical",
+        "location": "Area N"
+      }
+    },
+    {
+      "id": "kn_en_008",
+      "language": "kn-en",
+      "input_text": "Control panel installation hold aayithu, drawing issue",
+      "expected": {
+        "activity_reference": "control panel installation",
+        "event_type": "HOLD",
+        "discipline": "Electrical"
+      }
+    }
+  ],
+  "accuracy_threshold": 0.85
+}

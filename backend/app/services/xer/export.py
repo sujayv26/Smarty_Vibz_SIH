@@ -115,8 +115,8 @@ class XERExportService:
 
         for a in activities:
             actuals = approved_actuals.get(a.activity_code, {})
-            act_start = actuals.get("actual_start")
-            act_finish = actuals.get("actual_finish")
+            act_start = actuals.get("actual_start") or a.actual_start
+            act_finish = actuals.get("actual_finish") or a.actual_finish
             pct_complete = 100 if act_finish else (0 if not act_start else 50)
 
             task_id = a.external_activity_id or a.activity_code

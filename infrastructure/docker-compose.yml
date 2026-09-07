@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: consight-postgres
+    environment:
+      POSTGRES_DB: consight
+      POSTGRES_USER: consight
+      POSTGRES_PASSWORD: consight
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U consight -d consight"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: consight-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: consight-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://consight:consight@postgres:5432/consight
+      REDIS_URL: redis://redis:6379/0
+      LLM_PROVIDER: mock
+      LLM_API_KEY: ""
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: consight-celery-worker
+    environment:
+      DATABASE_URL: postgresql+psycopg://consight:consight@postgres:5432/consight
+      REDIS_URL: redis://redis:6379/0
+      LLM_PROVIDER: mock
+      LLM_API_KEY: ""
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A app.core.celery_app worker --loglevel=info
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: consight-celery-beat
+    environment:
+      DATABASE_URL: postgresql+psycopg://consight:consight@postgres:5432/consight
+      REDIS_URL: redis://redis:6379/0
+      LLM_PROVIDER: mock
+      LLM_API_KEY: ""
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A app.core.celery_app beat --loglevel=info
+
+volumes:
+  postgres_data:
+  redis_data:

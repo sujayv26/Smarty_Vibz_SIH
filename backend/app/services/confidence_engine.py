@@ -17,8 +17,8 @@ class ConfidenceBreakdown:
     candidate_ambiguity_penalty: float
 
 
-HIGH_THRESHOLD = 0.80
-MEDIUM_THRESHOLD = 0.50
+HIGH_THRESHOLD = 0.85
+MEDIUM_THRESHOLD = 0.60
 
 
 def get_confidence_thresholds() -> tuple[float, float]:

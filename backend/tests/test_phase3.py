@@ -20,9 +20,11 @@ import json
 
 
 @pytest.fixture(scope="function")
-def sample_schedule(db_session):
+def sample_schedule(db_session, test_org, test_project):
     activities = [
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1023",
             activity_name="Erect Line 24-XX-101",
             discipline="Piping",
@@ -31,6 +33,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 8, 30),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1027",
             activity_name="Install Support for XX-101",
             discipline="Piping",
@@ -39,6 +43,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 8, 20),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="PIP-1042",
             activity_name="Inspect XX-101",
             discipline="Piping",
@@ -47,6 +53,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 9, 5),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="MEC-2011",
             activity_name="Install Pump P-101",
             discipline="Mechanical",
@@ -55,6 +63,8 @@ def sample_schedule(db_session):
             planned_finish=date(2026, 9, 5),
         ),
         ScheduleActivity(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             activity_code="CIV-3011",
             activity_name="Construct Foundation A1",
             discipline="Civil",
@@ -70,8 +80,10 @@ def sample_schedule(db_session):
 
 
 @pytest.fixture(scope="function")
-def high_confidence_event(db_session, sample_schedule):
+def high_confidence_event(db_session, sample_schedule, test_org, test_project):
     event = ProgressEvent(
+        organization_id=test_org.id,
+        project_id=test_project.id,
         raw_text="Today at 9:30 AM, the piping team started erection of the XX-101 spool in Area B",
         activity_reference="XX-101 spool erection",
         event_type="START",
@@ -91,8 +103,10 @@ def high_confidence_event(db_session, sample_schedule):
 
 
 @pytest.fixture(scope="function")
-def medium_confidence_event(db_session, sample_schedule):
+def medium_confidence_event(db_session, sample_schedule, test_org, test_project):
     event = ProgressEvent(
+        organization_id=test_org.id,
+        project_id=test_project.id,
         raw_text="Work started on XX-101 piping",
         activity_reference="XX-101 work",
         event_type="START",
@@ -109,8 +123,10 @@ def medium_confidence_event(db_session, sample_schedule):
 
 
 @pytest.fixture(scope="function")
-def low_confidence_event(db_session, sample_schedule):
+def low_confidence_event(db_session, sample_schedule, test_org, test_project):
     event = ProgressEvent(
+        organization_id=test_org.id,
+        project_id=test_project.id,
         raw_text="Some piping work happened",
         event_type="START",
         event_date=date(2026, 8, 30),
@@ -124,8 +140,10 @@ def low_confidence_event(db_session, sample_schedule):
 
 
 @pytest.fixture(scope="function")
-def no_match_event(db_session, sample_schedule):
+def no_match_event(db_session, sample_schedule, test_org, test_project):
     event = ProgressEvent(
+        organization_id=test_org.id,
+        project_id=test_project.id,
         raw_text="Office furniture delivery received",
         event_type="COMPLETE",
         event_date=date(2026, 8, 15),
@@ -141,26 +159,26 @@ def no_match_event(db_session, sample_schedule):
 class TestConfidenceEngine:
     def test_confidence_thresholds_default(self):
         high, medium = get_confidence_thresholds()
-        assert high == 0.80
-        assert medium == 0.50
+        assert high == 0.85
+        assert medium == 0.60
     
     def test_confidence_thresholds_custom(self):
-        set_confidence_thresholds(0.85, 0.55)
+        set_confidence_thresholds(0.90, 0.65)
         high, medium = get_confidence_thresholds()
-        assert high == 0.85
-        assert medium == 0.55
-        set_confidence_thresholds(0.80, 0.50)
+        assert high == 0.90
+        assert medium == 0.65
+        set_confidence_thresholds(0.85, 0.60)
     
     def test_classify_high(self):
         assert classify_confidence(0.90) == "HIGH"
-        assert classify_confidence(0.80) == "HIGH"
+        assert classify_confidence(0.85) == "HIGH"
     
     def test_classify_medium(self):
-        assert classify_confidence(0.70) == "MEDIUM"
-        assert classify_confidence(0.50) == "MEDIUM"
+        assert classify_confidence(0.75) == "MEDIUM"
+        assert classify_confidence(0.60) == "MEDIUM"
     
     def test_classify_low(self):
-        assert classify_confidence(0.40) == "LOW"
+        assert classify_confidence(0.55) == "LOW"
         assert classify_confidence(0.0) == "LOW"
     
     def test_should_auto_match_high(self):
@@ -240,8 +258,10 @@ class TestConfidenceAPI:
         assert response.status_code == 400
         assert "not found" in response.json()["detail"]
     
-    def test_evaluate_confidence_invalid_progress_event(self, client, db_session, sample_schedule):
+    def test_evaluate_confidence_invalid_progress_event(self, client, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Test work",
             event_type="START",
             event_date=date(2026, 8, 30),
@@ -531,7 +551,7 @@ class TestAuditTrail:
 
 
 class TestNewActivityFutureMatching:
-    def test_new_activity_participates_in_future_matching(self, client, db_session, sample_schedule, low_confidence_event):
+    def test_new_activity_participates_in_future_matching(self, client, db_session, sample_schedule, low_confidence_event, test_org, test_project):
         eval_response = client.post(f"/confidence/evaluate/{low_confidence_event.id}")
         review_id = eval_response.json()["review_id"]
         client.post(f"/reviews/{review_id}/create-new", json={
@@ -541,6 +561,8 @@ class TestNewActivityFutureMatching:
         })
         
         new_event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Future matching test activity started",
             event_type="START",
             event_date=date(2026, 9, 1),
@@ -590,8 +612,10 @@ class TestPhase1And2StillWork:
         assert response.status_code == 200
         assert response.json()["progress_event_id"] > 0
     
-    def test_matching_still_works(self, client, db_session, sample_schedule):
+    def test_matching_still_works(self, client, db_session, sample_schedule, test_org, test_project):
         event = ProgressEvent(
+            organization_id=test_org.id,
+            project_id=test_project.id,
             raw_text="Started erection of XX-101 spool",
             event_type="START",
             event_date=date(2026, 8, 30),

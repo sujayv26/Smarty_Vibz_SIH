@@ -1,264 +1,226 @@
-# Smarty Vibz - CONSight Schedule Interoperability
+# Smarty Vibz / CONSight — Schedule Intelligence Platform
 
-Phase 1, 2, 3 & 4 Implementation for SIH26122
+**Phases 1–12 Implemented** (see `STATE.json` and `docs/STABILIZATION_REPORT_P0-P12.md` for verified status)
 
 ## Overview
 
-This project implements a schedule interoperability system that connects field progress reports with Primavera P6 schedules through a complete matching, confidence, and review workflow.
+CONSight is a schedule intelligence platform that connects field progress reports (voice, text, Excel, WhatsApp, scanned diaries) with Primavera P6 / MS Project schedules through a complete matching, confidence, and planner-review workflow. It extends through ML-based delay prediction, institutional-memory analytics, delay-ripple analysis, multilingual extraction, voice, and OCR.
 
-### Phases Implemented
+**Source of truth for implemented features:** `STATE.json` and `docs/STABILIZATION_REPORT_P0-P12.md` — check these before assuming a feature exists.
 
-- **Phase 1**: Schedule ingestion (Excel), progress extraction (free text + Excel), Time Agent chat interface
-- **Phase 2**: Schedule matching engine (exact, fuzzy, semantic, context, temporal matchers)
-- **Phase 3**: Confidence classification, planner review workflow, audit trail
-- **Phase 4**: Primavera P6 XER import/export, schedule relationships, approved actuals export
+## Quick Links
+
+- **Setup & Operations:** `SETUP.md` (cross-platform, step-by-step)
+- **Verified Status Report:** `docs/STABILIZATION_REPORT_P0-P12.md`
+- **Feature Tracker:** `STATE.json`
+- **API Docs (local):** `http://localhost:8000/docs` (when running)
+
+## Phases Implemented (P0–P12)
+
+| Phase | Name | Key Deliverables |
+|-------|------|------------------|
+| **P0** | Infra & Foundations | Postgres+pgvector, Redis, Celery, JWT/RBAC (5 roles), Alembic, SQLite backup, synthetic data, design system, frontend shell, landing page |
+| **P1** | Schedule & Progress Core | Excel schedule upload, free-text/Excel progress extraction, Time-Agent chat |
+| **P2** | Matching Engine | Exact, fuzzy, semantic, context, temporal matchers; benchmark suite |
+| **P3** | Confidence & Review | Confidence scoring (HIGH/MEDIUM/LOW), planner review queue (approve/correct/reject/new), audit trail |
+| **P4** | P6/XER Round-Trip | XER import/export, predecessor-successor (FS/SS/FF/SF+lag), MPP via mpxj, actuals write-back on approval |
+| **P5** | WhatsApp Ingestion | Business Cloud API webhook, same extraction→matching pipeline, live Inbound Channels panel |
+| **P6** | Multilingual Extraction | Hi/En, Ta/En, Te/En, Kn/En code-mixed; 38 benchmarks @ 85% |
+| **P7** | Delay Ripple | CPM-based graph traversal over P4 predecessor/successor; critical-path exposure; DelayImpact records |
+| **P8** | Institutional Memory | Discipline summary, delay patterns, productivity benchmarks, variance trends; Insights dashboard (recharts) |
+| **P9** | ML Delay Prediction | RandomForest (32 features), daily retrain, 6-hr predictions; RiskWatchlist with confidence bars |
+| **P10** | Voice Agent | Whisper STT (5 langs), waveform viz, Time-Agent integration; press-to-talk UI |
+| **P11** | OCR Scanned Diaries | Tesseract (PDF/PNG/JPG/TIFF/BMP/WebP, 5 langs); confidence routing to review |
+
+**P13+ (Advanced RAG, Weather, BIM, Multi-project, PWA, Observability, E2E) — NOT IMPLEMENTED**
 
 ## Architecture
 
 ```
-backend/
+backend/                          # FastAPI (Python 3.11+ in Docker, 3.9 local)
 ├── app/
-│   ├── api/                 # FastAPI route handlers
-│   │   ├── schedule.py      # Excel schedule upload
-│   │   ├── progress.py      # Progress extraction endpoints
-│   │   ├── agent.py         # Time Agent chat
-│   │   ├── matching.py      # Phase 2 matching
-│   │   ├── confidence.py    # Phase 3 confidence evaluation
-│   │   ├── reviews.py       # Planner review workflow
-│   │   ├── audit.py         # Audit trail
-│   │   ├── xer_import.py    # Phase 4: XER import & relationships
-│   │   └── xer_export.py    # Phase 4: XER export with approved actuals
-│   ├── core/
-│   │   └── config.py        # Settings
-│   ├── matching/
-│   │   ├── engine.py        # Matching orchestration
-│   │   ├── matchers/        # Individual matchers
-│   │   ├── schemas.py       # Matching data models
-│   │   └── service.py       # Matching service
-│   ├── models/
-│   │   ├── schedule.py      # ScheduleActivity model
-│   │   ├── progress.py      # ProgressEvent model
-│   │   ├── confidence.py    # Phase 3 models
-│   │   └── xer.py           # Phase 4: ExternalSchedule, ScheduleRelationship
-│   ├── schemas/             # Pydantic request/response models
-│   ├── services/
-│   │   ├── schedule_service.py     # Excel schedule validation/insertion
-│   │   ├── progress_service.py     # Progress extraction
-│   │   ├── excel_progress_service.py
-│   │   ├── confidence_engine.py    # Confidence scoring
-│   │   ├── confidence_service.py   # Confidence workflow
-│   │   ├── extraction_service.py   # LLM provider abstraction
-│   │   ├── llm_provider.py         # Real LLM provider
-│   │   ├── mock_provider.py        # Offline mock provider
-│   │   ├── xer/
-│   │   │   ├── parser.py           # XER file parser
-│   │   │   ├── service.py          # XER import service
-│   │   │   └── export.py           # XER export service
-│   ├── database.py          # SQLAlchemy setup
-│   └── main.py              # FastAPI app entry point
-├── tests/
-│   ├── conftest.py          # Test fixtures
-│   ├── test_phase1.py       # Phase 1 tests
-│   ├── test_phase2.py       # Phase 2 tests
-│   ├── test_phase3.py       # Phase 3 tests
-│   └── test_phase4.py       # Phase 4 tests
-└── fixtures/
-    └── sample_schedule.xer  # Synthetic XER test fixture
+│   ├── api/v1/                   # Versioned routers (auth, schedule, progress, agent, matching, confidence, reviews, xer, webhooks, delay_impact, analytics, delay_prediction, voice, ocr)
+│   ├── core/                     # config, security, auth, celery_app
+│   ├── matching/                 # engine, matchers (exact/fuzzy/semantic/context/temporal), benchmark
+│   ├── models/                   # SQLAlchemy models (all PRD §9 tables + P4–P12 extensions)
+│   ├── schemas/                  # Pydantic v2 request/response models
+│   ├── services/                 # Business logic (schedule, progress, confidence, delay_ripple, analytics, ML, voice, OCR, XER, WhatsApp, backup)
+│   ├── workers/                  # Celery tasks (backup, ML retrain, delay-ripple recompute)
+│   ├── database.py               # SQLAlchemy async/sync engines, Alembic
+│   └── main.py                   # FastAPI entrypoint
+├── alembic/                      # Migrations (P0 schema + P4–P12 additions)
+├── tests/                        # 196 backend tests (all passing)
+└── scripts/
+    ├── generate_synthetic_data.py    # Full P0–P12 dataset
+    └── seed_demo_project.py
+
+frontend/                         # React + Vite + TypeScript
+├── src/
+│   ├── app/                      # Routed screens (Dashboard, Schedule, Planner Queue, Time Agent, Inbound, Insights, Risk, BIM, Admin, Settings)
+│   ├── components/               # Design-system primitives (Button, Badge, Card, Input, Select, DataTable, Skeleton, EmptyState)
+│   ├── features/                 # Feature-specific components
+│   ├── hooks/                    # Custom React hooks
+│   └── lib/                      # API client, auth context
+└── package.json
+
+infrastructure/
+└── docker-compose.yml            # postgres:pgvector, redis, api, celery-worker, celery-beat
 ```
 
 ## Requirements
 
-- Python 3.12+
-- Dependencies in `requirements.txt`
+- **Docker Desktop** (or Podman) + Docker Compose v2
+- **Python 3.11+** (for local dev without Docker; Docker image uses 3.11-slim)
+- **Node.js 20+** (for frontend)
+- **Git**
 
-## Installation
+## Quick Start (Docker - Recommended)
 
+```bash
+# 1. Clone & configure
+git clone <repo-url>
+cd Smarty_Vibz_SIH
+cp backend/.env.example backend/.env   # NEVER commit the filled .env
+
+# 2. Launch full stack (Postgres+pgvector, Redis, API, Celery worker, Celery beat)
+docker compose -f infrastructure/docker-compose.yml up -d --build
+
+# 3. Run migrations & seed synthetic data
+docker compose -f infrastructure/docker-compose.yml exec api python -m alembic upgrade head
+docker compose -f infrastructure/docker-compose.yml exec api python scripts/generate_synthetic_data.py --project DEMO-001 --org demo --weeks 4 --seed 42
+
+# 4. Verify
+curl http://localhost:8000/health
+open http://localhost:5173   # Frontend dev server (if running separately) or use Docker Compose override
+```
+
+**Demo credentials** (from synthetic data): `supervisor@demo.com` / `supervisor123` (role: SITE_SUPERVISOR)
+
+## Local Development (Without Docker)
+
+### Prerequisites
+- Python 3.9+ (3.11+ recommended; Docker uses 3.11)
+- Node.js 20+
+- Postgres 16 + pgvector extension
+- Redis 7+
+
+### Backend
 ```bash
 cd backend
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env        # Edit with your Postgres/Redis credentials
+python -m alembic upgrade head
+python scripts/generate_synthetic_data.py --project DEMO-001 --org demo --weeks 4 --seed 42
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## Running the Application
-
+### Frontend
 ```bash
-cd backend
-uvicorn app.main:app --reload
+cd frontend
+npm install
+npm run dev      # http://localhost:5173
+# For production build: npm run build && npm run preview
 ```
 
-API Documentation: http://localhost:8000/docs
+### Celery (separate terminals)
+```bash
+# Terminal 1: Worker
+cd backend && .venv/bin/celery -A app.core.celery_app worker --loglevel=info
 
-## API Endpoints
+# Terminal 2: Beat (scheduler)
+cd backend && .venv/bin/celery -A app.core.celery_app beat --loglevel=info
+```
 
-### Phase 1 - Schedule & Progress
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/schedule/upload` | Upload Excel schedule (.xlsx) |
-| GET | `/schedule/activities` | List all schedule activities |
-| POST | `/progress/extract` | Extract progress from free text |
-| POST | `/progress/upload-excel` | Upload progress from Excel |
-| GET | `/progress/events` | List progress events |
-| POST | `/agent/chat` | Time Agent chat interface |
-| GET | `/agent/sessions/{session_id}/events` | Get session events |
-
-### Phase 2 - Matching
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/matching/run/{progress_event_id}` | Run matching for progress event |
-| POST | `/matching/benchmark` | Run benchmark suite |
-
-### Phase 3 - Confidence & Review
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/confidence/evaluate/{progress_event_id}` | Evaluate confidence |
-| GET | `/reviews/pending` | List pending reviews |
-| GET | `/reviews/{review_id}` | Get review details |
-| POST | `/reviews/{review_id}/approve` | Approve match |
-| POST | `/reviews/{review_id}/correct` | Correct to different activity |
-| POST | `/reviews/{review_id}/reject` | Reject match |
-| POST | `/reviews/{review_id}/create-new` | Create new unplanned activity |
-| GET | `/audit/{progress_event_id}` | Get audit trail |
-
-### Phase 4 - P6/XER Interoperability
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/schedule/import/p6` | Import Primavera P6 .xer file |
-| GET | `/schedule/relationships` | Get schedule relationships |
-| GET | `/schedule/external-schedules` | List imported external schedules |
-| GET | `/schedule/external-schedules/{id}/activities` | Get activities for external schedule |
-| POST | `/schedule/export/p6/{external_schedule_id}` | Export XER with approved actuals |
-| GET | `/schedule/export/p6/{external_schedule_id}/preview` | Preview export content |
-
-## XER Import/Export
-
-### Import Flow
-
-1. Upload `.xer` file via `POST /schedule/import/p6`
-2. Parser extracts activities, WBS, planned dates, relationships
-3. Activities mapped to internal `ScheduleActivity` model
-4. Relationships persisted in `ScheduleRelationship` table
-5. External IDs preserved for traceability
-
-### Export Flow
-
-1. Run Phase 2 matching + Phase 3 review for progress events
-2. Planner approves actual start/finish dates
-3. Export via `POST /schedule/export/p6/{external_schedule_id}`
-4. Exported XER contains:
-   - All original activities with planned dates
-   - Approved actual start/finish dates
-   - Predecessor-successor relationships with lag
-   - Original external identifiers preserved
-
-### Supported Relationship Types
-
-- **FS** - Finish to Start
-- **SS** - Start to Start
-- **FF** - Finish to Finish
-- **SF** - Start to Finish
-
-Lag values preserved in days.
-
-## Testing
+## Running Tests
 
 ```bash
+# Backend (196 tests)
 cd backend
 python -m pytest tests/ -v
+
+# Frontend
+cd frontend
+npm run build
+npm run lint
 ```
 
-### Test Coverage
+## Three-Case Core Demo (Verified Live)
 
-- **135 tests total** (105 Phase 1-3 + 30 Phase 4)
-- All tests run offline (no internet, no LLM API, no P6 installation)
-- Synthetic XER fixture with 11 activities, 11 relationships (FS, SS, FF, SF, lag)
-- End-to-end test: XER import → progress → matching → confidence → review → export
+1. **Clean Auto-Match** → confidence ≥ 0.85 → `AUTO_MATCH` (no human review)
+   - Upload schedule with `PIP-1023`
+   - Submit: `"Today at 9:30 AM, the piping team started erection of the PIP-1023 line 24-XX-101 spool in Area B"`
+   - Result: `AUTO_MATCH`, confidence 0.8975, AuditRecord(action=AUTO_MATCH, actor=SYSTEM)
 
-### Phase 4 Test Categories
+2. **Ambiguous Match + Planner Correction** → `REVIEW_REQUIRED` → planner corrects
+   - Submit: `"Work on XX-101 piping"`
+   - Two 0.7 candidates → planner `POST /reviews/{id}/correct` with `activity_id=2`
+   - Result: Review status `CORRECTED`, activity `PIP-1027`
 
-- **Parser tests**: Valid XER, activity extraction, WBS mapping, all 4 relationship types, lag, empty/malformed XER, duplicate IDs, missing names
-- **Import service tests**: Activity creation, relationship persistence, external ID preservation, Excel coexistence, self-ref rejection, invalid ref rejection
-- **Export tests**: Valid XER output, approved actuals, unapproved actuals excluded, relationships preserved, original file unchanged
-- **API tests**: Import endpoint, relationships endpoint, external schedules endpoint
-- **End-to-end test**: Complete workflow from XER import to approved export
+3. **Unmatched → New Activity** → `REVIEW_REQUIRED` → planner creates new
+   - Submit: `"Office furniture delivery received at warehouse"`
+   - 0 matches → planner `POST /reviews/{id}/create-new` with new activity
+   - Result: `NEW_ACTIVITY_CREATED`, new activity in schedule (`is_unplanned=true`)
 
-## Data Models
+## Key API Endpoints (v1)
 
-### ScheduleActivity (Extended for Phase 4)
+| Domain | Endpoints |
+|--------|-----------|
+| Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me`, `POST /auth/csrf-token` |
+| Schedule | `POST /schedule/upload` (Excel), `POST /schedule/import/p6` (XER/MPP), `POST /schedule/export/p6/{id}`, `GET /schedule/activities` |
+| Progress | `POST /progress/extract`, `POST /progress/upload-excel`, `GET /progress/events`, `GET /progress/inbound/recent` |
+| Agent | `POST /agent/chat`, `GET /agent/sessions/{id}/events` |
+| Matching | `POST /matching/run/{event_id}`, `POST /matching/benchmark` |
+| Confidence | `POST /confidence/evaluate/{event_id}` |
+| Reviews | `GET /reviews/pending`, `GET /reviews/{id}`, `POST /reviews/{id}/approve`, `POST /reviews/{id}/correct`, `POST /reviews/{id}/reject`, `POST /reviews/{id}/create-new` |
+| Delay Impact | `GET /delay-impacts/event/{id}`, `GET /delay-impacts/activity/{id}`, `GET /delay-impacts/project/{id}/critical` |
+| Analytics | `GET /analytics/discipline-summary`, `GET /analytics/delay-patterns`, `GET /analytics/benchmarks`, `GET /analytics/variance-trend`, `GET /analytics/matching-quality`, `GET /analytics/confidence-distribution` |
+| Delay Prediction | `GET /delay-predictions/project/{id}`, `GET /delay-predictions/project/{id}/watchlist`, `POST /delay-predictions/train` |
+| Voice | `POST /voice/transcribe`, `POST /voice/process`, `GET /voice/model-info` |
+| OCR | `POST /ocr/upload`, `POST /ocr/process`, `GET /ocr/model-info` |
+| WhatsApp | `GET /webhooks/whatsapp/inbound` (verify), `POST /webhooks/whatsapp/inbound` (ingest) |
 
-```python
-activity_code: str          # Unique identifier
-activity_name: str
-discipline: str
-wbs: str
-planned_start: date
-planned_finish: date
-is_unplanned: bool
-source_format: str          # "EXCEL" or "XER"
-external_schedule_id: int   # FK to ExternalSchedule
-external_activity_id: str   # Original P6 task_id
-```
+## Environment Variables (backend/.env)
 
-### ExternalSchedule (New)
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | `postgresql+psycopg://user:pass@host:5432/db` (or `sqlite:///./local.db` for dev) |
+| `REDIS_URL` | Yes | `redis://host:6379/0` |
+| `JWT_SECRET_KEY` | Yes | Strong random string (≥32 chars) |
+| `JWT_ALGORITHM` | No | `HS256` (default) |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | No | `15` (default) |
+| `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | No | `7` (default) |
+| `CORS_ORIGINS` | No | `http://localhost:3000,http://localhost:5173` |
+| `LLM_PROVIDER` | No | `mock` (default; set to `openai`/`anthropic` for real LLM) |
+| `LLM_API_KEY` | If LLM_PROVIDER≠mock | Provider API key |
+| `WHATSAPP_*` | If WhatsApp enabled | Cloud API credentials |
+| `TESSERACT_CMD` | If OCR enabled | Path to tesseract binary |
 
-```python
-external_schedule_id: str   # P6 proj_id
-schedule_name: str
-source_filename: str
-source_format: str          # "XER"
-imported_at: datetime
-```
+**⚠️ Never commit a filled `.env`** — `.gitignore` covers `.env`, `.env.*`, secrets, backups, build artifacts.
 
-### ScheduleRelationship (New)
+## Troubleshooting
 
-```python
-predecessor_activity_id: int
-successor_activity_id: int
-relationship_type: str      # FS, SS, FF, SF
-lag: int                    # Days
-lag_unit: str               # "days"
-external_schedule_id: int   # FK to ExternalSchedule
-```
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| `alembic upgrade head` fails | Postgres not ready / wrong URL | Check `DATABASE_URL`, ensure pgvector extension exists |
+| `pytest` fails with `IntegrityError: organization_id` | Test DB not overridden | Ensure `conftest.py` overrides `get_db` |
+| `uvicorn` import errors | Missing deps / wrong venv | Re-create venv, `pip install -r requirements.txt` |
+| Frontend `npm run build` fails | Node version mismatch | Use Node 20+ (`nvm use 20`) |
+| Celery tasks not running | Redis not reachable | Check `REDIS_URL`, ensure Redis running |
+| `gitleaks` finds secrets | Secret in history | Rotate secret, rewrite history or accept risk |
+| `python-multipart` SpooledTemporaryFile error | Python 3.9 file upload | Fixed in code (read file content first) |
 
-## Validation & Error Handling
+## OS-Specific Notes
 
-### Import Validation
-
-- Empty XER file → Clear error
-- Malformed XER → Clear error with line context
-- Missing activity ID → Rejected with record
-- Missing activity name → Rejected with record
-- Invalid dates → Rejected with record
-- Duplicate activity IDs → First kept, rest rejected
-- Self-referencing relationships → Rejected
-- Invalid relationship references → Rejected
-
-### Export Safety
-
-- Never overwrites original imported file
-- Only approved actual dates exported (APPROVED, CORRECTED, NEW_ACTIVITY_CREATED)
-- Unapproved (PENDING, REJECTED, AUTO_MATCH without review) excluded
-- Unsupported fields documented in warnings
-
-## MPP Support Status
-
-Microsoft Project .MPP native import/export is **not implemented**. The XER adapter interface is designed for future extension. For MPP interoperability, export to XER from MS Project first.
-
-## Limitations
-
-- No delay ripple calculation
-- No critical path prediction
-- No productivity analytics
-- No institutional memory analytics
-- No multilingual extraction (Hinglish, Tamil-English)
-- No WhatsApp integration
-- No frontend/dashboard
-- MPP support requires separate investigation
+| OS | Notes |
+|----|-------|
+| **macOS** | Docker Desktop works natively. Use `brew install postgresql@16 redis node@20 python@3.11` for local services. |
+| **Linux** | Native Docker/Podman works. Install `postgresql-16`, `postgresql-16-pgvector`, `redis`, `nodejs`, `python3.11` via package manager. |
+| **Windows** | **Use WSL2** (Docker Desktop backend). Native Windows Postgres pgvector support is limited; WSL2 provides full Linux compatibility. Run all commands inside WSL2 Ubuntu. |
 
 ## License
 
-SIH26122 Project - Smarty Vibz Team
+SIH26122 Project — Smarty Vibz Team
+
+See `STATE.json` and `docs/STABILIZATION_REPORT_P0-P12.md` for verified implementation status.

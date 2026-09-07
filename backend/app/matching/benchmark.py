@@ -335,8 +335,10 @@ BENCHMARK_CASES: List[BenchmarkCase] = [
 ]
 
 
-def create_progress_event(db: Session, case: BenchmarkCase) -> ProgressEvent:
+def create_progress_event(db: Session, case: BenchmarkCase, organization_id: int = None, project_id: int = None) -> ProgressEvent:
     event = ProgressEvent(
+        organization_id=organization_id,
+        project_id=project_id,
         raw_text=case.raw_text,
         activity_reference=None,
         event_type=case.event_type,
@@ -355,7 +357,7 @@ def create_progress_event(db: Session, case: BenchmarkCase) -> ProgressEvent:
     return event
 
 
-def run_benchmark(db: Session) -> BenchmarkSummary:
+def run_benchmark(db: Session, organization_id: int = None, project_id: int = None) -> BenchmarkSummary:
     reports = []
     top1_correct = 0
     top3_correct = 0
@@ -364,7 +366,7 @@ def run_benchmark(db: Session) -> BenchmarkSummary:
     category_top3 = {}
     
     for case in BENCHMARK_CASES:
-        event = create_progress_event(db, case)
+        event = create_progress_event(db, case, organization_id, project_id)
         result = run_matching(db, event.id)
         
         top1_match = None
