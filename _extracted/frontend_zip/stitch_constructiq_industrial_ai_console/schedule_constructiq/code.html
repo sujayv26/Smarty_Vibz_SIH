@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ConstructIQ - WBS Schedule</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#ff8849",
+                      "primary-container": "#181c22",
+                      "on-surface": "#1c1b1c",
+                      "secondary-fixed": "#ffdbcc",
+                      "outline-variant": "#c6c6cb",
+                      "primary": "#000000",
+                      "on-background": "#1c1b1c",
+                      "surface-container-high": "#ebe7e7",
+                      "on-primary-fixed-variant": "#43474e",
+                      "surface-container": "#f0eded",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "secondary": "#a04101",
+                      "on-tertiary-fixed": "#231a11",
+                      "primary-fixed": "#dfe2eb",
+                      "on-primary-fixed": "#181c22",
+                      "outline": "#76777b",
+                      "on-surface-variant": "#45474b",
+                      "inverse-on-surface": "#f3f0f0",
+                      "surface-container-highest": "#e5e2e2",
+                      "on-tertiary-container": "#908175",
+                      "surface-dim": "#dcd9d9",
+                      "surface-variant": "#e5e2e2",
+                      "tertiary-fixed-dim": "#d5c3b6",
+                      "surface-container-low": "#f6f3f3",
+                      "tertiary": "#000000",
+                      "on-secondary-fixed-variant": "#7a3000",
+                      "on-primary": "#ffffff",
+                      "surface": "#fcf8f9",
+                      "surface-bright": "#fcf8f9",
+                      "inverse-surface": "#313031",
+                      "primary-fixed-dim": "#c3c6cf",
+                      "on-error-container": "#93000a",
+                      "on-primary-container": "#80848c",
+                      "tertiary-container": "#231a11",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed": "#351000",
+                      "background": "#fcf8f9",
+                      "on-secondary-container": "#6b2900",
+                      "secondary-fixed-dim": "#ffb693",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#51443a",
+                      "tertiary-fixed": "#f2dfd1",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#5b5e66",
+                      "inverse-primary": "#c3c6cf"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "data-mono": [
+                              "IBM Plex Mono"
+                      ],
+                      "label-caps": [
+                              "IBM Plex Sans"
+                      ],
+                      "body-lg": [
+                              "IBM Plex Sans"
+                      ],
+                      "body-sm": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-mono": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Modal transitions */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 200ms ease-out, transform 200ms ease-out;
+        }
+        .modal-exit {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .modal-exit-active {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 150ms ease-in, transform 150ms ease-in;
+        }
+      </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row overflow-hidden font-body-sm">
+<!-- Desktop SideNavBar -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full z-50 bg-primary-container text-secondary-fixed w-20 hover:w-64 transition-all duration-300 ease-in-out border-r border-outline-variant overflow-hidden group">
+<div class="flex items-center h-16 px-4 shrink-0">
+<span class="material-symbols-outlined text-white text-3xl shrink-0" data-weight="fill">domain</span>
+<div class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap overflow-hidden">
+<span class="block font-headline-md text-headline-md font-bold text-white tracking-tight">ConstructIQ</span>
+<span class="block font-label-caps text-label-caps text-on-primary-fixed-variant">Industrial Intelligence</span>
+</div>
+</div>
+<div class="mt-4 px-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+<button class="w-full flex items-center justify-center gap-2 bg-secondary text-white font-label-caps text-label-caps py-2 rounded shadow-sm hover:bg-secondary/90 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>New Project</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto mt-6 py-2 flex flex-col gap-1 w-full">
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 group-hover/item:text-white transition-colors">dashboard</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Dashboard</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 group-hover/item:text-white transition-colors">analytics</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Analytics</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 group-hover/item:text-white transition-colors">construction</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Projects</span>
+</a>
+<a aria-current="page" class="border-l-4 border-secondary-container bg-surface-container-highest/10 text-secondary-container flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 text-secondary-container" data-weight="fill">account_tree</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap font-bold">WBS</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 group-hover/item:text-white transition-colors">event_note</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Events</span>
+</a>
+</div>
+<div class="mt-auto py-4 flex flex-col gap-1 border-t border-outline-variant/30 shrink-0">
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 group-hover/item:text-white transition-colors">settings</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Settings</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item" href="#">
+<span class="material-symbols-outlined shrink-0 group-hover/item:text-white transition-colors">help</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Support</span>
+</a>
+</div>
+</nav>
+<!-- Mobile TopAppBar -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 bg-surface border-b border-outline-variant shrink-0 z-40 fixed top-0 left-0">
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">ConstructIQ</span>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A small circular avatar showing a professional engineer in a hard hat against a bright industrial background. Modern light mode aesthetic, high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd0ZZTRRD19TmBlv4IscCh2daFclfEaumKndvwZsPGuFbgC41_7tvxtQ2BdhXnHbv-7lnqbhVqt0kV7nyQOsrggm-Jvxk6_eNyiQ5g9looePFUS6mnqtHzpZNvu2JhzkbdedY95COtEw-pRFIUW9NJ7fFckz6xYQ5ZzYS-lX_ElCvMrE5jxoqi9dvRPJ99bmPJEHPs4u7u8PpiF7gV3_kIvYhC5iwzkZNc9Yy0NOpREgEqghX9c6MbIA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen md:ml-20 pt-16 md:pt-0 w-full overflow-hidden transition-all duration-300 peer">
+<!-- Desktop Header / Toolbar -->
+<header class="hidden md:flex justify-between items-center w-full px-gutter h-16 bg-surface border-b border-outline-variant shrink-0 z-40">
+<div class="flex items-center gap-8">
+<h1 class="font-headline-sm text-headline-sm text-primary">WBS Schedule Manager</h1>
+<nav class="flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm" href="#">Projects</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm" href="#">Resources</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-sm" href="#">Compliance</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+<input class="pl-8 pr-3 py-1.5 bg-surface-container-low border border-outline-variant rounded text-sm focus:border-secondary focus:ring-0 focus:outline-none focus:shadow-[inset_0_0_0_2px_rgba(160,65,1,0.2)] transition-all w-48 font-body-sm placeholder:text-outline" placeholder="Search WBS..." type="text"/>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">apps</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant shrink-0 ml-2">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A small circular avatar showing a professional engineer in a hard hat against a bright industrial background. Modern light mode aesthetic, high contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8woEE6SUaHdeK2GbL-IQsHJNqQeJD5YJBnXWY7Wc8DxkCEXTGWTWjb0ogEayjH45n1KLjSTxzW-HUJce5Y8NXXl0EDaIIXEjHeyRAo9s0-N38O9TJ466mmK9zoL11cK-i3kmDJiZKusRYVvnk6-Zah2PnHh2E8MuAWNA3WEst2CUPyThQ1NWfPctHScs-aW0S83f-qzBGTyK3olqeJbPQLkJW6y0nPTBoblA6_2Y0JSOgpnPIc_oraA"/>
+</div>
+</div>
+</header>
+<!-- Page Toolbar -->
+<div class="bg-surface px-margin-mobile md:px-gutter py-4 border-b border-outline-variant shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<button class="bg-secondary text-white font-label-caps text-label-caps px-4 py-2 rounded shadow-sm hover:bg-secondary/90 transition-colors flex items-center gap-2" onclick="openModal()">
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+                    Upload Schedule
+                </button>
+<button class="bg-white border border-primary text-primary font-label-caps text-label-caps px-4 py-2 rounded hover:bg-surface-container-low transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Export
+                </button>
+</div>
+<div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+<button class="bg-white border border-outline-variant text-on-surface font-label-caps text-label-caps px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+                    Filter
+                </button>
+<button class="bg-white border border-outline-variant text-on-surface font-label-caps text-label-caps px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors flex items-center gap-1 shrink-0">
+<span class="material-symbols-outlined text-[16px]">sort</span>
+                    Sort
+                </button>
+<div class="h-6 w-px bg-outline-variant mx-1 hidden sm:block"></div>
+<div class="flex items-center gap-1 bg-surface-container-low rounded p-0.5 border border-outline-variant shrink-0">
+<button aria-label="Table View" class="p-1 rounded bg-white shadow-sm text-primary">
+<span class="material-symbols-outlined text-[18px]">table_rows</span>
+</button>
+<button aria-label="Gantt View" class="p-1 rounded text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">view_timeline</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="flex-1 overflow-auto bg-surface-container-lowest p-margin-mobile md:p-gutter">
+<div class="bg-white border border-outline-variant rounded shadow-sm overflow-hidden flex flex-col h-full relative">
+<div class="overflow-auto flex-1 hide-scrollbar relative">
+<table class="w-full text-left border-collapse whitespace-nowrap min-w-[800px]">
+<thead class="sticky top-0 bg-surface-container-low z-10 font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant shadow-[0_1px_0_rgba(226,228,233,1)]">
+<tr>
+<th class="px-4 py-3 font-semibold w-12 text-center">Status</th>
+<th class="px-4 py-3 font-semibold w-24">WBS Code</th>
+<th class="px-4 py-3 font-semibold">Activity Name</th>
+<th class="px-4 py-3 font-semibold w-32">Start Date</th>
+<th class="px-4 py-3 font-semibold w-32">Finish Date</th>
+<th class="px-4 py-3 font-semibold w-24 text-right">Duration</th>
+<th class="px-4 py-3 font-semibold w-32 text-right">Cost</th>
+<th class="px-4 py-3 font-semibold w-16 text-center">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-on-surface divide-y divide-outline-variant/50">
+<!-- Level 1 -->
+<tr class="hover:bg-surface-container-lowest/50 transition-colors bg-surface-container-low/30">
+<td class="px-4 py-2 text-center">
+<div class="w-2 h-2 rounded-full bg-outline mx-auto"></div>
+</td>
+<td class="px-4 py-2 font-data-mono text-data-mono">1.0</td>
+<td class="px-4 py-2 font-semibold">Site Preparation</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-on-surface-variant">2023-10-01</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-on-surface-variant">2023-11-15</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono">45d</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono">$120,000</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Level 2 -->
+<tr class="hover:bg-surface-container-lowest/50 transition-colors">
+<td class="px-4 py-2 text-center">
+<span class="material-symbols-outlined text-[16px] text-green-600" data-weight="fill">check_circle</span>
+</td>
+<td class="px-4 py-2 font-data-mono text-data-mono pl-8 relative">
+<div class="absolute left-4 top-0 bottom-1/2 border-l border-outline-variant"></div>
+<div class="absolute left-4 top-1/2 w-3 border-t border-outline-variant"></div>
+                                    1.1
+                                </td>
+<td class="px-4 py-2 pl-8">Surveying &amp; Marking</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-on-surface-variant">2023-10-01</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-on-surface-variant">2023-10-05</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono">5d</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono">$15,000</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Level 2 - UNPLANNED HIGHLIGHT -->
+<tr class="hover:bg-surface-container-lowest/50 transition-colors bg-secondary-fixed/10 relative">
+<td class="absolute left-0 top-0 bottom-0 w-1 bg-secondary"></td>
+<td class="px-4 py-2 text-center">
+<span class="material-symbols-outlined text-[16px] text-secondary" data-weight="fill">warning</span>
+</td>
+<td class="px-4 py-2 font-data-mono text-data-mono pl-8 relative text-secondary font-bold">
+<div class="absolute left-4 top-0 bottom-1/2 border-l border-outline-variant"></div>
+<div class="absolute left-4 top-1/2 w-3 border-t border-outline-variant"></div>
+                                    1.1.1
+                                </td>
+<td class="px-4 py-2 pl-8 flex items-center gap-2">
+<span class="font-medium text-secondary">Additional Soil Testing</span>
+<span class="bg-secondary/10 text-secondary border border-secondary/20 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider leading-none">Unplanned</span>
+</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-secondary">2023-10-06</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-secondary">2023-10-08</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono text-secondary">3d</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono text-secondary">$8,500</td>
+<td class="px-4 py-2 text-center">
+<button class="text-secondary hover:text-secondary-container transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+<!-- Level 2 -->
+<tr class="hover:bg-surface-container-lowest/50 transition-colors">
+<td class="px-4 py-2 text-center">
+<div class="w-2 h-2 rounded-full bg-outline mx-auto"></div>
+</td>
+<td class="px-4 py-2 font-data-mono text-data-mono pl-8 relative">
+<div class="absolute left-4 top-0 bottom-full border-l border-outline-variant"></div>
+<div class="absolute left-4 top-0 bottom-1/2 border-l border-outline-variant"></div>
+<div class="absolute left-4 top-1/2 w-3 border-t border-outline-variant"></div>
+                                    1.2
+                                </td>
+<td class="px-4 py-2 pl-8">Excavation</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-on-surface-variant">2023-10-09</td>
+<td class="px-4 py-2 font-data-mono text-data-mono text-on-surface-variant">2023-10-25</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono">17d</td>
+<td class="px-4 py-2 text-right font-data-mono text-data-mono">$85,000</td>
+<td class="px-4 py-2 text-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="bg-surface border-t border-outline-variant p-2 flex items-center justify-between text-xs text-on-surface-variant shrink-0">
+<div>Showing 1-4 of 124 activities</div>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-surface-container transition-colors disabled:opacity-50"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+<span class="px-2 font-data-mono text-data-mono">Page 1 of 32</span>
+<button class="p-1 rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 pb-safe bg-primary-container z-50 rounded-t-xl border-t border-outline-variant shadow-lg shrink-0">
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center text-secondary-container bg-secondary-fixed/10 rounded-xl p-2 active:bg-primary-container/80 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]" data-weight="fill">account_tree</span>
+<span class="font-label-caps text-label-caps mt-1">WBS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">event_note</span>
+<span class="font-label-caps text-label-caps mt-1">Events</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<!-- Upload Modal Overlay (Hidden by default) -->
+<div class="fixed inset-0 bg-primary/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4" id="uploadModalOverlay">
+<!-- Modal Content -->
+<div class="bg-surface rounded-xl shadow-2xl border border-outline-variant w-full max-w-lg overflow-hidden transform scale-95 opacity-0 transition-all duration-200" id="uploadModal">
+<!-- Modal Header -->
+<div class="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h2 class="font-headline-sm text-headline-sm text-primary">Upload Schedule</h2>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-variant" onclick="closeModal()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<!-- Modal Body: Simulated Upload State -->
+<div class="p-6">
+<!-- File Drop Zone (Dormant State initially, simulating active processing here) -->
+<div class="hidden border-2 border-dashed border-outline-variant rounded-lg p-8 text-center hover:bg-surface-container-low transition-colors cursor-pointer mb-6" id="dropZone">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant mb-2">cloud_upload</span>
+<p class="font-body-md text-primary mb-1">Drag and drop your .mpp or .csv file here</p>
+<p class="font-body-sm text-on-surface-variant">or click to browse files</p>
+</div>
+<!-- Processing State (Active) -->
+<div class="space-y-6" id="processingState">
+<div class="flex items-center gap-4 bg-surface-container-low p-4 rounded border border-outline-variant">
+<div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-white text-[20px]">description</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="font-semibold text-primary truncate">project_alpha_schedule_v2.mpp</p>
+<p class="font-data-mono text-data-mono text-on-surface-variant text-xs">4.2 MB</p>
+</div>
+</div>
+<!-- Progress Area -->
+<div class="space-y-4">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-caps text-label-caps text-secondary font-bold" id="progressLabel">Validating WBS Hierarchy...</span>
+<span class="font-data-mono text-data-mono font-bold text-primary">68%</span>
+</div>
+<!-- Progress Bar -->
+<div class="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full relative w-[68%] transition-all duration-500 ease-out">
+<!-- Animated stripe effect in CSS -->
+<div class="absolute inset-0 bg-[image:repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.2)_10px,rgba(255,255,255,0.2)_20px)] animate-[pan_1s_linear_infinite]"></div>
+</div>
+</div>
+<!-- Processing Steps -->
+<ul class="space-y-2 mt-4">
+<li class="flex items-center gap-3 font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-green-600">check_circle</span>
+                                Parsing 1,245 rows...
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-primary font-medium">
+<span class="material-symbols-outlined text-[16px] text-secondary animate-spin">sync</span>
+                                Validating WBS structure...
+                            </li>
+<li class="flex items-center gap-3 font-body-sm text-outline opacity-50">
+<span class="material-symbols-outlined text-[16px]">radio_button_unchecked</span>
+                                Checking resource allocations...
+                            </li>
+</ul>
+<!-- Results Counter (Simulated preview) -->
+<div class="mt-6 pt-4 border-t border-outline-variant grid grid-cols-3 gap-4">
+<div class="text-center">
+<div class="font-data-mono text-data-mono text-lg font-bold text-primary">1,245</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">Total Rows</div>
+</div>
+<div class="text-center border-l border-outline-variant">
+<div class="font-data-mono text-data-mono text-lg font-bold text-secondary">3</div>
+<div class="font-label-caps text-label-caps text-secondary">New Unplanned</div>
+</div>
+<div class="text-center border-l border-outline-variant">
+<div class="font-data-mono text-data-mono text-lg font-bold text-green-600">0</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">Conflicts</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="px-6 py-4 border-t border-outline-variant bg-surface flex justify-end gap-3">
+<button class="px-4 py-2 font-label-caps text-label-caps text-primary border border-outline-variant rounded hover:bg-surface-container-low transition-colors" onclick="closeModal()">Cancel</button>
+<button class="px-4 py-2 font-label-caps text-label-caps text-white bg-secondary opacity-50 cursor-not-allowed rounded shadow-sm" disabled="">Importing...</button>
+</div>
+</div>
+</div>
+<style>
+        /* Custom styles for utility classes not in Tailwind by default */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+        @keyframes pan {
+            0% { background-position: 0 0; }
+            100% { background-position: 28px 0; }
+        }
+    </style>
+<script>
+        // Simple modal interaction logic
+        const modalOverlay = document.getElementById('uploadModalOverlay');
+        const modal = document.getElementById('uploadModal');
+        
+        function openModal() {
+            modalOverlay.classList.remove('hidden');
+            // Trigger reflow
+            void modalOverlay.offsetWidth;
+            
+            modal.classList.remove('scale-95', 'opacity-0');
+            modal.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeModal() {
+            modal.classList.remove('scale-100', 'opacity-100');
+            modal.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modalOverlay.classList.add('hidden');
+            }, 200); // match transition duration
+        }
+        
+        // Optional: click outside to close
+        modalOverlay.addEventListener('click', (e) => {
+            if(e.target === modalOverlay) {
+                closeModal();
+            }
+        });
+    </script>
+</body></html>

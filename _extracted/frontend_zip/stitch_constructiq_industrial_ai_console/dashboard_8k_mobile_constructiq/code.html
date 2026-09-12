@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
+        <title>ConstructIQ - Mobile Dashboard</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap"
+                rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+                rel="stylesheet" />
+        <script id="tailwind-config">
+                tailwind.config = {
+                        darkMode: "class",
+                        theme: {
+                                extend: {
+                                        "colors": {
+                                                "outline": "#76777b",
+                                                "on-error": "#ffffff",
+                                                "primary": "#000000",
+                                                "on-surface": "#1c1b1c",
+                                                "primary-fixed": "#dfe2eb",
+                                                "secondary-fixed-dim": "#ffb693",
+                                                "on-primary": "#ffffff",
+                                                "surface-bright": "#fcf8f9",
+                                                "surface-container": "#f0eded",
+                                                "background": "#fcf8f9",
+                                                "tertiary": "#000000",
+                                                "on-tertiary": "#ffffff",
+                                                "on-surface-variant": "#45474b",
+                                                "secondary-fixed": "#ffdbcc",
+                                                "error": "#ba1a1a",
+                                                "error-container": "#ffdad6",
+                                                "secondary-container": "#ff8849",
+                                                "tertiary-fixed": "#f2dfd1",
+                                                "surface-variant": "#e5e2e2",
+                                                "on-error-container": "#93000a",
+                                                "on-background": "#1c1b1c",
+                                                "secondary": "#a04101",
+                                                "primary-fixed-dim": "#c3c6cf",
+                                                "surface-tint": "#5b5e66",
+                                                "surface-container-lowest": "#ffffff",
+                                                "on-secondary-container": "#6b2900",
+                                                "inverse-primary": "#c3c6cf",
+                                                "on-tertiary-container": "#908175",
+                                                "outline-variant": "#c6c6cb",
+                                                "tertiary-container": "#231a11",
+                                                "on-secondary-fixed": "#351000",
+                                                "tertiary-fixed-dim": "#d5c3b6",
+                                                "surface-container-low": "#f6f3f3",
+                                                "on-secondary-fixed-variant": "#7a3000",
+                                                "primary-container": "#181c22",
+                                                "on-secondary": "#ffffff",
+                                                "on-primary-container": "#80848c",
+                                                "on-tertiary-fixed-variant": "#51443a",
+                                                "surface": "#fcf8f9",
+                                                "surface-dim": "#dcd9d9",
+                                                "inverse-surface": "#313031",
+                                                "on-primary-fixed": "#181c22",
+                                                "surface-container-highest": "#e5e2e2",
+                                                "surface-container-high": "#ebe7e7",
+                                                "on-tertiary-fixed": "#231a11",
+                                                "inverse-on-surface": "#f3f0f0",
+                                                "on-primary-fixed-variant": "#43474e"
+                                        },
+                                        "borderRadius": {
+                                                "DEFAULT": "0.125rem",
+                                                "lg": "0.25rem",
+                                                "xl": "0.5rem",
+                                                "full": "0.75rem"
+                                        },
+                                        "spacing": {
+                                                "margin-mobile": "16px",
+                                                "margin-desktop": "40px",
+                                                "unit": "4px",
+                                                "container-max": "1440px",
+                                                "gutter": "24px"
+                                        },
+                                        "fontFamily": {
+                                                "label-caps": [
+                                                        "IBM Plex Sans"
+                                                ],
+                                                "data-mono": [
+                                                        "IBM Plex Mono"
+                                                ],
+                                                "body-sm": [
+                                                        "IBM Plex Sans"
+                                                ],
+                                                "headline-md": [
+                                                        "Inter"
+                                                ],
+                                                "display-lg": [
+                                                        "Inter"
+                                                ],
+                                                "body-lg": [
+                                                        "IBM Plex Sans"
+                                                ],
+                                                "body-md": [
+                                                        "IBM Plex Sans"
+                                                ],
+                                                "headline-sm": [
+                                                        "Inter"
+                                                ],
+                                                "display-lg-mobile": [
+                                                        "Inter"
+                                                ]
+                                        },
+                                        "fontSize": {
+                                                "label-caps": [
+                                                        "12px",
+                                                        {
+                                                                "lineHeight": "16px",
+                                                                "letterSpacing": "0.05em",
+                                                                "fontWeight": "700"
+                                                        }
+                                                ],
+                                                "data-mono": [
+                                                        "14px",
+                                                        {
+                                                                "lineHeight": "20px",
+                                                                "letterSpacing": "0.02em",
+                                                                "fontWeight": "500"
+                                                        }
+                                                ],
+                                                "body-sm": [
+                                                        "14px",
+                                                        {
+                                                                "lineHeight": "20px",
+                                                                "fontWeight": "400"
+                                                        }
+                                                ],
+                                                "headline-md": [
+                                                        "24px",
+                                                        {
+                                                                "lineHeight": "32px",
+                                                                "fontWeight": "600"
+                                                        }
+                                                ],
+                                                "display-lg": [
+                                                        "48px",
+                                                        {
+                                                                "lineHeight": "56px",
+                                                                "letterSpacing": "-0.02em",
+                                                                "fontWeight": "700"
+                                                        }
+                                                ],
+                                                "body-lg": [
+                                                        "18px",
+                                                        {
+                                                                "lineHeight": "28px",
+                                                                "fontWeight": "400"
+                                                        }
+                                                ],
+                                                "body-md": [
+                                                        "16px",
+                                                        {
+                                                                "lineHeight": "24px",
+                                                                "fontWeight": "400"
+                                                        }
+                                                ],
+                                                "headline-sm": [
+                                                        "20px",
+                                                        {
+                                                                "lineHeight": "28px",
+                                                                "fontWeight": "600"
+                                                        }
+                                                ],
+                                                "display-lg-mobile": [
+                                                        "32px",
+                                                        {
+                                                                "lineHeight": "40px",
+                                                                "letterSpacing": "-0.02em",
+                                                                "fontWeight": "700"
+                                                        }
+                                                ]
+                                        }
+                                },
+                        },
+                }
+        </script>
+        <style>
+                body {
+                        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCFsdlZlNh4tCGWduHwdvIeNaqFWej2veNYIrwCodAa1AOyOYlLayNrzgBC-GcGZ1qQa1iIh9tp8qEtSmHSKv0-cQ78XwykMLP4JBLAZgX69ozdKL6hxtHTMOY9CPI_EqPdq3AI24CmAQ35PzJiINK9vpJhTiKZKb8XkRKzf2Kt26Cu6GQ6gO5P9_7BwaevxrOKfRM9j0_tW-QJd70ZczCHMrsRuSsS_YsLP_ybgM29u0E95kZKYqJ5rA');
+                        background-size: cover;
+                        background-position: center;
+                        background-attachment: fixed;
+                        color: #ffffff;
+                        -webkit-tap-highlight-color: transparent;
+                }
+
+                .card-surface {
+                        background-color: rgba(18, 22, 28, 0.65);
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+                }
+
+                .glass-header {
+                        background-color: rgba(18, 22, 28, 0.8);
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                }
+
+                .glass-nav {
+                        background-color: rgba(18, 22, 28, 0.85);
+                        backdrop-filter: blur(20px);
+                        -webkit-backdrop-filter: blur(20px);
+                        border-top: 1px solid rgba(255, 255, 255, 0.1);
+                }
+
+                .pb-safe {
+                        padding-bottom: env(safe-area-inset-bottom, 16px);
+                }
+        </style>
+        <style>
+                body {
+                        min-height: max(884px, 100dvh);
+                }
+        </style>
+</head>
+
+<body class="font-body-md text-body-md min-h-screen flex flex-col pb-24 relative overflow-x-hidden">
+        <!-- Mobile Header -->
+        <header class="flex justify-between items-center w-full px-margin-mobile h-16 glass-header sticky top-0 z-40">
+                <div
+                        class="font-headline-sm text-headline-sm font-bold text-white tracking-tight uppercase tracking-widest font-data-mono">
+                        ConstructIQ</div>
+                <div class="flex gap-4">
+                        <button
+                                class="text-gray-300 hover:text-white transition-colors flex items-center justify-center h-10 w-10">
+                                <span class="material-symbols-outlined" data-icon="search">search</span>
+                        </button>
+                        <button
+                                class="text-gray-300 hover:text-white transition-colors flex items-center justify-center h-10 w-10 relative">
+                                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                                <span
+                                        class="absolute top-2 right-2 w-2 h-2 bg-[#ff8849] rounded-full shadow-[0_0_8px_#ff8849]"></span>
+                        </button>
+                </div>
+        </header>
+        <!-- Main Content Canvas -->
+        <main
+                class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile py-unit-6 flex flex-col gap-unit-6 pt-4">
+                <!-- Hero Metric Card -->
+                <section
+                        class="card-surface rounded-xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+                        <div
+                                class="absolute inset-0 bg-gradient-to-br from-[#ff8849]/10 to-transparent pointer-events-none">
+                        </div>
+                        <div class="relative z-10 flex flex-col gap-2">
+                                <div
+                                        class="flex items-center gap-2 text-[#ff8849] font-label-caps text-label-caps uppercase tracking-wider">
+                                        <span class="material-symbols-outlined text-[16px]"
+                                                data-icon="assignment_late">assignment_late</span>
+                                        Action Required
+                                </div>
+                                <div
+                                        class="font-display-lg text-display-lg font-bold text-white tracking-tighter leading-none mt-1">
+                                        12 <br /><span
+                                                class="text-3xl text-gray-300 font-headline-md tracking-normal">Pending
+                                                Reviews</span>
+                                </div>
+                                <p
+                                        class="font-data-mono text-xs text-gray-400 mt-3 border-l-2 border-[#ff8849] pl-3 uppercase tracking-wider">
+                                        Critical path items requiring sign-off across 3 active projects.</p>
+                        </div>
+                        <div class="relative z-10 mt-6">
+                                <button
+                                        class="bg-transparent border border-[#ff8849] text-[#ff8849] hover:bg-[#ff8849]/10 px-6 py-3 rounded-DEFAULT font-data-mono text-label-caps uppercase tracking-widest w-full flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(255,136,73,0.15)]">
+                                        Review Now
+                                        <span class="material-symbols-outlined text-[16px]"
+                                                data-icon="arrow_forward">arrow_forward</span>
+                                </button>
+                        </div>
+                </section>
+                <!-- KPI Grid -->
+                <section class="grid grid-cols-2 gap-4">
+                        <div class="card-surface rounded-lg p-4 flex flex-col gap-2 border-t-2 border-t-gray-600">
+                                <div class="font-data-mono text-xs text-gray-400 uppercase tracking-widest">SPI</div>
+                                <div class="flex items-end gap-2">
+                                        <span class="font-headline-md text-3xl font-bold text-white">0.94</span>
+                                        <span class="text-[#ff8849] font-data-mono text-xs flex items-center"><span
+                                                        class="material-symbols-outlined text-[14px]">arrow_downward</span>0.02</span>
+                                </div>
+                        </div>
+                        <div class="card-surface rounded-lg p-4 flex flex-col gap-2 border-t-2 border-t-gray-600">
+                                <div class="font-data-mono text-xs text-gray-400 uppercase tracking-widest">CPI</div>
+                                <div class="flex items-end gap-2">
+                                        <span class="font-headline-md text-3xl font-bold text-white">1.02</span>
+                                        <span class="text-[#059669] font-data-mono text-xs flex items-center"><span
+                                                        class="material-symbols-outlined text-[14px]">arrow_upward</span>0.01</span>
+                                </div>
+                        </div>
+                        <div class="card-surface rounded-lg p-4 flex flex-col gap-2 border-t-2 border-t-gray-600">
+                                <div class="font-data-mono text-xs text-gray-400 uppercase tracking-widest">Safety
+                                        Incidents</div>
+                                <div class="flex items-end gap-2">
+                                        <span class="font-headline-md text-3xl font-bold text-white">0</span>
+                                        <span class="text-gray-500 font-data-mono text-xs">LAST 30D</span>
+                                </div>
+                        </div>
+                        <div class="card-surface rounded-lg p-4 flex flex-col gap-2 border-t-2 border-t-gray-600">
+                                <div class="font-data-mono text-xs text-gray-400 uppercase tracking-widest">Active Crew
+                                </div>
+                                <div class="flex items-end gap-2">
+                                        <span class="font-headline-md text-3xl font-bold text-white">142</span>
+                                        <span class="text-gray-500 font-data-mono text-xs">ON-SITE</span>
+                                </div>
+                        </div>
+                </section>
+                <!-- Planned vs Actual Progress -->
+                <section class="card-surface rounded-xl p-5 flex flex-col gap-4">
+                        <div class="flex justify-between items-center border-b border-white/10 pb-3">
+                                <h2 class="font-data-mono text-sm uppercase tracking-widest font-semibold text-white">
+                                        Schedule Variance</h2>
+                                <button class="text-gray-400">
+                                        <span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+                                </button>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                                <!-- Bar 1 -->
+                                <div>
+                                        <div class="flex justify-between font-data-mono text-xs mb-2">
+                                                <span class="text-gray-200">Foundation</span>
+                                                <span class="text-gray-400">45% / 50%</span>
+                                        </div>
+                                        <div class="w-full bg-black/40 h-1.5 rounded-full overflow-hidden relative">
+                                                <div
+                                                        class="absolute top-0 left-0 h-full bg-gray-500 w-[50%] rounded-full opacity-50">
+                                                </div>
+                                                <div
+                                                        class="absolute top-0 left-0 h-full bg-white w-[45%] rounded-full shadow-[0_0_5px_#fff]">
+                                                </div>
+                                        </div>
+                                </div>
+                                <!-- Bar 2 -->
+                                <div>
+                                        <div class="flex justify-between font-data-mono text-xs mb-2">
+                                                <span class="text-gray-200">Structural Steel</span>
+                                                <span class="text-gray-400">12% / 10%</span>
+                                        </div>
+                                        <div class="w-full bg-black/40 h-1.5 rounded-full overflow-hidden relative">
+                                                <div
+                                                        class="absolute top-0 left-0 h-full bg-gray-500 w-[10%] rounded-full opacity-50">
+                                                </div>
+                                                <div
+                                                        class="absolute top-0 left-0 h-full bg-[#ff8849] w-[12%] rounded-full shadow-[0_0_5px_#ff8849]">
+                                                </div>
+                                        </div>
+                                </div>
+                                <!-- Legend -->
+                                <div
+                                        class="flex gap-4 mt-2 font-data-mono text-[10px] uppercase text-gray-400 pt-3 border-t border-white/10">
+                                        <div class="flex items-center gap-1.5">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-gray-500 opacity-50"></div>
+                                                PLANNED
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_3px_#fff]">
+                                                </div> ACTUAL
+                                        </div>
+                                        <div class="flex items-center gap-1.5">
+                                                <div
+                                                        class="w-1.5 h-1.5 rounded-full bg-[#ff8849] shadow-[0_0_3px_#ff8849]">
+                                                </div> AHEAD
+                                        </div>
+                                </div>
+                        </div>
+                </section>
+                <!-- Discipline Progress List -->
+                <section class="card-surface rounded-xl p-0 flex flex-col overflow-hidden">
+                        <div class="p-4 border-b border-white/10 bg-white/5">
+                                <h2 class="font-data-mono text-xs font-bold text-gray-300 uppercase tracking-widest">
+                                        Discipline Status</h2>
+                        </div>
+                        <div class="flex flex-col">
+                                <!-- Item 1 -->
+                                <div
+                                        class="flex items-center justify-between p-4 border-b border-white/10 hover:bg-white/5 transition-colors">
+                                        <div class="flex items-center gap-4">
+                                                <div
+                                                        class="w-10 h-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-300">
+                                                        <span class="material-symbols-outlined"
+                                                                data-icon="architecture">architecture</span>
+                                                </div>
+                                                <div class="flex flex-col gap-0.5">
+                                                        <span class="font-body-md text-sm font-medium text-white">Civil
+                                                                &amp; Structural</span>
+                                                        <span
+                                                                class="font-data-mono text-[10px] uppercase text-gray-400 tracking-wider">Phase
+                                                                2 Active</span>
+                                                </div>
+                                        </div>
+                                        <div class="flex flex-col items-end gap-1">
+                                                <span class="font-data-mono text-sm text-white">68%</span>
+                                                <span
+                                                        class="text-[9px] uppercase tracking-widest font-bold text-[#059669] bg-[#059669]/20 border border-[#059669]/30 px-2 py-0.5 rounded-sm">On
+                                                        Track</span>
+                                        </div>
+                                </div>
+                                <!-- Item 2 -->
+                                <div
+                                        class="flex items-center justify-between p-4 border-b border-white/10 hover:bg-white/5 transition-colors">
+                                        <div class="flex items-center gap-4">
+                                                <div
+                                                        class="w-10 h-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-300">
+                                                        <span class="material-symbols-outlined"
+                                                                data-icon="bolt">bolt</span>
+                                                </div>
+                                                <div class="flex flex-col gap-0.5">
+                                                        <span
+                                                                class="font-body-md text-sm font-medium text-white">Electrical</span>
+                                                        <span
+                                                                class="font-data-mono text-[10px] uppercase text-[#ff8849] tracking-wider">Awaiting
+                                                                Materials</span>
+                                                </div>
+                                        </div>
+                                        <div class="flex flex-col items-end gap-1">
+                                                <span class="font-data-mono text-sm text-white">15%</span>
+                                                <span
+                                                        class="text-[9px] uppercase tracking-widest font-bold text-[#ff8849] bg-[#ff8849]/20 border border-[#ff8849]/30 px-2 py-0.5 rounded-sm shadow-[0_0_8px_rgba(255,136,73,0.15)]">Delayed</span>
+                                        </div>
+                                </div>
+                                <!-- Item 3 -->
+                                <div class="flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
+                                        <div class="flex items-center gap-4">
+                                                <div
+                                                        class="w-10 h-10 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-300">
+                                                        <span class="material-symbols-outlined"
+                                                                data-icon="plumbing">plumbing</span>
+                                                </div>
+                                                <div class="flex flex-col gap-0.5">
+                                                        <span
+                                                                class="font-body-md text-sm font-medium text-white">Mechanical</span>
+                                                        <span
+                                                                class="font-data-mono text-[10px] uppercase text-gray-400 tracking-wider">Pre-staging</span>
+                                                </div>
+                                        </div>
+                                        <div class="flex flex-col items-end gap-1">
+                                                <span class="font-data-mono text-sm text-white">5%</span>
+                                                <span
+                                                        class="text-[9px] uppercase tracking-widest font-bold text-gray-400 bg-black/40 border border-white/10 px-2 py-0.5 rounded-sm">Pending</span>
+                                        </div>
+                                </div>
+                        </div>
+                </section>
+        </main>
+        <!-- Bottom Navigation Shell -->
+        <nav
+                class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 pb-safe glass-nav text-gray-400 shadow-2xl z-50 transition-all duration-150">
+                <!-- Active Tab: Home -->
+                <button aria-label="Home"
+                        class="flex flex-col items-center justify-center text-[#ff8849] bg-[#ff8849]/10 rounded-lg p-2 w-16 border border-[#ff8849]/20 shadow-[0_0_10px_rgba(255,136,73,0.1)]">
+                        <span class="material-symbols-outlined" data-icon="home" data-weight="fill"
+                                style="font-variation-settings: 'FILL' 1;">home</span>
+                        <span class="font-data-mono text-[10px] uppercase tracking-wider mt-1">Home</span>
+                </button>
+                <!-- Inactive Tab: WBS -->
+                <button aria-label="WBS"
+                        class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-200 p-2 w-16 transition-colors">
+                        <span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+                        <span class="font-data-mono text-[10px] uppercase tracking-wider mt-1">WBS</span>
+                </button>
+                <!-- Inactive Tab: Events -->
+                <button aria-label="Events"
+                        class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-200 p-2 w-16 transition-colors">
+                        <span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+                        <span class="font-data-mono text-[10px] uppercase tracking-wider mt-1">Events</span>
+                </button>
+                <!-- Inactive Tab: Profile -->
+                <button aria-label="Profile"
+                        class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-200 p-2 w-16 transition-colors">
+                        <span class="material-symbols-outlined" data-icon="person">person</span>
+                        <span class="font-data-mono text-[10px] uppercase tracking-wider mt-1">Profile</span>
+                </button>
+        </nav>
+        <!-- Desktop Navigation Warning (Hidden on mobile) -->
+        <div class="hidden md:flex fixed inset-0 bg-black/90 z-[100] items-center justify-center backdrop-blur-sm">
+                <div class="text-center p-8 max-w-md card-surface rounded-xl border border-white/20">
+                        <span class="material-symbols-outlined text-4xl text-gray-400 mb-4"
+                                data-icon="devices">devices</span>
+                        <h1
+                                class="font-headline-md text-headline-md font-bold text-white mb-2 uppercase tracking-widest font-data-mono">
+                                Mobile View Requested</h1>
+                        <p class="font-data-mono text-sm text-gray-400 leading-relaxed">Please resize your browser
+                                window to a mobile width (&lt; 768px) to view the ConstructIQ Console.</p>
+                </div>
+        </div>
+</body>
+
+</html>

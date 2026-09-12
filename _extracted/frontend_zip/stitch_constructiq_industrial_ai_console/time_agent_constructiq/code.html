@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ConstructIQ - Time Agent</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&amp;family=IBM+Plex+Sans:wght@400;700&amp;family=Inter:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#ff8849",
+                        "primary-container": "#181c22",
+                        "on-surface": "#1c1b1c",
+                        "secondary-fixed": "#ffdbcc",
+                        "outline-variant": "#c6c6cb",
+                        "primary": "#000000",
+                        "on-background": "#1c1b1c",
+                        "surface-container-high": "#ebe7e7",
+                        "on-primary-fixed-variant": "#43474e",
+                        "surface-container": "#f0eded",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary": "#a04101",
+                        "on-tertiary-fixed": "#231a11",
+                        "primary-fixed": "#dfe2eb",
+                        "on-primary-fixed": "#181c22",
+                        "outline": "#76777b",
+                        "on-surface-variant": "#45474b",
+                        "inverse-on-surface": "#f3f0f0",
+                        "surface-container-highest": "#e5e2e2",
+                        "on-tertiary-container": "#908175",
+                        "surface-dim": "#dcd9d9",
+                        "surface-variant": "#e5e2e2",
+                        "tertiary-fixed-dim": "#d5c3b6",
+                        "surface-container-low": "#f6f3f3",
+                        "tertiary": "#000000",
+                        "on-secondary-fixed-variant": "#7a3000",
+                        "on-primary": "#ffffff",
+                        "surface": "#fcf8f9",
+                        "surface-bright": "#fcf8f9",
+                        "inverse-surface": "#313031",
+                        "primary-fixed-dim": "#c3c6cf",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#80848c",
+                        "tertiary-container": "#231a11",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#351000",
+                        "background": "#fcf8f9",
+                        "on-secondary-container": "#6b2900",
+                        "secondary-fixed-dim": "#ffb693",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#51443a",
+                        "tertiary-fixed": "#f2dfd1",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#5b5e66",
+                        "inverse-primary": "#c3c6cf"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "data-mono": ["IBM Plex Mono"],
+                        "label-caps": ["IBM Plex Sans"],
+                        "body-lg": ["IBM Plex Sans"],
+                        "body-sm": ["IBM Plex Sans"],
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "body-md": ["IBM Plex Sans"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .waveform-bar {
+            animation: waveform 1.2s ease-in-out infinite;
+        }
+        .waveform-bar:nth-child(1) { animation-delay: 0.0s; }
+        .waveform-bar:nth-child(2) { animation-delay: 0.2s; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.4s; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.2s; }
+        
+        @keyframes waveform {
+            0%, 100% { height: 8px; }
+            50% { height: 24px; }
+        }
+        
+        /* Hide scrollbar for cleaner UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-screen w-full overflow-hidden flex selection:bg-secondary-container selection:text-primary-container">
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full z-50 bg-primary-container h-full w-20 hover:w-64 transition-all duration-300 ease-in-out border-r border-outline-variant group">
+<!-- Header Logo -->
+<div class="flex items-center px-4 py-6 border-b border-surface-tint/20 h-16">
+<div class="w-10 h-10 flex-shrink-0 bg-secondary-container rounded-lg flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined font-bold">domain</span>
+</div>
+<div class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden whitespace-nowrap">
+<h1 class="font-headline-md text-headline-md font-bold text-white tracking-tight">ConstructIQ</h1>
+<p class="font-label-caps text-label-caps text-on-primary-container">Industrial Intelligence</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-4 py-4">
+<button class="w-full flex items-center justify-center md:justify-start bg-secondary-container text-primary-container rounded-lg p-2 hover:bg-secondary-fixed transition-colors">
+<span class="material-symbols-outlined">add</span>
+<span class="ml-3 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">New Project</span>
+</button>
+</div>
+<!-- Tabs -->
+<div class="flex-1 py-4 flex flex-col gap-2">
+<!-- Dashboard (Inactive) -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Dashboard</span>
+</a>
+<!-- Analytics (Inactive) -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Analytics</span>
+</a>
+<!-- Projects (Inactive) -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors" href="#">
+<span class="material-symbols-outlined">construction</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Projects</span>
+</a>
+<!-- WBS (Inactive) -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">WBS</span>
+</a>
+<!-- Events (Active - Maps to Time Agent Intent) -->
+<a class="border-l-4 border-secondary-container bg-surface-container-highest/10 text-secondary-container flex items-center px-[12px] py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_note</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap text-secondary-container">Events</span>
+</a>
+</div>
+<!-- Footer Tabs -->
+<div class="mt-auto border-t border-surface-tint/20 py-4 flex flex-col gap-2">
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Settings</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="ml-4 font-label-caps text-label-caps opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col md:ml-20 h-full relative bg-background">
+<!-- TopAppBar (Desktop) -->
+<header class="hidden md:flex justify-between items-center w-full px-margin-desktop h-16 border-b border-outline-variant bg-surface shrink-0 z-40 relative">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-primary">ConstructIQ</span>
+<nav class="flex gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Projects</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Resources</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Compliance</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search Bar -->
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-full text-sm focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container transition-all w-64 text-on-surface placeholder-on-surface-variant/50" placeholder="Search operations..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined">apps</span></button>
+<button class="bg-primary text-on-primary px-4 py-1.5 rounded-full font-label-caps text-label-caps hover:bg-primary/90 transition-colors">Create</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of an industrial construction supervisor wearing a white hard hat and safety glasses, bright neutral background, high resolution photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRhqJvL3e8wA-XJXOKHqzPqoIeFa-tOgICaJE8I8yBAnCcv3AT7rfKPA1cXLWFKw5CUIM8IhwFUt43jB74AdZ-nEcBskrIZuZ5nwRq6np2S8ytRou8jg8kzYnxrRRRPSzJVCiICruY2Yndpe-hGaWkyCCnzoa2if-5-nVR5JT_h7MHejAke9w8UhX0oPwNw2M0eiqAQ-jME87yzCPbXO3m7dm43Ra0iQQJvzHLXq0tjOf63r93ezFQ6g"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Conversational Interface Canvas -->
+<div class="flex-1 flex flex-col overflow-hidden w-full max-w-4xl mx-auto relative pb-[76px] md:pb-0">
+<!-- Session Header -->
+<div class="flex items-center justify-between p-4 md:px-8 md:py-6 border-b border-outline-variant/50 bg-background/80 backdrop-blur-md z-10 shrink-0">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+                        Time Agent Session
+                    </h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Zone B Operations • Today</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex flex-col items-end">
+<span class="font-data-mono text-data-mono text-primary">12 Logs</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Current Shift</span>
+</div>
+<div class="w-px h-8 bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-secondary-container bg-secondary-fixed/20 px-3 py-1.5 rounded-full border border-secondary-fixed">
+<span class="material-symbols-outlined text-sm pulse-ring" style="font-variation-settings: 'FILL' 1;">mic</span>
+<span class="font-label-caps text-label-caps">Listening</span>
+</div>
+</div>
+</div>
+<!-- Chat Scroll Area -->
+<div class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 flex flex-col gap-6">
+<!-- Date Divider -->
+<div class="flex justify-center">
+<span class="bg-surface-container-low px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface-variant border border-outline-variant">14:30 PM</span>
+</div>
+<!-- Supervisor Message -->
+<div class="flex justify-end">
+<div class="bg-surface-container text-on-surface px-4 py-3 rounded-2xl rounded-tr-sm max-w-[80%] border border-outline-variant shadow-sm">
+<p class="font-body-md text-body-md">Logged completion of conduit installation in sector 4. Team moving to wire pulling now. 4 electricians on site.</p>
+</div>
+</div>
+<!-- AI Thinking Indicator -->
+<div class="flex justify-start items-end gap-2 opacity-50 hidden"> <!-- Hidden by default, representing state -->
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-secondary-container">
+<span class="material-symbols-outlined text-sm">smart_toy</span>
+</div>
+<div class="bg-surface-container-lowest px-4 py-3 rounded-2xl rounded-tl-sm border border-outline-variant flex items-end h-[48px] gap-1">
+<div class="w-1.5 bg-secondary-container rounded-full waveform-bar"></div>
+<div class="w-1.5 bg-secondary-container rounded-full waveform-bar"></div>
+<div class="w-1.5 bg-secondary-container rounded-full waveform-bar"></div>
+<div class="w-1.5 bg-secondary-container rounded-full waveform-bar"></div>
+</div>
+</div>
+<!-- AI Response: Logged Event Card (Bento Style) -->
+<div class="flex justify-start items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex-shrink-0 flex items-center justify-center text-secondary-container mt-1 shadow-sm">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="flex flex-col gap-3 w-full max-w-[85%]">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+<!-- Card Header -->
+<div class="px-4 py-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+<span class="font-label-caps text-label-caps text-primary">Event Logged</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">14:31:05</span>
+</div>
+<!-- Card Body: Bento Grid Layout -->
+<div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Main Info -->
+<div class="col-span-1 sm:col-span-2">
+<p class="font-body-md text-body-md text-on-surface mb-3">Conduit installation marked complete. Initialized wire pulling task.</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 bg-surface-container text-on-surface-variant rounded font-label-caps text-label-caps border border-outline-variant/50">Sector 4</span>
+<span class="px-2.5 py-1 bg-secondary-fixed/20 text-on-secondary-container rounded font-label-caps text-label-caps border border-secondary-fixed/50 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">bolt</span> Electrical
+                                        </span>
+<span class="px-2.5 py-1 bg-surface-container text-on-surface-variant rounded font-label-caps text-label-caps border border-outline-variant/50 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">group</span> 4 Personnel
+                                        </span>
+</div>
+</div>
+<!-- Meta Data Box 1 -->
+<div class="bg-surface-container-low p-3 rounded-lg border border-outline-variant/50">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Location Data</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">location_on</span>
+<span class="font-data-mono text-data-mono text-on-surface">Zone B, Lvl 2</span>
+</div>
+</div>
+<!-- Meta Data Box 2 -->
+<div class="bg-surface-container-low p-3 rounded-lg border border-outline-variant/50">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Time Allocation</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary">schedule</span>
+<span class="font-data-mono text-data-mono text-on-surface">4.5 hrs estimated</span>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Response: Match Result Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-4">
+<!-- Confidence Ring -->
+<div class="relative w-12 h-12 flex items-center justify-center flex-shrink-0">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
+<path class="text-secondary-container stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="92, 100" stroke-width="3"></path>
+</svg>
+<span class="absolute font-data-mono text-[10px] text-primary font-bold">92%</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="font-data-mono text-data-mono text-primary font-bold">WBS-EL-402</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed-variant px-2 py-0.5 rounded text-[10px] font-label-caps uppercase">Auto-confirmed</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Matched activity code based on syntax and location.</p>
+</div>
+</div>
+<button class="text-outline hover:text-primary transition-colors p-2">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Spacer for scrolling above input -->
+<div class="h-24"></div>
+</div>
+<!-- Input Area (Fixed to bottom of content area on desktop, above bottom nav on mobile) -->
+<div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-background via-background to-transparent pt-8 pb-4 px-4 md:px-8 z-20">
+<div class="max-w-4xl mx-auto flex flex-col gap-3">
+<!-- Suggestion Chips -->
+<div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 pl-1">
+<button class="shrink-0 bg-surface border border-outline-variant hover:border-secondary-container px-3 py-1.5 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-all shadow-sm">Modify Location</button>
+<button class="shrink-0 bg-surface border border-outline-variant hover:border-secondary-container px-3 py-1.5 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-all shadow-sm">Add Material Issue</button>
+<button class="shrink-0 bg-surface border border-outline-variant hover:border-secondary-container px-3 py-1.5 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-all shadow-sm">Flag for review</button>
+</div>
+<!-- Input Bar -->
+<div class="flex items-end gap-3 bg-surface-container-lowest p-2 rounded-3xl border border-outline-variant shadow-lg relative">
+<div class="flex-1 min-h-[56px] relative flex items-center px-4">
+<input autocomplete="off" class="w-full bg-transparent border-none focus:ring-0 font-body-md text-body-md text-primary placeholder-on-surface-variant/50 p-0" placeholder="Describe observation or issue command..." type="text"/>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-1 pr-1 pb-1">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<!-- Large Mic Button -->
+<button class="w-12 h-12 bg-secondary-container text-primary-container rounded-full flex items-center justify-center hover:bg-secondary transition-colors shadow-md relative group">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mic</span>
+<!-- Subtle pulse effect behind mic when active -->
+<div class="absolute inset-0 rounded-full border border-secondary-container opacity-0 group-hover:animate-[pulse-ring_1.5s_cubic-bezier(0.215,0.61,0.355,1)_infinite]"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 pb-safe bg-primary-container z-50 rounded-t-xl border-t border-outline-variant shadow-lg h-[76px]">
+<!-- Home (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-[10px] mt-1">Home</span>
+</a>
+<!-- WBS (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-colors" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-[10px] mt-1">WBS</span>
+</a>
+<!-- Events (Active) -->
+<a class="flex flex-col items-center justify-center text-secondary-container bg-secondary-fixed/10 rounded-xl p-2 active:bg-primary-container/80 haptic-like scale transition duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">event_note</span>
+<span class="font-label-caps text-[10px] mt-1">Events</span>
+</a>
+<!-- Profile (Inactive) -->
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-[10px] mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple script for micro-interactions (e.g. haptic scale effect on mobile nav)
+        document.querySelectorAll('.haptic-like').forEach(el => {
+            el.addEventListener('touchstart', () => el.style.transform = 'scale(0.95)');
+            el.addEventListener('touchend', () => el.style.transform = 'scale(1)');
+        });
+    </script>
+</body></html>

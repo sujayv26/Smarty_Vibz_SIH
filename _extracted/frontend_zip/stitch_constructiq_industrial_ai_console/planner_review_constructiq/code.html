@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ConstructIQ - Planner Review</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;700&amp;family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#ff8849",
+                    "primary-container": "#181c22",
+                    "on-surface": "#1c1b1c",
+                    "secondary-fixed": "#ffdbcc",
+                    "outline-variant": "#c6c6cb",
+                    "primary": "#000000",
+                    "on-background": "#1c1b1c",
+                    "surface-container-high": "#ebe7e7",
+                    "on-primary-fixed-variant": "#43474e",
+                    "surface-container": "#f0eded",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "secondary": "#a04101",
+                    "on-tertiary-fixed": "#231a11",
+                    "primary-fixed": "#dfe2eb",
+                    "on-primary-fixed": "#181c22",
+                    "outline": "#76777b",
+                    "on-surface-variant": "#45474b",
+                    "inverse-on-surface": "#f3f0f0",
+                    "surface-container-highest": "#e5e2e2",
+                    "on-tertiary-container": "#908175",
+                    "surface-dim": "#dcd9d9",
+                    "surface-variant": "#e5e2e2",
+                    "tertiary-fixed-dim": "#d5c3b6",
+                    "surface-container-low": "#f6f3f3",
+                    "tertiary": "#000000",
+                    "on-secondary-fixed-variant": "#7a3000",
+                    "on-primary": "#ffffff",
+                    "surface": "#fcf8f9",
+                    "surface-bright": "#fcf8f9",
+                    "inverse-surface": "#313031",
+                    "primary-fixed-dim": "#c3c6cf",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#80848c",
+                    "tertiary-container": "#231a11",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed": "#351000",
+                    "background": "#fcf8f9",
+                    "on-secondary-container": "#6b2900",
+                    "secondary-fixed-dim": "#ffb693",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#51443a",
+                    "tertiary-fixed": "#f2dfd1",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#5b5e66",
+                    "inverse-primary": "#c3c6cf"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "unit": "4px",
+                    "container-max": "1440px",
+                    "gutter": "24px",
+                    "margin-desktop": "40px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "data-mono": ["IBM Plex Mono"],
+                    "label-caps": ["IBM Plex Sans"],
+                    "body-lg": ["IBM Plex Sans"],
+                    "body-sm": ["IBM Plex Sans"],
+                    "headline-md": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "body-md": ["IBM Plex Sans"],
+                    "display-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Hide scrollbar for cleaner look in the workspace */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md overflow-hidden flex h-screen">
+<!-- Shared Component: SideNavBar (Rail Desktop) -->
+<nav class="hidden md:flex bg-primary-container h-full w-20 hover:w-64 transition-all duration-300 ease-in-out border-r border-outline-variant fixed left-0 top-0 z-50 flex-col group overflow-hidden">
+<div class="p-4 flex items-center gap-4 border-b border-surface-container-highest/10 min-w-max">
+<span class="material-symbols-outlined text-secondary-fixed text-3xl">domain</span>
+<div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-white tracking-tight">ConstructIQ</span>
+<span class="font-label-caps text-label-caps text-on-primary-container">Industrial Intelligence</span>
+</div>
+</div>
+<div class="flex-1 py-4 flex flex-col gap-2 w-full">
+<!-- Dashboard -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined min-w-[24px]">dashboard</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-label-caps text-label-caps">Dashboard</span>
+</a>
+<!-- Analytics -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined min-w-[24px]">analytics</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-label-caps text-label-caps">Analytics</span>
+</a>
+<!-- Projects -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined min-w-[24px]">construction</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-label-caps text-label-caps">Projects</span>
+</a>
+<!-- WBS (Active) -->
+<a class="border-l-4 border-secondary-container bg-surface-container-highest/10 text-secondary-container flex items-center px-[12px] py-3 duration-200 group/item relative" href="#">
+<span class="material-symbols-outlined min-w-[24px] relative">
+                    account_tree
+                    <!-- Badge -->
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-secondary-container rounded-full border border-primary-container"></span>
+</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-label-caps text-label-caps">WBS</span>
+</a>
+<!-- Events -->
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center px-4 py-3 hover:bg-surface-container-highest/5 transition-colors group/item relative" href="#">
+<span class="material-symbols-outlined min-w-[24px]">event_note</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap font-label-caps text-label-caps">Events</span>
+</a>
+</div>
+<div class="p-4 flex flex-col gap-2 min-w-max">
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center hover:bg-surface-container-highest/5 transition-colors p-2 rounded" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity font-label-caps text-label-caps">Settings</span>
+</a>
+<a class="text-on-primary-fixed-variant hover:text-white flex items-center hover:bg-surface-container-highest/5 transition-colors p-2 rounded" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity font-label-caps text-label-caps">Support</span>
+</a>
+<button class="mt-4 bg-secondary-container text-primary-container font-label-caps text-label-caps py-2 px-4 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity w-full">
+                New Project
+            </button>
+</div>
+</nav>
+<!-- Shared Component: TopAppBar -->
+<header class="fixed top-0 right-0 w-full md:w-[calc(100%-5rem)] bg-surface border-b border-outline-variant h-16 z-40 flex justify-between items-center px-gutter md:px-margin-desktop transition-all duration-300 md:ml-20">
+<div class="flex items-center gap-6">
+<span class="font-headline-md text-headline-md font-bold text-primary block md:hidden">ConstructIQ</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant hover:text-primary hover:text-secondary transition-colors font-headline-sm text-headline-sm" href="#">Projects</a>
+<a class="text-secondary font-bold border-b-2 border-secondary pb-1 font-headline-sm text-headline-sm" href="#">Resources</a>
+<a class="text-on-surface-variant hover:text-primary hover:text-secondary transition-colors font-headline-sm text-headline-sm" href="#">Compliance</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">search</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">apps</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant ml-2">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5whNsdKRrQ-Wm74Aw7JuOXD971kGkfmzgiulgdkZDLJCah0eRL3aPf1veKXvU806ULK6jPHTi6Ss9HSXHW1SiN2oeo0iMTd8m3AH7O5f5zT-Z4fYxav9sWPVOYwYv0v2kov7IGy94owD6MIU2L5wAvgw7MsoIrbJtWjwYaf-x0Ra7S9JGy_gzaeotIhTZ9DvL4W3WiNqdQgdtShWtgPjqMQYdstZdvrWNOS6v8bwM1wX7vM6D3n-raQ"/>
+</div>
+<button class="hidden md:block bg-primary text-on-primary font-label-caps text-label-caps px-4 py-2 rounded hover:bg-surface-tint transition-colors ml-2">
+                Create
+            </button>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 w-full md:ml-20 pt-16 h-screen overflow-y-auto no-scrollbar relative bg-background pb-[140px]">
+<div class="max-w-container-max mx-auto px-gutter md:px-margin-desktop py-8">
+<div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h1 class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary block">Planner Review</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">Evaluate AI-extracted field reports against planned Work Breakdown Structure.</p>
+</div>
+<div class="flex gap-2">
+<span class="inline-flex items-center gap-1 bg-surface-container-low border border-outline-variant px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+                        3 Pending Reviews
+                    </span>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left Column: Source Data -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<!-- Raw Progress Report -->
+<div class="bg-surface border border-outline-variant rounded-lg p-6 flex flex-col h-full">
+<div class="flex items-center gap-2 mb-4 border-b border-surface-container-highest pb-3">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">chat</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Raw Field Report</h2>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-4 rounded text-on-surface font-data-mono text-data-mono leading-relaxed whitespace-pre-wrap flex-1">Subj: Sector 4B Pour Update
+Time: 14:30
+Supervisor: J. Miller
+
+Completed concrete pour for foundation footings in Sector 4B. Rebar grid was fully installed and inspected prior to pour. 
+
+Note: We had a 2-hour delay starting due to heavy morning rain, but caught up by skip-lunch rotation. Need additional cure blankets delivered by tomorrow AM.</div>
+<div class="mt-4 flex justify-between items-center text-on-surface-variant">
+<span class="font-label-caps text-label-caps">Source: SMS Gateway</span>
+<span class="font-label-caps text-label-caps">Today, 14:35</span>
+</div>
+</div>
+<!-- AI Extracted Event -->
+<div class="bg-surface border border-outline-variant rounded-lg p-6">
+<div class="flex items-center gap-2 mb-4 border-b border-surface-container-highest pb-3">
+<span class="material-symbols-outlined text-secondary text-[20px]">auto_awesome</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Extracted Entities</h2>
+</div>
+<div class="grid grid-cols-2 gap-y-4 gap-x-2">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Action</p>
+<p class="font-body-md text-body-md text-primary font-medium">Concrete Pour</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Location</p>
+<p class="font-body-md text-body-md text-primary font-medium">Sector 4B</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Component</p>
+<p class="font-body-md text-body-md text-primary font-medium">Foundation Footings</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Status</p>
+<span class="inline-block bg-[#e6f4ea] text-[#137333] px-2 py-0.5 rounded text-[12px] font-bold tracking-wider uppercase mt-1">Completed</span>
+</div>
+<div class="col-span-2">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase">Flags / Delays</p>
+<div class="flex gap-2 mt-1">
+<span class="inline-flex items-center gap-1 bg-error-container text-on-error-container px-2 py-0.5 rounded text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 2hr Delay (Weather)
+                                    </span>
+<span class="inline-flex items-center gap-1 bg-surface-container-high text-on-surface px-2 py-0.5 rounded text-[12px] font-bold">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span> Material Req.
+                                    </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Resolution & Matching -->
+<div class="lg:col-span-8 flex flex-col gap-6">
+<!-- Proposed Activity Match (Primary) -->
+<div class="bg-surface border-2 border-secondary/20 rounded-lg p-6 shadow-[0_4px_12px_rgba(0,0,0,0.03)] relative overflow-hidden">
+<!-- Accent Bar -->
+<div class="absolute top-0 left-0 w-1.5 h-full bg-secondary"></div>
+<div class="flex justify-between items-start mb-6 pl-2">
+<div>
+<p class="font-label-caps text-label-caps text-secondary uppercase mb-1">Primary Match Candidate</p>
+<h2 class="font-headline-md text-headline-md text-primary">WBS 4.2.1: Sector 4 Foundation Pour</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Planned Date: Today • Assigned to: Miller Construction</p>
+</div>
+<!-- Confidence Indicator -->
+<div class="flex flex-col items-center justify-center bg-surface-container-low border border-outline-variant rounded-lg p-3 min-w-[100px]">
+<span class="font-display-lg-mobile text-display-lg-mobile text-secondary leading-none">94<span class="text-[20px]">%</span></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant mt-1 uppercase text-[10px]">Confidence</span>
+<div class="w-full bg-surface-variant h-1.5 rounded-full mt-2 overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 94%;"></div>
+</div>
+</div>
+</div>
+<!-- Match Reasons Checklist -->
+<div class="pl-2 border-t border-surface-container-highest pt-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-3">Match Analysis</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#137333] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Location exactly matches 'Sector 4B'</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#137333] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Action 'Pour' aligns with WBS verb</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#137333] mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Temporal alignment (Planned for Today)</span>
+</div>
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-[#b06000] mt-0.5" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-body-sm text-body-sm text-on-surface">Delay reported alters critical path slightly</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Expandable Top 3 Candidates -->
+<div class="bg-surface border border-outline-variant rounded-lg">
+<details class="group">
+<summary class="flex justify-between items-center p-4 cursor-pointer hover:bg-surface-container-low transition-colors select-none">
+<span class="font-headline-sm text-headline-sm text-primary">Alternative Match Candidates (3)</span>
+<span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform duration-200">expand_more</span>
+</summary>
+<div class="p-4 border-t border-surface-container-highest bg-surface-container-lowest flex flex-col gap-4">
+<!-- Alt Candidate 1 -->
+<div class="border border-outline-variant rounded p-3 flex justify-between items-center bg-surface">
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="font-body-sm text-body-sm font-medium text-primary">WBS 4.2.2: Sector 4 Rebar Installation</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">68%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-on-surface-variant h-full rounded-full" style="width: 68%;"></div>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">Matches location, but action 'Pour' strongly supersedes 'Installation'.</p>
+</div>
+<button class="ml-4 font-label-caps text-label-caps text-primary border border-outline-variant px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">Select</button>
+</div>
+<!-- Alt Candidate 2 -->
+<div class="border border-outline-variant rounded p-3 flex justify-between items-center bg-surface">
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<span class="font-body-sm text-body-sm font-medium text-primary">WBS 4.1.9: Sector 3B Concrete Pour</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">42%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-on-surface-variant h-full rounded-full" style="width: 42%;"></div>
+</div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mt-2">Matches action, but location vector distance is too high.</p>
+</div>
+<button class="ml-4 font-label-caps text-label-caps text-primary border border-outline-variant px-3 py-1.5 rounded hover:bg-surface-container-low transition-colors">Select</button>
+</div>
+</div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Action Bar -->
+<div class="fixed bottom-[56px] md:bottom-0 left-0 md:left-20 right-0 bg-surface/95 backdrop-blur-sm border-t border-outline-variant p-4 md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 z-40 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="text-on-surface-variant font-body-sm text-body-sm hidden md:block">
+            Reviewing 1 of 3 unmapped field reports.
+        </div>
+<div class="flex flex-wrap items-center justify-center md:justify-end gap-3 w-full md:w-auto">
+<button class="font-label-caps text-label-caps text-primary px-4 py-2 hover:bg-surface-container-low rounded transition-colors order-4 md:order-1">
+                Create New Activity
+            </button>
+<button class="font-label-caps text-label-caps text-error border border-outline-variant px-6 py-2 rounded hover:bg-error-container hover:border-error hover:text-on-error-container transition-colors order-3 md:order-2">
+                Reject Data
+            </button>
+<button class="font-label-caps text-label-caps text-primary border border-primary px-6 py-2 rounded hover:bg-surface-container-high transition-colors order-2 md:order-3">
+                Correct Match
+            </button>
+<button class="font-label-caps text-label-caps text-white bg-secondary px-8 py-2 rounded shadow-sm hover:bg-[#853500] transition-colors order-1 md:order-4 active:scale-[0.98]">
+                Approve &amp; Update WBS
+            </button>
+</div>
+</div>
+<!-- Shared Component: BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 pb-safe bg-primary-container border-t border-outline-variant shadow-lg rounded-t-xl z-50">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps-mobile text-label-caps-mobile mt-1 text-[10px]">Home</span>
+</a>
+<!-- WBS (Active intent fallback) -->
+<a class="flex flex-col items-center justify-center text-secondary-container bg-secondary-fixed/10 rounded-xl p-2 active:bg-primary-container/80 transition-transform duration-150 active:scale-95 relative" href="#">
+<span class="material-symbols-outlined relative">
+                account_tree
+                <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-secondary-container rounded-full border border-primary-container"></span>
+</span>
+<span class="font-label-caps-mobile text-label-caps-mobile mt-1 text-[10px]">WBS</span>
+</a>
+<!-- Events -->
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined">event_note</span>
+<span class="font-label-caps-mobile text-label-caps-mobile mt-1 text-[10px]">Events</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 transition-transform duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps-mobile text-label-caps-mobile mt-1 text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>
