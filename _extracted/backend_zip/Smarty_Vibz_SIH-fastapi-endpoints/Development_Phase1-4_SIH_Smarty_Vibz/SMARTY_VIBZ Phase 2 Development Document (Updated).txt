@@ -1,0 +1,753 @@
+SMARTY_VIBZ
+PHASE 2 DEVELOPMENT DOCUMENT (UPDATED)
+Hybrid Schedule Matching Engine & Benchmark Evaluation
+Reference basis: Phase 1 establishes schedule ingestion/storage, multi-format progress extraction (free text, Excel, Time Agent) and validated progress-event storage. Phase 2 extends that foundation rather than rebuilding it.
+
+1. Phase 2 Objective
+Build a lightweight, explainable Hybrid Schedule Matching Engine that consumes the structured Progress Events and Schedule Activities already produced and stored by Phase 1, identifies the most likely planned activities, ranks candidates, and returns the top three matches. Additionally, Phase 2 includes a benchmark dataset and accuracy evaluation framework that produces measurable metrics for judges.
+
+Phase 1 answers: "What happened on site?"
+Phase 2 answers: "Which planned activity did that site event belong to?" (with measured accuracy)
+
+2. Direct Reference to Phase 1
+Phase 1 defines the handoff boundary explicitly: schedule activities are stored from Excel, while free-text field reports, discipline-wise Excel progress, and Time Agent conversations are converted into validated Progress Events and stored in SQLite. Phase 1 also provides source_type (FREE_TEXT / EXCEL / AGENT_CHAT) on progress_events.
+
+Phase 1 specifically provides the schedule_activity fields activity_code, activity_name, discipline, WBS and planned dates, and progress_event fields such as activity_reference, event_type, event_date, event_time, discipline, location, equipment_tag, raw_text, source_type and created_at.
+
+3. Phase 1 → Phase 2 System Flow
+PHASE 1
+Schedule.xlsx → Validation → schedule_activities (SQLite)
+
+Field Progress Report → AI Extraction → Pydantic Validation → progress_events (SQLite)
+Discipline-wise Excel → Row Extraction → Pydantic Validation → progress_events (SQLite)
+Time Agent Chat → Extraction (reused) → Pydantic Validation → progress_events (SQLite)
+
+                ↓ PHASE 2 HANDOFF ↓
+
+progress_event_id
+    ↓
+Matching Service
+    ↓
+Candidate Retrieval
+    ↓
+Exact / Identifier Matching
+    +
+Fuzzy Text Matching
+    +
+Semantic Matching
+    +
+Context / Temporal Matching
+    ↓
+Score Aggregation
+    ↓
+Ranking
+    ↓
+Top 3 Schedule Activities
+    ↓
+Explainable Match Results
+
+4. Scope of Phase 2
+4.1 In Scope
+Read a stored Progress Event using progress_event_id.
+Read relevant Schedule Activities from the existing Phase 1 database.
+Retrieve a manageable candidate set for the hackathon dataset.
+Perform deterministic identifier/exact matching.
+Perform fuzzy text matching using a lightweight local library such as RapidFuzz.
+Provide a semantic similarity component behind a clean abstraction, preferably using a lightweight local model.
+Gracefully fall back to Exact + Fuzzy + Context if semantic matching is unavailable.
+Compare structured context such as discipline, WBS, location, equipment tag, event type and planned dates when data exists.
+Aggregate normalized component scores using the defined MVP weights.
+Rank candidates and return the top 3.
+Return score breakdown and deterministic human-readable reasons.
+Expose the matching functionality through FastAPI.
+Add automated offline tests without requiring a live external API.
+Benchmark dataset with 40-50 synthetic progress reports and accuracy evaluation (NEW).
+
+4.2 Explicitly Out of Scope
+React frontend or dashboard
+Planner approval/review workflow
+Phase 3 confidence workflow
+OCR
+Voice processing
+Delay prediction
+Primavera P6 integration
+Mobile application
+Kubernetes, microservices or Redis
+Authentication
+Complex vector database
+Any redesign/rebuild of Phase 1
+
+5. Inputs and Data Contract
+5.1 Progress Event Input
+
+| Field | Use in Matching | Missing Field Behavior |
+|---|---|---|
+| id | Lookup key | Invalid ID → 404 |
+| activity_reference | Text/identifier signal | Ignore if null |
+| event_type | Work-state/context signal | Ignore if null |
+| event_date | Temporal compatibility | Ignore if null |
+| event_time | Optional temporal refinement | Ignore if null |
+| discipline | Structured context | Ignore if null |
+| location | Location/context signal | Ignore if null; never guess |
+| equipment_tag | Strong identifier signal | Ignore if null |
+| raw_text | Fuzzy/semantic text signal | Use other available fields if absent |
+| source_type | Metadata; does not affect matching | Ignore |
+
+5.2 Schedule Activity Input
+
+| Field | Use in Matching |
+|---|---|
+| id | Candidate identity |
+| activity_code | Exact identifier signal |
+| activity_name | Fuzzy/semantic text signal |
+| discipline | Structured context |
+| wbs | Context signal where available |
+| planned_start | Temporal compatibility |
+| planned_finish | Temporal compatibility |
+
+6. Matching Architecture
+POST /matching/run/{progress_event_id}
+                │
+                ▼
+        Retrieve Progress Event
+                │
+                ▼
+        Candidate Retrieval
+                │
+       ┌────────┼─────────┐
+       ▼        ▼         ▼
+     Exact    Fuzzy    Semantic
+       │        │         │
+       └────────┼─────────┘
+                ▼
+        Context + Temporal
+                │
+                ▼
+        Score Aggregation
+                │
+                ▼
+            Ranking
+                │
+                ▼
+       Top 3 + Explanations
+
+7. Candidate Retrieval
+For the Phase 2 MVP, candidate retrieval should remain simple and deterministic:
+1. Equipment tag match
+2. Discipline match
+3. Keyword overlap
+4. Full schedule fallback
+
+The sample schedule is intentionally around 15–20 activities and contains similar activities for future matching, so a full-schedule fallback is acceptable and preferable to over-engineering.
+
+8. Matching Components
+8.1 Exact / Identifier Matching
+Prioritize deterministic signals:
+- Equipment tags
+- Activity references/codes
+- IDs and unique identifiers
+- Strong domain keywords
+
+Example: XX-101 in the Progress Event and XX-101 in the Schedule Activity should produce a strong exact signal.
+This component must work completely offline.
+
+8.2 Fuzzy Text Matching
+Use RapidFuzz or an equivalent lightweight local library. It should handle word-order differences, minor spelling differences, abbreviations, similar phrases and singular/plural variations.
+
+Progress:  "XX-101 spool erection"
+Schedule:  "Erection of spool for XX-101"
+
+8.3 Semantic Matching
+Provide a SemanticMatcher abstraction so the semantic implementation can be replaced later.
+Prefer a lightweight local embedding model if practical. The overall application must not depend on a live external LLM API. If the semantic component is unavailable, return a safe fallback using Exact + Fuzzy + Context.
+
+8.4 Context and Temporal Matching
+Discipline: Piping, Civil, Mechanical, Electrical, etc.
+WBS: compare when present in both event context and schedule data.
+Location: compare only when the event contains a location; never infer a missing location.
+Equipment tag: compare as a strong contextual/identifier signal.
+Event type: START/PROGRESS/COMPLETE/DELAY/HOLD can inform compatibility with activity wording/state.
+Planned dates: compare event date with planned start/finish when dates are available.
+Missing values are not mismatches by default; the corresponding signal should be treated as not applicable rather than guessed.
+
+9. Hybrid Scoring Model
+Formula:
+Final Score =
+    0.30 × Exact Score
+  + 0.25 × Semantic Score
+  + 0.20 × Fuzzy Score
+  + 0.10 × Discipline Score
+  + 0.10 × Context Score
+  + 0.05 × Temporal Score
+
+All component scores must be normalized to 0.0–1.0. These are MVP starting weights and may be tuned against the benchmark dataset.
+
+10. Ranking and Match Confidence Behavior
+After calculating the final score for each candidate:
+Return Top 3, sorted descending.
+Do not force an unrelated activity to become a match. If evidence is weak, return a low-confidence/no-strong-match indication while still preserving the ranked candidates where appropriate.
+
+11. Explainable Results
+Every returned candidate should include:
+- Final score
+- Individual score components
+- Human-readable reasons
+
+PIP-1023 — Erect Line 24"-XX-101
+Final Score: 94%
+
+Reasons:
+✓ Equipment tag XX-101 matched
+✓ Discipline Piping matched
+✓ Activity wording is highly similar
+✓ Location matched
+✓ Schedule timing is compatible
+
+Reasons must be generated deterministically from the component scores. Do not make a second LLM request just to generate explanations.
+
+12. API Specification
+New endpoint:
+POST /matching/run/{progress_event_id}
+
+Flow:
+progress_event_id → Retrieve Progress Event → Retrieve Schedule Activities / Candidates → Run Matching Engine → Calculate Component Scores → Aggregate Final Score → Rank → Return Top 3
+
+12.1 Example Response
+{
+  "progress_event_id": 17,
+  "candidates": [
+    {
+      "activity_code": "PIP-1023",
+      "activity_name": "Erect Line 24\"-XX-101",
+      "final_score": 0.94,
+      "score_breakdown": {
+        "exact": 1.0,
+        "semantic": 0.91,
+        "fuzzy": 0.87,
+        "discipline": 1.0,
+        "context": 1.0,
+        "temporal": 0.8
+      },
+      "reasons": [
+        "Equipment tag XX-101 matched",
+        "Discipline Piping matched",
+        "Activity wording is highly similar",
+        "Location matched",
+        "Schedule timing is compatible"
+      ]
+    }
+  ]
+}
+
+13. Benchmark Dataset and Accuracy Evaluation (NEW)
+This section is critical for the SIH demonstration. Judges will ask for accuracy numbers. Having measured metrics is a significant differentiator.
+
+13.1 Benchmark Dataset Structure
+Create a benchmark_data/ directory containing:
+- benchmark_schedule.xlsx — the standard 15-20 activity schedule (same as sample data)
+- benchmark_reports.json — 40-50 synthetic progress reports with known ground-truth matches
+
+13.2 Benchmark Report Categories
+Each report must have:
+- input_text: the free-text or Excel-derived progress description
+- expected_activity_code: the correct schedule activity code
+- category: the type of test case
+- source_type: FREE_TEXT or EXCEL or AGENT_CHAT
+
+| Category | Count | Description |
+|---|---|---|
+| EXACT_MATCH | 15 | Clear exact-match cases with equipment tags and specific descriptions |
+| FUZZY_WORDING | 10 | Same activity, different wording or word order |
+| AMBIGUOUS_TAG | 10 | Same equipment tag across multiple activities (e.g., XX-101 erection vs. support vs. inspection) — tests that the matcher picks the right one based on context |
+| MISSING_FIELDS | 5 | Reports with missing discipline, location, or equipment tag |
+| NO_MATCH | 5 | Reports that do not correspond to any schedule activity |
+| MULTI_DISCIPLINE | 5 | Reports spanning multiple disciplines to test cross-discipline handling |
+
+Total: 50 reports
+
+13.3 Benchmark Report Examples
+
+EXACT_MATCH example:
+{
+  "input_text": "Started XX-101 spool erection at 9:30 AM in Area B",
+  "expected_activity_code": "PIP-1023",
+  "category": "EXACT_MATCH",
+  "source_type": "FREE_TEXT"
+}
+
+AMBIGUOUS_TAG example:
+{
+  "input_text": "Installed support for XX-101",
+  "expected_activity_code": "PIP-1027",
+  "category": "AMBIGUOUS_TAG",
+  "source_type": "FREE_TEXT"
+}
+
+NO_MATCH example:
+{
+  "input_text": "Repainted the perimeter fence around the compound",
+  "expected_activity_code": null,
+  "category": "NO_MATCH",
+  "source_type": "FREE_TEXT"
+}
+
+MISSING_FIELDS example:
+{
+  "input_text": "Started spool erection",
+  "expected_activity_code": "PIP-1023",
+  "category": "MISSING_FIELDS",
+  "source_type": "AGENT_CHAT"
+}
+
+13.4 Accuracy Evaluation Endpoint
+Endpoint: POST /matching/benchmark
+This endpoint runs the full matching pipeline against all benchmark reports and returns accuracy metrics.
+
+Response:
+{
+  "total_reports": 50,
+  "metrics": {
+    "top1_accuracy": 0.84,
+    "top3_accuracy": 0.92,
+    "precision_at_high_confidence": 0.95,
+    "unmatched_rate": 0.10,
+    "avg_processing_time_ms": 45
+  },
+  "by_category": {
+    "EXACT_MATCH": {"count": 15, "top1_correct": 15, "top3_correct": 15},
+    "FUZZY_WORDING": {"count": 10, "top1_correct": 8, "top3_correct": 10},
+    "AMBIGUOUS_TAG": {"count": 10, "top1_correct": 7, "top3_correct": 9},
+    "MISSING_FIELDS": {"count": 5, "top1_correct": 3, "top3_correct": 4},
+    "NO_MATCH": {"count": 5, "top1_correct": 4, "top3_correct": 5},
+    "MULTI_DISCIPLINE": {"count": 5, "top1_correct": 4, "top3_correct": 5}
+  },
+  "high_confidence_threshold": 0.80,
+  "auto_accepted_count": 38,
+  "auto_accepted_correct": 36,
+  "planner_review_count": 12
+}
+
+13.5 Accuracy Metrics Definitions
+- Top-1 Accuracy: percentage of reports where the correct activity is ranked #1
+- Top-3 Accuracy: percentage of reports where the correct activity appears in the top 3
+- Precision at High-Confidence: percentage of auto-accepted matches (above threshold) that are correct
+- Unmatched Rate: percentage of NO_MATCH reports correctly identified as having no strong match
+- Average Processing Time: mean time from report input to matching result
+
+13.6 Benchmark Test
+The benchmark must be runnable as an automated test without internet access.
+Test: test_benchmark_accuracy
+This test loads the benchmark dataset, runs matching on each report, compares against ground truth, and asserts that metrics meet minimum thresholds:
+- Top-1 accuracy >= 0.75
+- Top-3 accuracy >= 0.85
+- Precision at high confidence >= 0.90
+- Unmatched rate detection >= 0.80
+
+If thresholds are not met, the test should report the failing categories and specific reports, not silently pass.
+
+14. Backend Integration with Phase 1
+Extend the existing Phase 1 project. Do not create a parallel backend.
+Do not blindly create a new directory structure if Phase 1 already has an equivalent organization. Reuse existing patterns.
+
+15. Optional Match Persistence
+If match results need to be persisted for the Phase 3 handoff, add an activity_matches table/model without duplicating Phase 1 tables.
+
+16. Edge Cases and Error Handling
+The no-hallucination rule from Phase 1 continues into Phase 2: never invent missing activity IDs, equipment tags, locations, dates or disciplines.
+
+| Condition | Required Behavior |
+|---|---|
+| Invalid progress_event_id | Return 404 Not Found |
+| Empty schedule | Controlled response; do not crash |
+| Missing equipment tag | Use remaining signals |
+| Missing discipline | Use remaining signals |
+| Missing location | Do not guess; location signal not applicable |
+| Missing optional fields | Do not crash; ignore unavailable signal |
+| Ambiguous event | Return multiple ranked candidates |
+| No relevant match | Return no-strong-match/low-confidence result |
+| Semantic matcher unavailable | Fallback to Exact + Fuzzy + Context |
+| Database failure | Controlled server error without sensitive internals |
+| Two activities same equipment tag | Context + event_type matching must distinguish (e.g., erection vs. support vs. inspection) |
+| Benchmark dataset missing | Return controlled error; do not crash |
+
+17. Test Dataset
+Use the existing Phase 1 sample dataset as the starting point. Phase 1 specifies approximately 15–20 activities across Civil, Piping, Mechanical and Electrical and deliberately includes similar activities.
+
+The intentionally similar XX-101 activities are especially important for proving that the matcher distinguishes erection from support installation and inspection.
+
+18. Required Test Cases
+All tests must run without internet access or a live AI API.
+
+| Test | Input / Condition | Expected Result |
+|---|---|---|
+| Exact identifier | Started XX-101 spool erection | PIP-1023 ranks first |
+| Different wording | Installation commenced for the XX-101 piping assembly | PIP-1023 ranks highly |
+| Similar activities | Erection of XX-101 | PIP-1023 > PIP-1027 > PIP-1042 |
+| Context | Piping + XX-101 + Area B | Correct piping candidate receives stronger score |
+| Missing fields | No location/equipment/discipline | Matcher does not crash |
+| Ambiguous event | Insufficiently specific work description | Multiple candidates returned |
+| No match | Unrelated activity text | No forced unrelated match |
+| Semantic failure | Semantic component unavailable | Fallback succeeds |
+| Score calculation | Known component values | Final weighted score is correct |
+| API | POST /matching/run/{id} | Valid top-3 response schema |
+| Regression | Run all Phase 1 tests | All Phase 1 tests continue to pass |
+| Ambiguous tag — support | Installed support for XX-101 | PIP-1027 ranks first (NEW) |
+| Ambiguous tag — inspection | Inspected XX-101 | PIP-1042 ranks first (NEW) |
+| Benchmark top-1 | Run 50-report benchmark | Top-1 accuracy >= 0.75 (NEW) |
+| Benchmark top-3 | Run 50-report benchmark | Top-3 accuracy >= 0.85 (NEW) |
+| Benchmark precision | Run 50-report benchmark | Precision at high confidence >= 0.90 (NEW) |
+| Benchmark unmatched | Run NO_MATCH reports | Unmatched detection >= 0.80 (NEW) |
+
+19. Development Order
+1. Inspect the complete Phase 1 repository.
+2. Run the existing Phase 1 test suite and record the baseline.
+3. Understand the actual models, schemas, database, services and API conventions.
+4. Confirm the fields available on schedule_activities and progress_events.
+5. Implement candidate retrieval.
+6. Implement exact/identifier matching.
+7. Implement fuzzy matching.
+8. Implement context and temporal matching.
+9. Implement semantic matching behind a replaceable abstraction.
+10. Implement semantic fallback behavior.
+11. Implement weighted score aggregation.
+12. Implement ranking and top-3 selection.
+13. Implement deterministic explanations.
+14. Implement POST /matching/run/{progress_event_id}.
+15. Create the benchmark dataset (50 reports with ground truth) (NEW).
+16. Implement POST /matching/benchmark endpoint (NEW).
+17. Add/update tests including benchmark accuracy tests (NEW).
+18. Run the complete Phase 1 + Phase 2 test suite.
+19. Start the FastAPI application and verify /docs.
+20. Manually test the matching endpoint with the sample progress events.
+21. Run the benchmark and record actual accuracy numbers (NEW).
+22. Fix all failures and remove unnecessary complexity.
+23. Commit the completed Phase 2 implementation.
+
+20. Definition of Done
+Phase 1 stored data → Progress Event + Schedule Activities → Hybrid Matching Engine → Exact + Fuzzy + Semantic + Context → Score Aggregation → Ranked Top 3 → Scores + Breakdown + Reasons
+
+Existing Phase 1 functionality remains intact.
+POST /matching/run/{progress_event_id} works.
+Exact/identifier matching works.
+Fuzzy matching works.
+Context/temporal matching works.
+Semantic matching works or has a clean fallback.
+Candidates are correctly ranked.
+Only the top 3 are returned.
+Score breakdown is returned.
+Reasons are returned deterministically.
+Ambiguous tag cases are correctly distinguished (erection vs. support vs. inspection for XX-101).
+Missing fields and edge cases are handled safely.
+Benchmark dataset exists with 50 reports and ground truth (NEW).
+POST /matching/benchmark returns accuracy metrics (NEW).
+Benchmark tests pass with minimum thresholds (NEW).
+Automated tests pass offline.
+Phase 1 tests still pass.
+Swagger /docs exposes and can exercise the endpoints.
+No API key is required for automated tests.
+No Phase 3 workflow has been implemented.
+
+21. Phase 3 Handoff Boundary
+PHASE 2
+Match → Top 3 + Scores + Reasons
+PHASE 3
+Confidence → High Confidence → Auto Match | Low Confidence → Planner Review → Approve / Correct / Reject / Create New → Audit Trail
+
+Phase 2 should provide enough structured scoring information for Phase 3, including the benchmark accuracy data to justify confidence thresholds, but it must not implement planner review, approval, correction, audit workflow, or new-activity creation.
+
+22. What NOT to Build
+Frontend/dashboard
+Planner review or approval UI
+OCR
+Voice input
+Delay prediction
+Primavera P6 integration
+Mobile app
+Kubernetes
+Microservices
+Redis
+Authentication
+Complex vector database
+Phase 3 confidence workflow
+Phase 4 frontend
+
+23. Git Handoff
+git add .
+git commit -m "Implement Phase 2 hybrid schedule matching engine with benchmark"
+git push
+
+24. Phase Progression
+PHASE 1: What happened on site? (Free text + Excel + Time Agent)
+    ↓ FastAPI + SQLite → Schedule Activities + Progress Events
+PHASE 2: Which planned activity? (With measured accuracy)
+    ↓ Hybrid Matching Engine + Benchmark → Top 3 + Scores + Reasons + Accuracy Metrics
+PHASE 3: Can we trust the match?
+    ↓ Confidence + Planner Review + Create New Activity
+PHASE 4: Can we demonstrate the complete product?
+    ↓ Frontend + Dashboard + Time Agent UI + Insights + Demo Flow
+
+25. Implementation Prompt
+
+You are the lead backend engineer working on our SIH hackathon project, Smarty_vibz.
+
+I have provided the SMARTY_VIBZ Phase 1 Development Document and the Phase 2 Development Document.
+
+Treat Phase 1 as the existing implementation baseline and Phase 2 as the PRIMARY SPECIFICATION for the new work.
+
+Your job is to ACTUALLY IMPLEMENT Phase 2 in the existing repository.
+Do not merely explain the implementation.
+Do not only generate snippets.
+Inspect the repository, run the existing tests, modify the code, run the application, test the API, debug failures, and leave the repository in a working state.
+
+===================================================
+PHASE 1 IS THE FOUNDATION — DO NOT REBUILD IT
+===================================================
+
+Before writing code:
+1. Inspect the complete repository.
+2. Run the existing Phase 1 test suite and record the baseline.
+3. Identify the actual FastAPI application structure, SQLAlchemy models, Pydantic schemas, SQLite/database configuration, schedule ingestion service, progress extraction service, Excel progress service, Time Agent service, AI provider abstraction, existing API routers, and existing tests.
+4. Confirm how schedule_activities and progress_events (including source_type) are represented in the actual code.
+5. Reuse the existing Phase 1 architecture and conventions.
+6. Do not unnecessarily rename, delete, replace or duplicate working Phase 1 code.
+
+Phase 1 already provides:
+- schedule Excel ingestion and validation
+- stored schedule activities
+- free-text progress extraction
+- discipline-wise Excel progress upload
+- Time Agent conversational interface
+- validated structured progress events
+- SQLite persistence
+- FastAPI APIs
+- pytest-based offline testing
+- Swagger at /docs
+
+Phase 2 starts from these stored structured objects.
+
+===================================================
+PHASE 2 OBJECTIVE
+===================================================
+
+Implement the Hybrid Schedule Matching Engine AND the benchmark evaluation framework.
+
+Input:
+- progress_event_id
+- stored Progress Event
+- stored Schedule Activities
+
+Output:
+- Top 3 matching schedule activities
+- final score
+- score breakdown
+- deterministic human-readable reasons
+
+Additionally:
+- Create a benchmark dataset of 50 synthetic progress reports with ground-truth matches
+- Implement POST /matching/benchmark to evaluate accuracy
+- Report top-1 accuracy, top-3 accuracy, precision at high confidence, unmatched rate, and average processing time
+
+Pipeline:
+Progress Event → Candidate Retrieval → Exact / Identifier Matching → Fuzzy Matching → Semantic Matching → Context + Temporal Matching → Score Aggregation → Ranking → Top 3 → Explainable Results
+
+===================================================
+MATCHING COMPONENTS
+===================================================
+
+1. EXACT / IDENTIFIER MATCHING — match equipment tags, activity references, codes, IDs, strong domain keywords. Must work completely offline.
+
+2. FUZZY MATCHING — use RapidFuzz. Handle word-order differences, spelling, abbreviations, similar phrases, singular/plural.
+
+3. SEMANTIC MATCHING — clean SemanticMatcher abstraction. Prefer lightweight local embedding. Fall back to Exact + Fuzzy + Context if unavailable. Never crash on semantic failure.
+
+4. CONTEXT / TEMPORAL MATCHING — discipline, WBS, location, equipment tag, event type, planned dates. Never invent missing information.
+
+===================================================
+MVP SCORING
+===================================================
+
+Final Score = 0.30*exact + 0.25*semantic + 0.20*fuzzy + 0.10*discipline + 0.10*context + 0.05*temporal
+
+Normalize every component to 0-1. Keep weights easy to modify.
+
+===================================================
+AMBIGUOUS TAG HANDLING (CRITICAL)
+===================================================
+
+The sample dataset contains multiple activities referencing XX-101:
+- PIP-1023: Erect Line 24"-XX-101
+- PIP-1027: Install Support for XX-101
+- PIP-1042: Inspect XX-101
+
+The matcher MUST distinguish between these based on:
+- Event type (START for erection, PROGRESS for support, COMPLETE for inspection)
+- Activity description keywords (erection vs. support vs. inspection)
+- Context signals
+
+This is a critical test case. If the matcher cannot distinguish these, it is not working correctly.
+
+===================================================
+BENCHMARK DATASET (NEW)
+===================================================
+
+Create benchmark_data/ directory with:
+- benchmark_schedule.xlsx (same as sample schedule)
+- benchmark_reports.json (50 reports with ground truth)
+
+Categories:
+- EXACT_MATCH (15): clear matches with equipment tags
+- FUZZY_WORDING (10): same activity, different wording
+- AMBIGUOUS_TAG (10): same tag, different activity — tests disambiguation
+- MISSING_FIELDS (5): missing discipline/location/tag
+- NO_MATCH (5): unrelated activities — must not force a match
+- MULTI_DISCIPLINE (5): cross-discipline reports
+
+Implement POST /matching/benchmark:
+- Load benchmark dataset
+- Run matching on each report
+- Compare against ground truth
+- Return metrics: top-1 accuracy, top-3 accuracy, precision at high confidence, unmatched rate, avg processing time
+- Return per-category breakdown
+
+Add test: test_benchmark_accuracy
+- Assert top-1 accuracy >= 0.75
+- Assert top-3 accuracy >= 0.85
+- Assert precision at high confidence >= 0.90
+- Assert unmatched detection >= 0.80
+- If thresholds not met, report failing categories and specific reports
+
+===================================================
+CANDIDATE RETRIEVAL
+===================================================
+
+1. equipment tag → 2. discipline → 3. keyword overlap → 4. full schedule fallback
+Do not over-engineer.
+
+===================================================
+RANKING
+===================================================
+
+Calculate final score for every candidate. Sort descending. Return top 3.
+Do not force an unrelated activity to become a match.
+
+===================================================
+EXPLAINABILITY
+===================================================
+
+Every candidate: final_score, score_breakdown, reasons.
+Generate reasons deterministically. Do NOT call an LLM for explanations.
+
+===================================================
+API
+===================================================
+
+Implement:
+POST /matching/run/{progress_event_id}
+POST /matching/benchmark (NEW)
+
+Keep route logic thin. Put business logic in services.
+
+===================================================
+PHASE 1 INTEGRATION
+===================================================
+
+Extend the existing project. Do not create a second backend, database, or duplicate tables.
+
+===================================================
+EDGE CASES
+===================================================
+
+Handle: invalid progress_event_id, empty schedule, missing equipment tag, missing discipline, missing location, missing optional fields, ambiguous event, no relevant match, semantic matcher unavailable, database failure, two activities with same equipment tag.
+
+===================================================
+TESTING
+===================================================
+
+Tests MUST work without internet access or an external API key.
+
+Add tests for:
+1. exact identifier matching
+2. different wording
+3. similar XX-101 activities
+4. discipline/context matching
+5. missing fields
+6. ambiguous events
+7. no relevant match
+8. semantic failure/fallback
+9. score calculation
+10. ranking
+11. API response schema
+12. Phase 1 regression
+13. ambiguous tag — support installation (NEW)
+14. ambiguous tag — inspection (NEW)
+15. benchmark top-1 accuracy (NEW)
+16. benchmark top-3 accuracy (NEW)
+17. benchmark precision at high confidence (NEW)
+18. benchmark unmatched detection (NEW)
+
+===================================================
+STRICT SCOPE CONTROL
+===================================================
+
+DO NOT implement: React frontend, dashboard, planner approval UI, OCR, voice processing, delay prediction, Primavera P6 integration, mobile app, Kubernetes, microservices, Redis, authentication, complex vector database, Phase 3 confidence workflow, Phase 3 planner review, Phase 3 create-new-activity.
+
+===================================================
+DEVELOPMENT PROCESS
+===================================================
+
+STEP 1: Inspect the repository.
+STEP 2: Run existing Phase 1 tests.
+STEP 3: Record baseline.
+STEP 4: Explain briefly what Phase 1 already provides.
+STEP 5: Identify exactly what Phase 2 must add.
+STEP 6: Implement candidate retrieval.
+STEP 7: Implement exact matching.
+STEP 8: Implement fuzzy matching.
+STEP 9: Implement context/temporal matching.
+STEP 10: Implement semantic matching and fallback.
+STEP 11: Implement weighted scoring.
+STEP 12: Implement ranking/top-3.
+STEP 13: Implement deterministic explanations.
+STEP 14: Implement the FastAPI matching endpoint.
+STEP 15: Create the benchmark dataset (50 reports with ground truth) (NEW).
+STEP 16: Implement POST /matching/benchmark endpoint (NEW).
+STEP 17: Add benchmark accuracy tests (NEW).
+STEP 18: Run the complete Phase 1 + Phase 2 test suite.
+STEP 19: Fix all failures.
+STEP 20: Start the FastAPI application.
+STEP 21: Verify /docs.
+STEP 22: Manually test POST /matching/run/{progress_event_id}.
+STEP 23: Run the benchmark and record actual accuracy numbers (NEW).
+STEP 24: Confirm Phase 1 endpoints still work.
+STEP 25: Review for unnecessary complexity.
+STEP 26: Commit the completed Phase 2.
+
+===================================================
+FINAL REPORT
+===================================================
+
+When complete, report:
+1. What you found in the Phase 1 repository.
+2. What Phase 1 functionality was reused.
+3. What files were created.
+4. What files were modified.
+5. What matching components were implemented.
+6. Candidate retrieval approach.
+7. Scoring formula and weights.
+8. Semantic matching approach.
+9. Fallback behavior.
+10. Ambiguous tag handling approach (NEW).
+11. API endpoint(s).
+12. Benchmark dataset summary (categories and counts) (NEW).
+13. Benchmark accuracy results (actual numbers) (NEW).
+14. Tests added.
+15. Complete test result.
+16. Commands to run the application.
+17. Swagger URL/path.
+18. Remaining limitations.
+19. Confirm that Phase 3 was NOT implemented.
+
+IMPORTANT:
+Do not stop after generating code.
+Actually run, test, debug and verify the implementation.
+The final repository must contain a working Phase 2 implementation with benchmark results that another teammate can directly continue into Phase 3.

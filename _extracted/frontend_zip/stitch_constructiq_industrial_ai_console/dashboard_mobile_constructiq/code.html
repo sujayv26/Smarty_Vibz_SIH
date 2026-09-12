@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>ConstructIQ - Mobile Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=IBM+Plex+Sans:wght@400;500;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-container": "#ff8849",
+                      "primary-container": "#181c22",
+                      "on-surface": "#1c1b1c",
+                      "secondary-fixed": "#ffdbcc",
+                      "outline-variant": "#c6c6cb",
+                      "primary": "#000000",
+                      "on-background": "#1c1b1c",
+                      "surface-container-high": "#ebe7e7",
+                      "on-primary-fixed-variant": "#43474e",
+                      "surface-container": "#f0eded",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "secondary": "#a04101",
+                      "on-tertiary-fixed": "#231a11",
+                      "primary-fixed": "#dfe2eb",
+                      "on-primary-fixed": "#181c22",
+                      "outline": "#76777b",
+                      "on-surface-variant": "#45474b",
+                      "inverse-on-surface": "#f3f0f0",
+                      "surface-container-highest": "#e5e2e2",
+                      "on-tertiary-container": "#908175",
+                      "surface-dim": "#dcd9d9",
+                      "surface-variant": "#e5e2e2",
+                      "tertiary-fixed-dim": "#d5c3b6",
+                      "surface-container-low": "#f6f3f3",
+                      "tertiary": "#000000",
+                      "on-secondary-fixed-variant": "#7a3000",
+                      "on-primary": "#ffffff",
+                      "surface": "#fcf8f9",
+                      "surface-bright": "#fcf8f9",
+                      "inverse-surface": "#313031",
+                      "primary-fixed-dim": "#c3c6cf",
+                      "on-error-container": "#93000a",
+                      "on-primary-container": "#80848c",
+                      "tertiary-container": "#231a11",
+                      "on-secondary": "#ffffff",
+                      "on-secondary-fixed": "#351000",
+                      "background": "#fcf8f9",
+                      "on-secondary-container": "#6b2900",
+                      "secondary-fixed-dim": "#ffb693",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#51443a",
+                      "tertiary-fixed": "#f2dfd1",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#5b5e66",
+                      "inverse-primary": "#c3c6cf"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "unit": "4px",
+                      "container-max": "1440px",
+                      "gutter": "24px",
+                      "margin-desktop": "40px"
+              },
+              "fontFamily": {
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "data-mono": [
+                              "IBM Plex Mono"
+                      ],
+                      "label-caps": [
+                              "IBM Plex Sans"
+                      ],
+                      "body-lg": [
+                              "IBM Plex Sans"
+                      ],
+                      "body-sm": [
+                              "IBM Plex Sans"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "display-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "IBM Plex Sans"
+                      ],
+                      "display-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-mono": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.02em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .card-surface {
+            background-color: theme('colors.surface');
+            border: 1px solid theme('colors.outline-variant');
+        }
+
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-md text-body-md min-h-screen flex flex-col pb-24 relative overflow-x-hidden">
+<!-- Mobile Header -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 bg-surface border-b border-outline-variant sticky top-0 z-40">
+<div class="font-headline-sm text-headline-sm font-bold text-primary tracking-tight">ConstructIQ</div>
+<div class="flex gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center h-10 w-10">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center h-10 w-10 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile py-unit-6 flex flex-col gap-unit-6 pt-4">
+<!-- Hero Metric Card -->
+<section class="card-surface rounded-xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[160px]">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary-container/10 to-transparent pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-2">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]" data-icon="assignment_late">assignment_late</span>
+                    Action Required
+                </div>
+<div class="font-display-lg-mobile text-display-lg-mobile font-bold text-primary">
+                    12 Pending Reviews
+                </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">Critical path items requiring sign-off across 3 active projects.</p>
+</div>
+<div class="relative z-10 mt-6">
+<button class="bg-[#C25A1E] text-white px-6 py-3 rounded-DEFAULT font-label-caps text-label-caps uppercase tracking-wider w-full flex items-center justify-center gap-2 hover:bg-opacity-90 transition-opacity">
+                    Review Now
+                    <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- KPI Grid -->
+<section class="grid grid-cols-2 gap-4">
+<div class="card-surface rounded-lg p-4 flex flex-col gap-2">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">SPI</div>
+<div class="flex items-end gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">0.94</span>
+<span class="text-error font-body-sm text-body-sm flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_downward</span>0.02</span>
+</div>
+</div>
+<div class="card-surface rounded-lg p-4 flex flex-col gap-2">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">CPI</div>
+<div class="flex items-end gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">1.02</span>
+<span class="text-[#059669] font-body-sm text-body-sm flex items-center"><span class="material-symbols-outlined text-[14px]">arrow_upward</span>0.01</span>
+</div>
+</div>
+<div class="card-surface rounded-lg p-4 flex flex-col gap-2">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Safety Incidents</div>
+<div class="flex items-end gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">0</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">Last 30d</span>
+</div>
+</div>
+<div class="card-surface rounded-lg p-4 flex flex-col gap-2">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase">Active Crew</div>
+<div class="flex items-end gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">142</span>
+<span class="text-on-surface-variant font-body-sm text-body-sm">On-site</span>
+</div>
+</div>
+</section>
+<!-- Planned vs Actual Progress -->
+<section class="card-surface rounded-xl p-5 flex flex-col gap-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-3">
+<h2 class="font-headline-sm text-headline-sm font-semibold text-primary">Schedule Variance</h2>
+<button class="text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Bar 1 -->
+<div>
+<div class="flex justify-between font-body-sm text-body-sm mb-1">
+<span class="text-on-surface">Foundation</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">45% / 50%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-outline-variant w-[50%] rounded-full opacity-50"></div>
+<div class="absolute top-0 left-0 h-full bg-[#12161C] w-[45%] rounded-full"></div>
+</div>
+</div>
+<!-- Bar 2 -->
+<div>
+<div class="flex justify-between font-body-sm text-body-sm mb-1">
+<span class="text-on-surface">Structural Steel</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">12% / 10%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full bg-outline-variant w-[10%] rounded-full opacity-50"></div>
+<div class="absolute top-0 left-0 h-full bg-[#C25A1E] w-[12%] rounded-full"></div>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex gap-4 mt-2 font-label-caps text-label-caps text-on-surface-variant pt-2 border-t border-outline-variant">
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-outline-variant opacity-50"></div> Planned
+                    </div>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-[#12161C]"></div> Actual
+                    </div>
+<div class="flex items-center gap-1">
+<div class="w-2 h-2 rounded-full bg-[#C25A1E]"></div> Ahead
+                    </div>
+</div>
+</div>
+</section>
+<!-- Discipline Progress List -->
+<section class="card-surface rounded-xl p-0 flex flex-col overflow-hidden">
+<div class="p-4 border-b border-outline-variant bg-[#F9FAFB]">
+<h2 class="font-label-caps text-label-caps font-bold text-on-surface-variant uppercase">Discipline Status</h2>
+</div>
+<div class="flex flex-col">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="architecture">architecture</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-primary">Civil &amp; Structural</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Phase 2 Active</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-data-mono text-data-mono text-primary">68%</span>
+<span class="text-[10px] uppercase font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-DEFAULT">On Track</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-4 border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-primary">Electrical</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Awaiting Materials</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-data-mono text-data-mono text-primary">15%</span>
+<span class="text-[10px] uppercase font-bold text-[#C25A1E] bg-[#C25A1E]/10 px-2 py-0.5 rounded-DEFAULT">Delayed</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="plumbing">plumbing</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-medium text-primary">Mechanical</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pre-staging</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-data-mono text-data-mono text-primary">5%</span>
+<span class="text-[10px] uppercase font-bold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-DEFAULT">Pending</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-2 pb-safe bg-primary-container text-secondary-fixed shadow-lg rounded-t-xl z-50 transition-all duration-150 border-t border-outline-variant">
+<!-- Active Tab: Home -->
+<button aria-label="Home" class="flex flex-col items-center justify-center text-secondary-container bg-secondary-fixed/10 rounded-xl p-2 active:bg-primary-container/80 w-16">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</button>
+<!-- Inactive Tab: WBS -->
+<button aria-label="WBS" class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 w-16">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-label-caps text-label-caps mt-1">WBS</span>
+</button>
+<!-- Inactive Tab: Events -->
+<button aria-label="Events" class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 w-16">
+<span class="material-symbols-outlined" data-icon="event_note">event_note</span>
+<span class="font-label-caps text-label-caps mt-1">Events</span>
+</button>
+<!-- Inactive Tab: Profile -->
+<button aria-label="Profile" class="flex flex-col items-center justify-center text-on-primary-fixed-variant p-2 active:bg-primary-container/80 w-16">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</button>
+</nav>
+<!-- Desktop Navigation Warning (Hidden on mobile) -->
+<div class="hidden md:flex fixed inset-0 bg-background z-[100] items-center justify-center">
+<div class="text-center p-8 max-w-md">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant mb-4" data-icon="devices">devices</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary mb-2">Mobile View Requested</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Please resize your browser window to a mobile width (&lt; 768px) to view the ConstructIQ Mobile Dashboard design.</p>
+</div>
+</div>
+</body></html>

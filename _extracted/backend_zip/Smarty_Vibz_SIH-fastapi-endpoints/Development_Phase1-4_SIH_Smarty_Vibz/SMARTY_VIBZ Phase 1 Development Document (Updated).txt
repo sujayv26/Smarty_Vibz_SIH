@@ -1,0 +1,481 @@
+SMARTY_VIBZ
+PHASE 1 DEVELOPMENT DOCUMENT (UPDATED)
+FastAPI Backend Foundation, Intelligent Progress Data Extraction, Multi-Format Ingestion & Conversational Time Agent
+
+1. Phase 1 Objective
+Build a working FastAPI backend that accepts an infrastructure project schedule in Excel format, validates and stores schedule activities, accepts messy/free-text field progress reports AND discipline-wise Excel progress reports, uses AI to extract structured progress information, validates that output with Pydantic, stores progress events in SQLite, provides a conversational Time Agent interface for site supervisors, exposes clean APIs, and supports automated tests without depending on a live AI API.
+
+2. Phase 1 Flow
+SCHEDULE SIDE: Schedule Excel → Excel Validation → Schedule Activities → SQLite Database
+
+PROGRESS SIDE (FREE TEXT): Field Progress Report → AI Extraction → Pydantic Validation → Structured Progress Event → SQLite Database
+
+PROGRESS SIDE (EXCEL): Discipline-wise Excel → Column Mapping → Row-level Extraction → Pydantic Validation → Structured Progress Event → SQLite Database
+
+TIME AGENT SIDE: Supervisor Chat Input → AI Extraction (reused) → Structured Event → Matching (Phase 2) → Conversational Response
+
+3. Why Phase 1 Matters
+The overall project has a structured planning side (L5/L6 schedule) and an unstructured execution side (daily site reports). Phase 1 builds the foundation by answering: "What happened on site?" Phase 2 will later answer: "Which planned activity did that site event belong to?"
+
+The Time Agent directly addresses the problem statement's requirement for "an LLM-based conversational interface for site supervisors across disciplines to log activity start/end with minimal friction."
+
+Example report: "Today at 9:30 AM, the piping team started erection of the XX-101 spool in Area B."
+Expected structured event: activity_reference=XX-101 spool erection; event_type=START; event_date=2026-08-30; event_time=09:30; discipline=Piping; location=Area B; equipment_tag=XX-101.
+
+4. Technology Stack
+
+| Area | Technology |
+|---|---|
+| Backend | Python 3.12+, FastAPI |
+| ORM | SQLAlchemy |
+| Validation | Pydantic |
+| Database | SQLite |
+| Excel | pandas, openpyxl |
+| Testing | pytest |
+| AI | LLM API behind an isolated service interface |
+
+5. Recommended Project Structure
+Smarty_vibz/
+└── backend/
+    ├── app/
+    │   ├── main.py
+    │   ├── database.py
+    │   ├── models/ (schedule.py, progress.py)
+    │   ├── schemas/ (schedule.py, progress.py, agent.py)
+    │   ├── services/ (schedule_service.py, extraction_service.py, excel_progress_service.py, agent_service.py)
+    │   └── api/ (schedule.py, progress.py, agent.py)
+    ├── tests/ (test_schedule.py, test_extraction.py, test_excel_progress.py, test_agent.py)
+    ├── requirements.txt
+    ├── .env.example
+    ├── .gitignore
+    └── README.md
+└── sample_data/
+
+Keep the architecture simple and avoid unnecessary layers.
+
+6. Database Design
+6.1 schedule_activities
+
+| Field | Purpose |
+|---|---|
+| id | Internal database ID |
+| activity_code | Unique schedule activity identifier |
+| activity_name | Planned activity name |
+| discipline | Civil/Piping/Mechanical/Electrical etc. |
+| wbs | Work Breakdown Structure |
+| planned_start | Planned start date |
+| planned_finish | Planned finish date |
+| created_at | Creation timestamp |
+
+6.2 progress_events
+
+| Field | Purpose |
+|---|---|
+| id | Internal ID |
+| raw_text | Original field report or Excel row description |
+| activity_reference | Work reference extracted from report |
+| event_type | START/PROGRESS/COMPLETE/DELAY/HOLD |
+| event_date | Execution date |
+| event_time | Time if available |
+| discipline | Discipline if available |
+| location | Site/location |
+| equipment_tag | Equipment identifier |
+| source_type | FREE_TEXT / EXCEL / AGENT_CHAT |
+| source_file | Original source |
+| created_at | Creation timestamp |
+
+7. Schedule Excel Ingestion
+Endpoint: POST /schedule/upload
+Required columns: activity_code, activity_name, discipline, wbs, planned_start, planned_finish.
+7.1 Validation Workflow
+Check file type and accept .xlsx.
+Check required columns.
+Validate dates.
+Validate individual rows and report malformed rows.
+Insert valid rows.
+Return total, inserted, failed rows and clear row-level errors.
+Never silently ignore bad data.
+
+8. Schedule APIs
+POST /schedule/upload — upload and validate schedule Excel.
+GET /schedule/activities — view stored schedule activities.
+
+9. AI Progress Extraction
+Endpoint: POST /progress/extract
+The API receives a free-text report and sends it to the extraction service.
+The MVP supports event types: START, PROGRESS, COMPLETE, DELAY, HOLD.
+The AI must extract only information supported by the input. Missing fields should be null rather than guessed. Do not hallucinate activity IDs, tags, dates, times, locations, or disciplines.
+
+10. Discipline-wise Excel Progress Upload (NEW)
+Endpoint: POST /progress/upload-excel
+This endpoint ingests a discipline-wise progress spreadsheet — a different input format from the schedule Excel. This directly satisfies the problem statement's requirement for "2-3 varied input formats."
+
+10.1 Expected Excel Structure
+The discipline-wise progress Excel may contain columns such as:
+| Column | Description |
+|---|---|
+| date | Date of the progress report |
+| discipline | Civil/Piping/Mechanical/Electrical |
+| activity_description | Free-text description of work done |
+| status | Started/InProgress/Completed/Delayed/On Hold |
+| equipment_tag | Equipment or line tag if available |
+| location | Area or location if available |
+| reported_by | Name or role of the reporter |
+
+10.2 Processing Workflow
+1. Accept .xlsx file upload.
+2. Validate required columns (date, activity_description, status).
+3. For each row, map the status to the event_type vocabulary:
+   - Started → START
+   - In Progress → PROGRESS
+   - Completed → COMPLETE
+   - Delayed → DELAY
+   - On Hold → HOLD
+4. Combine available columns into a structured progress event.
+5. If equipment_tag or location is present in the Excel, use it directly — do not require AI extraction for those fields.
+6. If activity_description contains free-text details, optionally run the AI extraction service on it to extract additional structured fields (activity_reference, equipment_tag if missing).
+7. Validate each event with Pydantic.
+8. Store valid events in progress_events with source_type=EXCEL.
+9. Return summary: total rows, extracted events, failed rows, row-level errors.
+
+10.3 Validation Rules
+- Missing date → row-level error, skip row.
+- Missing activity_description → row-level error, skip row.
+- Missing status → default to PROGRESS, do not fail.
+- Missing equipment_tag → null, do not guess.
+- Missing location → null, do not guess.
+- Invalid date format → row-level error.
+- Empty Excel file → 400 Bad Request.
+- Missing required columns → 400 Bad Request with clear message.
+
+10.4 Excel Progress APIs
+POST /progress/upload-excel — upload and process discipline-wise Excel progress report.
+GET /progress/events — return stored progress events (includes both free-text and Excel sources).
+
+11. Conversational Time Agent (NEW)
+Endpoint: POST /agent/chat
+This endpoint provides an LLM-based conversational interface for site supervisors to log activity start/end with minimal friction. This directly satisfies the problem statement's requirement for "an LLM-based conversational interface ('time agent') for site supervisors across disciplines."
+
+11.1 Purpose
+The Time Agent replaces rigid manual forms with a natural-language conversation. A supervisor types progress in their own words and the system:
+1. Extracts structured progress information (reuses the extraction service).
+2. Stores the progress event.
+3. If Phase 2 matching is available, runs matching and returns the top match with confidence.
+4. Returns a conversational response confirming what was understood and what it was matched to.
+
+11.2 Request Format
+{
+  "message": "Started XX-101 spool erection at 9:30 AM in Area B",
+  "session_id": "optional-session-identifier"
+}
+
+11.3 Response Format
+{
+  "understood": {
+    "activity_reference": "XX-101 spool erection",
+    "event_type": "START",
+    "event_date": "2026-08-30",
+    "event_time": "09:30",
+    "discipline": "Piping",
+    "location": "Area B",
+    "equipment_tag": "XX-101"
+  },
+  "progress_event_id": 17,
+  "matched_activity": null,
+  "confidence": null,
+  "reply": "Got it. I've logged: Piping — START — XX-101 spool erection at 09:30 on 2026-08-30 in Area B. Would you like to run matching now?",
+  "follow_up": "You can say 'match it' to find the schedule activity, or log another report."
+}
+
+If Phase 2 matching is not yet implemented, matched_activity and confidence should be null, and the reply should indicate the event was logged and matching will be available later.
+
+11.4 Multi-turn Conversation Support
+The Time Agent should support basic multi-turn context:
+- If the supervisor says "match it" after logging, the agent triggers matching for the most recent event.
+- If the supervisor says "log another", the agent resets for a new report.
+- If the supervisor says "show me what I logged today", the agent returns today's progress events.
+
+11.5 No-Hallucination Rule (Applies to Time Agent)
+The Time Agent must NEVER:
+- Invent activity IDs, equipment tags, or dates not present in the supervisor's input.
+- Auto-confirm a match without showing the confidence score.
+- Silently overwrite existing schedule data.
+- Guess missing fields — if a field is missing, ask the supervisor: "What discipline was this for?" or "Which area was this in?"
+
+11.6 Agent APIs
+POST /agent/chat — send a message and receive a conversational response.
+GET /agent/sessions/{session_id}/events — return all progress events logged in a session.
+POST /agent/chat — if the message contains "match" or "match it", trigger Phase 2 matching for the most recent event and return the top match in the conversational response.
+
+12. AI Service Architecture
+Keep the LLM call outside the FastAPI route: FastAPI Route → Extraction Service → LLM Provider. This makes the provider replaceable and the tests easier.
+Raw LLM Output → Pydantic Schema → Valid Structured Event. Invalid output must be rejected rather than stored.
+
+13. Mock AI Provider & Testing
+Tests must work without internet access or an API key. Use a mock extraction provider that returns predictable JSON.
+- Valid schedule upload
+- Missing Excel column
+- Invalid date
+- Empty Excel file
+- Valid progress extraction (free text)
+- Missing optional information
+- Invalid AI response
+- Empty progress report
+- AI/API failure handling
+- Valid Excel progress upload (NEW)
+- Excel progress with missing optional columns (NEW)
+- Excel progress with invalid date (NEW)
+- Empty Excel progress file (NEW)
+- Time Agent basic chat (NEW)
+- Time Agent extraction from natural language (NEW)
+- Time Agent with missing fields — agent asks for clarification (NEW)
+- Time Agent multi-turn conversation (NEW)
+- Time Agent hallucination prevention (NEW)
+
+14. Progress APIs
+POST /progress/extract — validate input, extract data, validate with Pydantic, store event, return result.
+POST /progress/upload-excel — upload discipline-wise Excel progress, extract events, store (NEW).
+GET /progress/events — return stored progress events (all sources).
+
+15. Agent APIs (NEW)
+POST /agent/chat — conversational interface for supervisors.
+GET /agent/sessions/{session_id}/events — return events logged in a session.
+
+16. Error Handling
+
+| Condition | Handling |
+|---|---|
+| Empty progress report | 400 Bad Request |
+| Empty agent message | 400 Bad Request |
+| Unsupported Excel | 400 Bad Request |
+| Missing Excel columns | Clear validation message |
+| Invalid date | Row-level error |
+| Missing API key | Controlled configuration error |
+| AI timeout | Controlled service error |
+| Invalid AI JSON | Validation error; do not store |
+| Database failure | Appropriate server error without sensitive internals |
+| Excel progress missing required columns | 400 Bad Request with message |
+| Agent extraction failure | Return conversational error, do not crash |
+
+17. Environment Variables & Secrets
+Use .env for secrets. .env.example should contain LLM_API_KEY=. Never commit .env to GitHub.
+.gitignore should include .env, .venv/, __pycache__/, and *.pyc.
+
+18. Required API Endpoints
+FastAPI provides Swagger testing at /docs.
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | / | Basic response |
+| GET | /health | Health check |
+| POST | /schedule/upload | Upload schedule Excel |
+| GET | /schedule/activities | View activities |
+| POST | /progress/extract | Extract progress from free text |
+| POST | /progress/upload-excel | Upload discipline-wise Excel progress (NEW) |
+| GET | /progress/events | View events (all sources) |
+| POST | /agent/chat | Conversational Time Agent (NEW) |
+| GET | /agent/sessions/{session_id}/events | Return session events (NEW) |
+
+19. Sample Schedule Dataset
+Create about 15–20 activities across Civil, Piping, Mechanical and Electrical. Include similar activities for future Phase 2 matching.
+Examples: PIP-1023 — Erect Line 24"-XX-101; PIP-1027 — Install Support for XX-101; PIP-1042 — Inspect XX-101; MEC-2011 — Install Pump P-101; CIV-3011 — Construct Foundation A1.
+
+20. Sample Progress Reports
+Free-text examples:
+- Started XX-101 spool erection.
+- Installation commenced for the XX-101 piping assembly.
+- Piping work started on XX-101.
+- Today at 9:30 AM, the piping team started erection of the XX-101 spool in Area B.
+- Work started around XX-101.
+
+Excel progress examples (discipline-wise spreadsheet):
+| date | discipline | activity_description | status | equipment_tag | location | reported_by |
+|---|---|---|---|---|---|---|
+| 2026-08-30 | Piping | Started erection of XX-101 spool | Started | XX-101 | Area B | Supervisor A |
+| 2026-08-30 | Civil | Foundation A1 concrete pouring in progress | In Progress | A1 | Area C | Supervisor B |
+| 2026-08-29 | Mechanical | Pump P-101 installation completed | Completed | P-101 | Pump House | Supervisor C |
+| 2026-08-30 | Electrical | Cable pulling for substation delayed due to rain | Delayed | SUB-1 | Substation | Supervisor D |
+
+Time Agent chat examples:
+- "Started XX-101 spool erection at 9:30 AM in Area B"
+- "Pump P-101 installation is complete"
+- "Cable pulling for substation is delayed because of rain"
+- "match it" (triggers matching for the most recent event)
+- "show me what I logged today"
+
+These examples become useful matching cases for Phase 2.
+
+21. Development Rules
+Do not over-engineer; this is a hackathon MVP.
+Keep business logic out of API routes.
+Use Pydantic for validation.
+Use SQLAlchemy for persistence.
+Never trust raw LLM output.
+Keep the AI provider isolated.
+Tests must work without internet access.
+Never expose API keys.
+Do not build the frontend during Phase 1.
+Do not implement Phase 2 matching yet (except the Time Agent may call it if available — use a graceful fallback if Phase 2 is not implemented).
+
+22. What NOT to Build in Phase 1
+Frontend/dashboard
+Hybrid or semantic matching
+Embedding search
+Confidence scoring
+Planner approval workflow
+Delay prediction
+OCR
+Voice input / speech recognition
+Primavera P6 integration
+Mobile app
+Microservices/Kubernetes/Redis/vector database
+
+23. Definition of Done
+Schedule flow: Schedule.xlsx → POST /schedule/upload → validated schedule → SQLite.
+Progress flow (free text): Progress Report → POST /progress/extract → AI extraction → Pydantic validation → structured progress event → SQLite.
+Progress flow (Excel): Discipline-wise Progress.xlsx → POST /progress/upload-excel → row extraction → Pydantic validation → structured progress event → SQLite (NEW).
+Time Agent flow: Supervisor message → POST /agent/chat → AI extraction (reused) → structured event → SQLite → conversational response (NEW).
+GET /schedule/activities and GET /progress/events must return stored data correctly, and pytest must pass.
+
+24. Phase 1 Demo Test
+1. Upload sample_schedule.xlsx.
+2. Call GET /schedule/activities and verify activities.
+3. Submit a sample free-text progress report via POST /progress/extract.
+4. Verify extracted activity reference, event type, date, time, discipline, location and equipment.
+5. Upload a discipline-wise Excel progress report via POST /progress/upload-excel (NEW).
+6. Verify Excel-derived events are stored with source_type=EXCEL.
+7. Call GET /progress/events and verify all events are stored.
+8. Open the Time Agent via POST /agent/chat and submit a natural-language progress report (NEW).
+9. Verify the agent extracts structured data and returns a conversational confirmation.
+10. Submit a second agent message "match it" and verify the agent attempts matching (or returns a graceful message if Phase 2 is not yet available) (NEW).
+
+25. Handoff to Phase 2
+After Phase 1 is tested, commit and push the repository. Phase 2 starts with Structured Progress Events (from free text, Excel, and Time Agent) + Schedule Activities and adds intelligent schedule matching, candidate ranking, explainable scores, and a benchmark dataset.
+
+PHASE 1: What happened on site? (From any input format)
+
+PHASE 2: Which planned activity did it belong to? (With measured accuracy)
+
+26. One-Line Handoff
+Build the FastAPI foundation that ingests the project schedule, converts messy field reports (free text, Excel, and conversational chat) into validated, database-stored progress events, and provides a Time Agent for supervisors; then hand this reliable foundation to Phase 2 for intelligent schedule matching and benchmark evaluation.
+
+27. Prompt
+
+You are the lead backend engineer for our SIH hackathon project, Smarty_vibz.
+I have attached the Phase 1 Development Document. Treat that document as the PRIMARY SPECIFICATION for Phase 1.
+Your job is to IMPLEMENT Phase 1 in the existing repository, not just explain it.
+
+IMPORTANT RULES:
+1. FIRST inspect the entire existing repository.
+2. Understand the current project structure, files, dependencies, database, models, schemas, services, APIs and tests.
+3. If an existing FastAPI foundation already exists, EXTEND it instead of rebuilding it.
+4. Do not unnecessarily change working code.
+5. Do not implement Phase 2 or Phase 3 features.
+6. Keep the architecture simple and hackathon-friendly.
+7. Follow the Phase 1 document exactly unless an existing implementation requires a small adaptation.
+8. Do not invent requirements that are not present in the document.
+9. Do not add unnecessary technologies, microservices, Docker/Kubernetes, Redis, vector databases, React frontend, authentication, OCR, voice processing, delay prediction or Primavera integration.
+10. Keep AI/LLM provider logic isolated inside a service.
+11. Never hard-code API keys or secrets.
+12. Use environment variables and provide a .env.example.
+13. Use Pydantic for validating structured AI output.
+14. Use SQLAlchemy and SQLite as specified.
+15. Schedule Excel ingestion must validate the required columns and report row-level errors.
+16. Progress extraction must convert free-text field reports into structured Progress Events.
+17. Discipline-wise Excel progress upload must map status columns to event types and extract structured events from each row.
+18. The Time Agent must reuse the extraction service and return conversational responses. It must never hallucinate missing fields.
+19. Create a mock extraction provider so automated tests do not require an external API or internet.
+20. All important business logic must be placed in services rather than directly inside FastAPI route handlers.
+21. Maintain clean error handling.
+22. Make the implementation easy for another team member to continue in Phase 2.
+
+IMPLEMENTATION ORDER:
+Step 1: Inspect the repository and summarize what already exists.
+Step 2: Run the existing tests BEFORE making changes. Record the result.
+Step 3: Compare the existing implementation against the Phase 1 document.
+Step 4: Implement only the missing Phase 1 functionality.
+
+Required Phase 1 functionality:
+- FastAPI application
+- Health endpoint
+- SQLite database
+- SQLAlchemy models (including source_type field on progress_events)
+- Pydantic schemas
+- Schedule Excel upload
+- Excel validation
+- Schedule activity storage
+- Schedule activity retrieval
+- Free-text progress report extraction
+- Structured progress event validation
+- Discipline-wise Excel progress upload and processing
+- Progress event storage (all source types)
+- Progress event retrieval
+- AI provider abstraction
+- Mock AI provider for testing
+- Conversational Time Agent (chat endpoint)
+- Time Agent multi-turn conversation support
+- Time Agent hallucination prevention
+- Proper error handling
+- Automated tests
+- Swagger documentation through /docs
+
+Required API endpoints:
+GET  /
+GET  /health
+POST /schedule/upload
+GET  /schedule/activities
+POST /progress/extract
+POST /progress/upload-excel
+GET  /progress/events
+POST /agent/chat
+GET  /agent/sessions/{session_id}/events
+
+For the progress extraction pipeline:
+Raw Field Report → Extraction Service → AI Provider → Structured Output → Pydantic Validation → Database → API Response
+
+For discipline-wise Excel ingestion:
+Excel File → File Validation → Column Validation → Row Validation → Status-to-EventType Mapping → Schedule Activity Objects → SQLite
+
+For Time Agent:
+Supervisor Message → Extraction Service (reused) → AI Provider → Structured Output → Pydantic Validation → Database → Conversational Response
+
+TESTING:
+Create tests for:
+- valid schedule upload
+- missing schedule columns
+- invalid dates
+- empty schedule
+- valid progress extraction (free text)
+- missing optional progress fields
+- malformed AI output
+- empty progress report
+- AI/provider failure
+- database behavior
+- valid Excel progress upload
+- Excel progress with missing optional columns
+- Excel progress with invalid date
+- empty Excel progress file
+- Time Agent basic chat
+- Time Agent extraction from natural language
+- Time Agent with missing fields (asks for clarification)
+- Time Agent multi-turn conversation
+- Time Agent hallucination prevention (never invents missing data)
+
+The complete test suite must be runnable without an internet connection.
+
+BEFORE FINISHING:
+1. Run the complete test suite.
+2. Fix all failures.
+3. Verify the FastAPI application starts successfully.
+4. Verify /docs works.
+5. Manually test the main endpoints.
+6. Manually test the Time Agent with sample chat messages.
+7. Check that no API keys or secrets are committed.
+8. Check that Phase 1 functionality is not broken.
+9. Provide a concise summary of files created/modified.
+10. Provide exact commands to install dependencies, start the server and run tests.
+11. Clearly state what is intentionally NOT implemented because it belongs to Phase 2.
+
+IMPORTANT:
+Do not stop after generating code.
+Actually inspect, implement, run, test, debug and verify the project until Phase 1 is working.
