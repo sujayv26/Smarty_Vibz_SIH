@@ -1,226 +1,345 @@
-# Smarty Vibz / CONSight — Schedule Intelligence Platform
+<!--
+  Smarty Vibz / CONSight
+  Smart Construction Progress & Schedule Intelligence
+-->
 
-**Phases 1–12 Implemented** (see `STATE.json` and `docs/STABILIZATION_REPORT_P0-P12.md` for verified status)
+<div align="center">
 
-## Overview
+# 🏗️ CONSight
+### From Field Progress to Schedule Intelligence
 
-CONSight is a schedule intelligence platform that connects field progress reports (voice, text, Excel, WhatsApp, scanned diaries) with Primavera P6 / MS Project schedules through a complete matching, confidence, and planner-review workflow. It extends through ML-based delay prediction, institutional-memory analytics, delay-ripple analysis, multilingual extraction, voice, and OCR.
+**An AI-assisted planning-to-execution platform that connects real-world construction updates with project schedules.**
 
-**Source of truth for implemented features:** `STATE.json` and `docs/STABILIZATION_REPORT_P0-P12.md` — check these before assuming a feature exists.
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![SIH](https://img.shields.io/badge/Smart%20India%20Hackathon-SIH%2026122-7C3AED?style=for-the-badge)](#)
 
-## Quick Links
+<br/>
 
-- **Setup & Operations:** `SETUP.md` (cross-platform, step-by-step)
-- **Verified Status Report:** `docs/STABILIZATION_REPORT_P0-P12.md`
-- **Feature Tracker:** `STATE.json`
-- **API Docs (local):** `http://localhost:8000/docs` (when running)
+[**Repository**](https://github.com/sujayv26/Smarty_Vibz_SIH) · [**Setup Guide**](SETUP.md) · [**API Docs**](http://localhost:8000/docs)
 
-## Phases Implemented (P0–P12)
+</div>
 
-| Phase | Name | Key Deliverables |
-|-------|------|------------------|
-| **P0** | Infra & Foundations | Postgres+pgvector, Redis, Celery, JWT/RBAC (5 roles), Alembic, SQLite backup, synthetic data, design system, frontend shell, landing page |
-| **P1** | Schedule & Progress Core | Excel schedule upload, free-text/Excel progress extraction, Time-Agent chat |
-| **P2** | Matching Engine | Exact, fuzzy, semantic, context, temporal matchers; benchmark suite |
-| **P3** | Confidence & Review | Confidence scoring (HIGH/MEDIUM/LOW), planner review queue (approve/correct/reject/new), audit trail |
-| **P4** | P6/XER Round-Trip | XER import/export, predecessor-successor (FS/SS/FF/SF+lag), MPP via mpxj, actuals write-back on approval |
-| **P5** | WhatsApp Ingestion | Business Cloud API webhook, same extraction→matching pipeline, live Inbound Channels panel |
-| **P6** | Multilingual Extraction | Hi/En, Ta/En, Te/En, Kn/En code-mixed; 38 benchmarks @ 85% |
-| **P7** | Delay Ripple | CPM-based graph traversal over P4 predecessor/successor; critical-path exposure; DelayImpact records |
-| **P8** | Institutional Memory | Discipline summary, delay patterns, productivity benchmarks, variance trends; Insights dashboard (recharts) |
-| **P9** | ML Delay Prediction | RandomForest (32 features), daily retrain, 6-hr predictions; RiskWatchlist with confidence bars |
-| **P10** | Voice Agent | Whisper STT (5 langs), waveform viz, Time-Agent integration; press-to-talk UI |
-| **P11** | OCR Scanned Diaries | Tesseract (PDF/PNG/JPG/TIFF/BMP/WebP, 5 langs); confidence routing to review |
+---
 
-**P13+ (Advanced RAG, Weather, BIM, Multi-project, PWA, Observability, E2E) — NOT IMPLEMENTED**
+## 📌 Overview
 
-## Architecture
+Construction projects rely on schedules such as **Primavera P6** and **Microsoft Project**, while actual site progress is often reported through daily reports, spreadsheets, supervisor messages, voice updates, and scanned diaries. Translating these updates into reliable schedule changes can be slow, fragmented, and difficult to audit.
 
-```
-backend/                          # FastAPI (Python 3.11+ in Docker, 3.9 local)
-├── app/
-│   ├── api/v1/                   # Versioned routers (auth, schedule, progress, agent, matching, confidence, reviews, xer, webhooks, delay_impact, analytics, delay_prediction, voice, ocr)
-│   ├── core/                     # config, security, auth, celery_app
-│   ├── matching/                 # engine, matchers (exact/fuzzy/semantic/context/temporal), benchmark
-│   ├── models/                   # SQLAlchemy models (all PRD §9 tables + P4–P12 extensions)
-│   ├── schemas/                  # Pydantic v2 request/response models
-│   ├── services/                 # Business logic (schedule, progress, confidence, delay_ripple, analytics, ML, voice, OCR, XER, WhatsApp, backup)
-│   ├── workers/                  # Celery tasks (backup, ML retrain, delay-ripple recompute)
-│   ├── database.py               # SQLAlchemy async/sync engines, Alembic
-│   └── main.py                   # FastAPI entrypoint
-├── alembic/                      # Migrations (P0 schema + P4–P12 additions)
-├── tests/                        # 196 backend tests (all passing)
-└── scripts/
-    ├── generate_synthetic_data.py    # Full P0–P12 dataset
-    └── seed_demo_project.py
+**CONSight** bridges that gap. It turns field updates into structured progress events, matches them to schedule activities, evaluates confidence, and routes uncertain matches to a planner for review. Approved changes can then flow back into the schedule, with an audit trail.
 
-frontend/                         # React + Vite + TypeScript
-├── src/
-│   ├── app/                      # Routed screens (Dashboard, Schedule, Planner Queue, Time Agent, Inbound, Insights, Risk, BIM, Admin, Settings)
-│   ├── components/               # Design-system primitives (Button, Badge, Card, Input, Select, DataTable, Skeleton, EmptyState)
-│   ├── features/                 # Feature-specific components
-│   ├── hooks/                    # Custom React hooks
-│   └── lib/                      # API client, auth context
-└── package.json
+The platform is developed for **Smart India Hackathon problem statement 26122** by the **Smarty Vibz** team.
 
-infrastructure/
-└── docker-compose.yml            # postgres:pgvector, redis, api, celery-worker, celery-beat
-```
+> **Core principle:** AI assists the planner; uncertain schedule changes remain reviewable by a human.
 
-## Requirements
+---
 
-- **Docker Desktop** (or Podman) + Docker Compose v2
-- **Python 3.11+** (for local dev without Docker; Docker image uses 3.11-slim)
-- **Node.js 20+** (for frontend)
-- **Git**
+## 🎯 The Problem
 
-## Quick Start (Docker - Recommended)
+- Field progress information arrives in different formats and levels of detail.
+- Reports may refer to activities using informal names, tags, locations, or partial descriptions.
+- Manually mapping updates to schedule activities creates repetitive work and opportunities for error.
+- Unplanned work and schedule changes need to remain visible and traceable.
+- Planners need more than a prediction: they need evidence, confidence, and control over updates.
 
-```bash
-# 1. Clone & configure
-git clone <repo-url>
-cd Smarty_Vibz_SIH
-cp backend/.env.example backend/.env   # NEVER commit the filled .env
+## 💡 The Solution
 
-# 2. Launch full stack (Postgres+pgvector, Redis, API, Celery worker, Celery beat)
-docker compose -f infrastructure/docker-compose.yml up -d --build
+CONSight provides a structured workflow:
 
-# 3. Run migrations & seed synthetic data
-docker compose -f infrastructure/docker-compose.yml exec api python -m alembic upgrade head
-docker compose -f infrastructure/docker-compose.yml exec api python scripts/generate_synthetic_data.py --project DEMO-001 --org demo --weeks 4 --seed 42
-
-# 4. Verify
-curl http://localhost:8000/health
-open http://localhost:5173   # Frontend dev server (if running separately) or use Docker Compose override
+```text
+Field Updates
+(text · Excel · voice · scanned diaries · WhatsApp)
+                    │
+                    ▼
+       Structured Progress Event
+                    │
+                    ▼
+          Schedule Matching
+   (exact · fuzzy · semantic · context · time)
+                    │
+                    ▼
+          Confidence Evaluation
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+   High Confidence      Review Required
+    Auto-match          Planner review
+          │          approve / correct /
+          │            reject / create
+          └─────────┬─────────┘
+                    ▼
+       Schedule Update + Audit Trail
+                    │
+                    ▼
+       Progress & Schedule Insights
 ```
 
-**Demo credentials** (from synthetic data): `supervisor@demo.com` / `supervisor123` (role: SITE_SUPERVISOR)
+---
 
-## Local Development (Without Docker)
+## ✨ Core Capabilities
+
+| Capability | What it does |
+|---|---|
+| **Schedule ingestion** | Imports schedule data from spreadsheets and supports Primavera P6 / Microsoft Project workflows. |
+| **Progress extraction** | Converts text and spreadsheet updates into structured progress events. |
+| **Multi-signal matching** | Uses exact, fuzzy, semantic, contextual, and temporal signals to identify candidate activities. |
+| **Confidence-based routing** | Separates high-confidence matches from cases that need planner attention. |
+| **Planner review** | Supports approving, correcting, rejecting, or creating an activity for unmatched work. |
+| **Schedule integration** | Supports P6/XER import-export workflows and schedule actuals write-back on approval. |
+| **Delay impact analysis** | Traces schedule relationships to understand potential downstream impact. |
+| **Project analytics** | Surfaces discipline summaries, delay patterns, productivity benchmarks, and schedule variance trends. |
+| **Delay prediction** | Provides ML-based project delay predictions and a risk watchlist. |
+| **Voice and OCR** | Supports voice transcription and OCR processing for scanned site records. |
+| **Auditability** | Keeps review decisions and schedule actions traceable. |
+
+Feature status and implementation boundaries are documented in `STATE.json` and the stabilization report. See [Verified Implementation Status](docs/STABILIZATION_REPORT_P0-P12.md).
+
+---
+
+## 🔁 Confidence & Human Review
+
+CONSight does not treat every model match as automatically correct. Matching results are routed according to confidence and review requirements.
+
+| Scenario | System behaviour |
+|---|---|
+| Strong, unambiguous match | Can be routed as an automatic match according to configured thresholds. |
+| Ambiguous candidates | Sent to the planner review queue. |
+| No suitable activity | Planner can create a new activity and mark it as unplanned. |
+| Incorrect candidate | Planner can correct or reject the proposed match. |
+
+This workflow is designed to keep schedule updates explainable and under planner control.
+
+---
+
+## 🧪 Example Workflow
+
+The repository documents three core end-to-end cases:
+
+1. **Clear match:** a detailed field update matches a known schedule activity and passes the configured confidence threshold.
+2. **Ambiguous match:** a short or underspecified update is sent for planner correction.
+3. **Unmatched work:** an update with no suitable schedule match is reviewed and can become a new, explicitly unplanned activity.
+
+For the exact sample inputs and verified outcomes, see the **Three-Case Core Demo** section in the repository documentation and the stabilization report.
+
+---
+
+## 🧠 Extended Intelligence
+
+Beyond the core progress-to-schedule workflow, the implementation includes additional capabilities:
+
+- **Schedule dependency analysis:** predecessor/successor relationships and critical-path exposure.
+- **Institutional-memory analytics:** recurring delay patterns, discipline-level summaries, and productivity benchmarks.
+- **ML delay prediction:** a Random Forest-based prediction workflow using engineered project features.
+- **Multilingual extraction:** support for documented mixed-language input scenarios.
+- **Voice processing:** speech-to-text integrated with the progress workflow.
+- **Scanned-document processing:** OCR with confidence-aware review routing.
+
+These capabilities depend on configuration, data, and external services where applicable. Consult the setup and status documentation before enabling them.
+
+---
+
+## 🏗️ Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                     React + Vite Frontend                   │
+│  Dashboard · Schedule · Planner Queue · Insights · Risk     │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ REST API
+┌──────────────────────────────▼──────────────────────────────┐
+│                       FastAPI Backend                        │
+│ Auth/RBAC · Schedule · Progress · Matching · Reviews         │
+│ Analytics · Delay Impact · Prediction · Voice · OCR          │
+└───────────────┬──────────────────────┬──────────────────────┘
+                │                      │
+       ┌────────▼────────┐    ┌────────▼────────┐
+       │ PostgreSQL      │    │ Redis + Celery  │
+       │ + pgvector      │    │ Background work │
+       └─────────────────┘    └─────────────────┘
+                │
+       ┌────────▼────────┐
+       │ Schedule Tools  │
+       │ P6 / XER / MPP  │
+       └─────────────────┘
+```
+
+### Technology Stack
+
+| Layer | Technologies |
+|---|---|
+| Backend API | Python, FastAPI, Pydantic |
+| Frontend | React, Vite, TypeScript |
+| Data layer | PostgreSQL, SQLAlchemy, Alembic, pgvector |
+| Background jobs | Redis, Celery |
+| ML / matching | Matching strategies, scikit-learn-based delay prediction |
+| Schedule interoperability | Excel, Primavera P6/XER, Microsoft Project/MPP |
+| Document & voice inputs | Tesseract OCR, speech-to-text pipeline |
+| Deployment | Docker Compose |
+| Testing | Pytest, frontend build and lint checks |
+
+---
+
+## 📁 Repository Structure
+
+```text
+Smarty_Vibz_SIH/
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/          # Versioned API routes
+│   │   ├── core/            # Configuration, security, auth, Celery
+│   │   ├── matching/        # Matching engine and strategies
+│   │   ├── models/          # Database models
+│   │   ├── schemas/         # Request/response schemas
+│   │   ├── services/        # Application and domain services
+│   │   ├── workers/         # Background tasks
+│   │   └── main.py          # FastAPI application
+│   ├── alembic/             # Database migrations
+│   ├── scripts/             # Seed and synthetic-data utilities
+│   ├── tests/               # Backend tests
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   ├── components/
+│   │   ├── features/
+│   │   ├── hooks/
+│   │   └── lib/
+│   └── package.json
+├── infrastructure/
+│   └── docker-compose.yml
+├── docs/
+│   └── STABILIZATION_REPORT_P0-P12.md
+├── SETUP.md
+├── STATE.json
+├── CHANGELOG.md
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+The project uses multiple services. **Docker Compose is the recommended setup** for running the full stack.
 
 ### Prerequisites
-- Python 3.9+ (3.11+ recommended; Docker uses 3.11)
-- Node.js 20+
-- Postgres 16 + pgvector extension
-- Redis 7+
+
+- Git
+- Docker Desktop with Docker Compose v2 (or a compatible Docker/Podman setup)
+- For local development: Python 3.11+, Node.js 20+, PostgreSQL with pgvector, and Redis
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sujayv26/Smarty_Vibz_SIH.git
+cd Smarty_Vibz_SIH
+```
+
+### 2. Configure the backend environment
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env` with your local database, Redis, and application settings. **Never commit real credentials, API keys, or a populated environment file.**
+
+### 3. Start the services
+
+```bash
+docker compose -f infrastructure/docker-compose.yml up -d --build
+```
+
+### 4. Apply database migrations
+
+```bash
+docker compose -f infrastructure/docker-compose.yml exec api python -m alembic upgrade head
+```
+
+### 5. Generate demo data
+
+```bash
+docker compose -f infrastructure/docker-compose.yml exec api python scripts/generate_synthetic_data.py --project DEMO-001 --org demo --weeks 4 --seed 42
+```
+
+### 6. Verify the API
+
+```bash
+curl http://localhost:8000/health
+```
+
+- API base URL: `http://localhost:8000`
+- Interactive API docs: `http://localhost:8000/docs`
+
+For the full local-development, frontend, worker, environment-variable, and OS-specific instructions, follow **[SETUP.md](SETUP.md)**.
+
+---
+
+## 🧪 Tests & Validation
+
+The project includes a backend test suite and frontend validation commands.
 
 ### Backend
+
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env        # Edit with your Postgres/Redis credentials
-python -m alembic upgrade head
-python scripts/generate_synthetic_data.py --project DEMO-001 --org demo --weeks 4 --seed 42
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+python -m pytest tests/ -v
 ```
 
 ### Frontend
-```bash
-cd frontend
-npm install
-npm run dev      # http://localhost:5173
-# For production build: npm run build && npm run preview
-```
-
-### Celery (separate terminals)
-```bash
-# Terminal 1: Worker
-cd backend && .venv/bin/celery -A app.core.celery_app worker --loglevel=info
-
-# Terminal 2: Beat (scheduler)
-cd backend && .venv/bin/celery -A app.core.celery_app beat --loglevel=info
-```
-
-## Running Tests
 
 ```bash
-# Backend (196 tests)
-cd backend
-python -m pytest tests/ -v
-
-# Frontend
 cd frontend
 npm run build
 npm run lint
 ```
 
-## Three-Case Core Demo (Verified Live)
+The repository's status documentation records the test and validation results. Re-run these commands in your own environment to verify the current checkout.
 
-1. **Clean Auto-Match** → confidence ≥ 0.85 → `AUTO_MATCH` (no human review)
-   - Upload schedule with `PIP-1023`
-   - Submit: `"Today at 9:30 AM, the piping team started erection of the PIP-1023 line 24-XX-101 spool in Area B"`
-   - Result: `AUTO_MATCH`, confidence 0.8975, AuditRecord(action=AUTO_MATCH, actor=SYSTEM)
+---
 
-2. **Ambiguous Match + Planner Correction** → `REVIEW_REQUIRED` → planner corrects
-   - Submit: `"Work on XX-101 piping"`
-   - Two 0.7 candidates → planner `POST /reviews/{id}/correct` with `activity_id=2`
-   - Result: Review status `CORRECTED`, activity `PIP-1027`
+## 🗺️ Development Status
 
-3. **Unmatched → New Activity** → `REVIEW_REQUIRED` → planner creates new
-   - Submit: `"Office furniture delivery received at warehouse"`
-   - 0 matches → planner `POST /reviews/{id}/create-new` with new activity
-   - Result: `NEW_ACTIVITY_CREATED`, new activity in schedule (`is_unplanned=true`)
+The repository tracks implementation by development phase. Use these documents as the source of truth:
 
-## Key API Endpoints (v1)
+- **[Implementation State](STATE.json)** — structured feature and phase tracking.
+- **[Stabilization Report](docs/STABILIZATION_REPORT_P0-P12.md)** — verified implementation and validation notes.
+- **[Changelog](CHANGELOG.md)** — development history.
+- **[Setup Guide](SETUP.md)** — environment and operations.
 
-| Domain | Endpoints |
-|--------|-----------|
-| Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/me`, `POST /auth/csrf-token` |
-| Schedule | `POST /schedule/upload` (Excel), `POST /schedule/import/p6` (XER/MPP), `POST /schedule/export/p6/{id}`, `GET /schedule/activities` |
-| Progress | `POST /progress/extract`, `POST /progress/upload-excel`, `GET /progress/events`, `GET /progress/inbound/recent` |
-| Agent | `POST /agent/chat`, `GET /agent/sessions/{id}/events` |
-| Matching | `POST /matching/run/{event_id}`, `POST /matching/benchmark` |
-| Confidence | `POST /confidence/evaluate/{event_id}` |
-| Reviews | `GET /reviews/pending`, `GET /reviews/{id}`, `POST /reviews/{id}/approve`, `POST /reviews/{id}/correct`, `POST /reviews/{id}/reject`, `POST /reviews/{id}/create-new` |
-| Delay Impact | `GET /delay-impacts/event/{id}`, `GET /delay-impacts/activity/{id}`, `GET /delay-impacts/project/{id}/critical` |
-| Analytics | `GET /analytics/discipline-summary`, `GET /analytics/delay-patterns`, `GET /analytics/benchmarks`, `GET /analytics/variance-trend`, `GET /analytics/matching-quality`, `GET /analytics/confidence-distribution` |
-| Delay Prediction | `GET /delay-predictions/project/{id}`, `GET /delay-predictions/project/{id}/watchlist`, `POST /delay-predictions/train` |
-| Voice | `POST /voice/transcribe`, `POST /voice/process`, `GET /voice/model-info` |
-| OCR | `POST /ocr/upload`, `POST /ocr/process`, `GET /ocr/model-info` |
-| WhatsApp | `GET /webhooks/whatsapp/inbound` (verify), `POST /webhooks/whatsapp/inbound` (ingest) |
+Advanced items listed as future work in the state documentation should not be assumed to be implemented.
 
-## Environment Variables (backend/.env)
+---
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `DATABASE_URL` | Yes | `postgresql+psycopg://user:pass@host:5432/db` (or `sqlite:///./local.db` for dev) |
-| `REDIS_URL` | Yes | `redis://host:6379/0` |
-| `JWT_SECRET_KEY` | Yes | Strong random string (≥32 chars) |
-| `JWT_ALGORITHM` | No | `HS256` (default) |
-| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | No | `15` (default) |
-| `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | No | `7` (default) |
-| `CORS_ORIGINS` | No | `http://localhost:3000,http://localhost:5173` |
-| `LLM_PROVIDER` | No | `mock` (default; set to `openai`/`anthropic` for real LLM) |
-| `LLM_API_KEY` | If LLM_PROVIDER≠mock | Provider API key |
-| `WHATSAPP_*` | If WhatsApp enabled | Cloud API credentials |
-| `TESSERACT_CMD` | If OCR enabled | Path to tesseract binary |
+## 🔐 Security Notes
 
-**⚠️ Never commit a filled `.env`** — `.gitignore` covers `.env`, `.env.*`, secrets, backups, build artifacts.
+- Keep populated `.env` files and credentials out of version control.
+- Replace development secrets before deploying.
+- Use demo accounts only in a local demo environment; never expose default credentials in a public deployment.
+- Configure CORS, authentication, and role permissions for your deployment.
+- Review external service credentials and data-handling requirements before enabling integrations.
 
-## Troubleshooting
+---
 
-| Symptom | Likely Cause | Fix |
-|---------|--------------|-----|
-| `alembic upgrade head` fails | Postgres not ready / wrong URL | Check `DATABASE_URL`, ensure pgvector extension exists |
-| `pytest` fails with `IntegrityError: organization_id` | Test DB not overridden | Ensure `conftest.py` overrides `get_db` |
-| `uvicorn` import errors | Missing deps / wrong venv | Re-create venv, `pip install -r requirements.txt` |
-| Frontend `npm run build` fails | Node version mismatch | Use Node 20+ (`nvm use 20`) |
-| Celery tasks not running | Redis not reachable | Check `REDIS_URL`, ensure Redis running |
-| `gitleaks` finds secrets | Secret in history | Rotate secret, rewrite history or accept risk |
-| `python-multipart` SpooledTemporaryFile error | Python 3.9 file upload | Fixed in code (read file content first) |
+## 👥 Team
 
-## OS-Specific Notes
+**Smarty Vibz**  
+Smart India Hackathon · Problem Statement **26122**
 
-| OS | Notes |
-|----|-------|
-| **macOS** | Docker Desktop works natively. Use `brew install postgresql@16 redis node@20 python@3.11` for local services. |
-| **Linux** | Native Docker/Podman works. Install `postgresql-16`, `postgresql-16-pgvector`, `redis`, `nodejs`, `python3.11` via package manager. |
-| **Windows** | **Use WSL2** (Docker Desktop backend). Native Windows Postgres pgvector support is limited; WSL2 provides full Linux compatibility. Run all commands inside WSL2 Ubuntu. |
+This repository contains the team's implementation of CONSight, an AI-assisted construction progress and schedule intelligence platform.
 
-## License
+## 📄 License & Usage
 
-SIH26122 Project — Smarty Vibz Team
+This repository is associated with the Smarty Vibz SIH project. No standard open-source license is specified here; contact the project maintainers before reusing or redistributing the code. Third-party libraries, pretrained models, and external datasets remain subject to their respective licenses and terms.
 
-See `STATE.json` and `docs/STABILIZATION_REPORT_P0-P12.md` for verified implementation status.
+---
+
+<div align="center">
+
+### Turning site updates into schedule intelligence.
+
+**Built for the planning-to-execution gap in construction projects.**
+
+[Back to Repository](https://github.com/sujayv26/Smarty_Vibz_SIH)
+
+</div>
